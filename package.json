@@ -13,9 +13,10 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit --pretty false && tsc --project tsconfig.node.json --noEmit --pretty false",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/tauri.ps1"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.11.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

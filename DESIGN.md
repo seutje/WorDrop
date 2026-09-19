@@ -982,6 +982,12 @@ Use SQLite for:
 - outfit-item relationships
 - application metadata if needed
 
+Implementation choice: the Tauri/Rust layer owns the SQLite connection and
+runs versioned migrations during application startup. Frontend features use a
+typed TypeScript repository that calls narrow Tauri commands rather than
+issuing SQL directly. The database file is named `wardrobe.db` and lives in the
+platform-managed application data directory.
+
 Use migrations from the beginning.
 
 ### 17.2 Recommended relational structure

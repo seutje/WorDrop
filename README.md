@@ -18,7 +18,16 @@ npm install
 npm run tauri dev
 ```
 
-The desktop window opens with Phase 0 placeholder navigation for Closet and Outfits. Core workflows remain offline-first and do not require an account.
+The `npm run tauri` wrapper locates Visual Studio Build Tools and initializes
+the MSVC/Windows SDK environment before compiling native dependencies. This is
+required even when `cl.exe` happens to be present on `PATH`; running Cargo from
+an uninitialized terminal otherwise leaves the C/C++ include and library paths
+unset.
+
+The desktop window opens with placeholder navigation for Closet and Outfits.
+On startup, the native layer creates or migrates `wardrobe.db` in the operating
+system's application-data directory. Core workflows remain offline-first and
+do not require an account.
 
 ## Quality checks
 
@@ -28,6 +37,7 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
+cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
 Use `npm run format` to apply formatting.

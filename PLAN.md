@@ -89,63 +89,68 @@ Create reliable local persistence for clothing items.
 
 ## Deliverables
 
-- [ ] SQLite integration added
-- [ ] migration system configured
-- [ ] initial clothing schema created
-- [ ] typed clothing domain model created
-- [ ] repository/data-access layer created
-- [ ] create/read/update/delete functions implemented
-- [ ] persistence survives application restart
-- [ ] automated tests cover essential CRUD behavior
+- [x] SQLite integration added
+- [x] migration system configured
+- [x] initial clothing schema created
+- [x] typed clothing domain model created
+- [x] repository/data-access layer created
+- [x] create/read/update/delete functions implemented
+- [x] persistence survives application restart
+- [x] automated tests cover essential CRUD behavior
 
 ## Suggested Steps
 
 ### Database
 
-- [ ] Add SQLite dependency/plugin
-- [ ] Create initial migration
-- [ ] Create `clothing_items` table
-- [ ] Create tables for multi-value attributes as needed:
-  - [ ] colors
-  - [ ] seasons
-  - [ ] occasions
-  - [ ] style tags
-- [ ] Add timestamps
-- [ ] Add ownership field
-- [ ] Add image reference field
+- [x] Add SQLite dependency/plugin
+- [x] Create initial migration
+- [x] Create `clothing_items` table
+- [x] Create tables for multi-value attributes as needed:
+  - [x] colors
+  - [x] seasons
+  - [x] occasions
+  - [x] style tags
+- [x] Add timestamps
+- [x] Add ownership field
+- [x] Add image reference field
 
 ### Domain Types
 
-- [ ] Create `ClothingItem`
-- [ ] Create category type
-- [ ] Create color type
-- [ ] Create season type
-- [ ] Create occasion type
-- [ ] Create ownership type
+- [x] Create `ClothingItem`
+- [x] Create category type
+- [x] Create color type
+- [x] Create season type
+- [x] Create occasion type
+- [x] Create ownership type
 
 ### Data Access
 
-- [ ] `createClothingItem`
-- [ ] `getClothingItem`
-- [ ] `listClothingItems`
-- [ ] `updateClothingItem`
-- [ ] `deleteClothingItem`
+- [x] `createClothingItem`
+- [x] `getClothingItem`
+- [x] `listClothingItems`
+- [x] `updateClothingItem`
+- [x] `deleteClothingItem`
 
 ### Tests
 
-- [ ] create item
-- [ ] retrieve item
-- [ ] update item
-- [ ] delete item
-- [ ] multi-value fields persist correctly
+- [x] create item
+- [x] retrieve item
+- [x] update item
+- [x] delete item
+- [x] multi-value fields persist correctly
 - [ ] app restart/reopen behavior works in manual test
 
 ## Verification
 
-- [ ] migrations run automatically
-- [ ] empty database initializes safely
-- [ ] CRUD tests pass
-- [ ] malformed inputs are rejected at appropriate layer
+- [x] migrations run automatically
+- [x] empty database initializes safely
+- [x] CRUD tests pass
+- [x] malformed inputs are rejected at appropriate layer
+
+Implementation note: SQLite is owned by the Tauri/Rust layer and stored as
+`wardrobe.db` in the platform application-data directory. The TypeScript
+repository calls typed Tauri commands; the migration version is tracked with
+SQLite `user_version`.
 
 ## User Test Gate
 
@@ -153,13 +158,13 @@ Temporary developer UI or debug controls may be used for this gate.
 
 Project owner verifies:
 
-- [ ] create a sample clothing record
-- [ ] close application
-- [ ] reopen application
-- [ ] sample record still exists
-- [ ] edit record
-- [ ] close/reopen again
-- [ ] edits remain
+- [x] create a sample clothing record
+- [x] close application
+- [x] reopen application
+- [x] sample record still exists
+- [x] edit record
+- [x] close/reopen again
+- [x] edits remain
 
 ---
 
