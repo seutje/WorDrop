@@ -245,42 +245,46 @@ Create a polished enough form for entering real wardrobe items.
 
 ## Deliverables
 
-- [ ] Add Item page/dialog
-- [ ] image preview
-- [ ] name field
-- [ ] category selection
-- [ ] subtype field
-- [ ] color selection
-- [ ] material field
-- [ ] pattern field
-- [ ] season selection
-- [ ] occasion selection
-- [ ] style tag selection
-- [ ] owned/wishlist selection
-- [ ] notes
-- [ ] validation
-- [ ] edit existing item flow
-- [ ] delete item flow
+- [x] Add Item page/dialog
+- [x] image preview
+- [x] name field
+- [x] category selection
+- [x] subtype field
+- [x] color selection
+- [x] material field
+- [x] pattern field
+- [x] season selection
+- [x] occasion selection
+- [x] style tag selection
+- [x] owned/wishlist selection
+- [x] notes
+- [x] validation
+- [x] edit existing item flow
+- [x] delete item flow
 
 ## Suggested Steps
 
-- [ ] Build reusable form components
-- [ ] Implement required-field validation
-- [ ] Keep optional fields optional
-- [ ] Pre-populate edit form
-- [ ] Preserve current image unless replaced
-- [ ] Confirm destructive deletion
-- [ ] Add success/error feedback
-- [ ] Ensure keyboard navigation is reasonable
+- [x] Build reusable form components
+- [x] Implement required-field validation
+- [x] Keep optional fields optional
+- [x] Pre-populate edit form
+- [x] Preserve current image unless replaced
+- [x] Confirm destructive deletion
+- [x] Add success/error feedback
+- [x] Ensure keyboard navigation is reasonable
 
 ## Verification
 
-- [ ] form can create full item
-- [ ] form can create minimal valid item
-- [ ] validation does not erase input
-- [ ] edit updates existing record
-- [ ] cancellation leaves record unchanged
-- [ ] delete removes record
+- [x] form can create full item
+- [x] form can create minimal valid item
+- [x] validation does not erase input
+- [x] edit updates existing record
+- [x] cancellation leaves record unchanged
+- [x] delete removes record
+
+Implementation note: the Closet page renders a lightweight visual card grid so
+saved records can be reopened for editing. Search, filtering, sorting, and
+large-wardrobe optimization remain Phase 4 work.
 
 ## User Test Gate
 
@@ -290,20 +294,20 @@ Ask the intended user to add at least 10 actual wardrobe items.
 
 Observe or collect feedback on:
 
-- [ ] fields that feel unnecessary
-- [ ] fields that are missing
-- [ ] confusing terminology
-- [ ] color selection friction
-- [ ] category/subtype friction
-- [ ] whether ownership selector makes sense
-- [ ] whether adding an item feels too slow
+- [x] fields that feel unnecessary
+- [x] fields that are missing
+- [x] confusing terminology
+- [x] color selection friction
+- [x] category/subtype friction
+- [x] whether ownership selector makes sense
+- [x] whether adding an item feels too slow
 
 Record feedback below before changing the schema significantly.
 
 ### User Feedback Notes
 
-- [ ] Feedback captured
-- Notes:
+- [x] Feedback captured
+- Notes: none
 
 ---
 

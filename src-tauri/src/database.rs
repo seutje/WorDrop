@@ -212,8 +212,9 @@ fn replace_values(
             [item_id],
         )
         .map_err(db_error)?;
-    let sql =
-        format!("INSERT INTO {table} (clothing_item_id, value, position) VALUES (?1, ?2, ?3)");
+    let sql = format!(
+        "INSERT OR IGNORE INTO {table} (clothing_item_id, value, position) VALUES (?1, ?2, ?3)"
+    );
     for (position, value) in values
         .iter()
         .map(|value| value.trim())
