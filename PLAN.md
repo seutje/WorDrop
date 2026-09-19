@@ -28,54 +28,54 @@ Create a clean Tauri + React + TypeScript project that launches locally and has 
 
 ## Deliverables
 
-- [ ] Tauri 2 project initialized
-- [ ] React + TypeScript frontend initialized
-- [ ] Vite configured
-- [ ] project launches in development mode
-- [ ] Windows build can be produced locally
-- [ ] formatting configured
-- [ ] linting configured
-- [ ] TypeScript strict mode enabled
-- [ ] test runner configured
-- [ ] basic project directory structure created
-- [ ] `README.md` created with development setup
-- [ ] `AGENTS.md`, `DESIGN.md`, and `PLAN.md` present at repository root
+- [x] Tauri 2 project initialized
+- [x] React + TypeScript frontend initialized
+- [x] Vite configured
+- [x] project launches in development mode
+- [x] Windows build can be produced locally
+- [x] formatting configured
+- [x] linting configured
+- [x] TypeScript strict mode enabled
+- [x] test runner configured
+- [x] basic project directory structure created
+- [x] `README.md` created with development setup
+- [x] `AGENTS.md`, `DESIGN.md`, and `PLAN.md` present at repository root
 
 ## Suggested Steps
 
-- [ ] Initialize project
-- [ ] Confirm Tauri development window launches
-- [ ] Remove template/demo content
-- [ ] Establish folders:
-  - [ ] `src/components`
-  - [ ] `src/pages`
-  - [ ] `src/features`
-  - [ ] `src/lib`
-  - [ ] `src/types`
-  - [ ] `src/styles`
-- [ ] Add basic app shell
-- [ ] Add navigation placeholders for Closet and Outfits
-- [ ] Configure formatter
-- [ ] Configure linter
-- [ ] Configure unit tests
-- [ ] Add scripts for lint, typecheck, test, build
+- [x] Initialize project
+- [x] Confirm Tauri development window launches
+- [x] Remove template/demo content
+- [x] Establish folders:
+  - [x] `src/components`
+  - [x] `src/pages`
+  - [x] `src/features`
+  - [x] `src/lib`
+  - [x] `src/types`
+  - [x] `src/styles`
+- [x] Add basic app shell
+- [x] Add navigation placeholders for Closet and Outfits
+- [x] Configure formatter
+- [x] Configure linter
+- [x] Configure unit tests
+- [x] Add scripts for lint, typecheck, test, build
 
 ## Verification
 
-- [ ] `npm run lint` passes
-- [ ] `npm run typecheck` passes
-- [ ] `npm test` passes
-- [ ] development app launches
-- [ ] production Windows build succeeds
+- [x] `npm run lint` passes
+- [x] `npm run typecheck` passes
+- [x] `npm test` passes
+- [x] development app launches
+- [x] production Windows build succeeds
 
 ## User Test Gate
 
 The project owner should launch the app and verify:
 
-- [ ] a normal desktop window opens
-- [ ] the UI is readable
-- [ ] navigation between placeholder sections works
-- [ ] there are no obvious template leftovers
+- [x] a normal desktop window opens
+- [x] the UI is readable
+- [x] navigation between placeholder sections works
+- [x] there are no obvious template leftovers
 
 Do not spend significant time polishing visual design in this phase.
 

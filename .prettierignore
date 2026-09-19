@@ -1,5 +1,9 @@
 dist
 node_modules
 src-tauri/target
+src-tauri/gen
 package-lock.json
 *.tsbuildinfo
+AGENTS.md
+DESIGN.md
+PLAN.md
