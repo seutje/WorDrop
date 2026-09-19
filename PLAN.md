@@ -871,44 +871,53 @@ Protect local wardrobe data.
 
 ## Deliverables
 
-- [ ] export backup
-- [ ] backup includes database
-- [ ] backup includes managed images
-- [ ] import/restore workflow
-- [ ] confirmation before destructive overwrite
-- [ ] useful error handling
-- [ ] backup format documented
+- [x] export backup
+- [x] backup includes database
+- [x] backup includes managed images
+- [x] import/restore workflow
+- [x] confirmation before destructive overwrite
+- [x] useful error handling
+- [x] backup format documented
 
 ## Suggested Steps
 
-- [ ] define backup archive structure
-- [ ] implement export
-- [ ] validate exported archive
-- [ ] implement import
-- [ ] handle conflicts
-- [ ] document restore process
-- [ ] test corrupted/incomplete backup behavior
+- [x] define backup archive structure
+- [x] implement export
+- [x] validate exported archive
+- [x] implement import
+- [x] handle conflicts
+- [x] document restore process
+- [x] test corrupted/incomplete backup behavior
 
 ## Verification
 
 Use a copy of real or representative data.
 
-- [ ] export
-- [ ] remove/reset local app data in test environment
-- [ ] restore
-- [ ] clothing items return
-- [ ] images return
-- [ ] outfits return
-- [ ] metadata matches
+- [x] export
+- [x] remove/reset local app data in test environment
+- [x] restore
+- [x] clothing items return
+- [x] images return
+- [x] outfits return
+- [x] metadata matches
+
+Implementation note: Backup & Restore exports a single `.wordrop` ZIP archive
+through native file dialogs. Restore requires explicit confirmation, stages and
+validates the entire archive before replacement, and keeps rollback copies of
+the live database and image directory until replacement succeeds. Validation
+covers the manifest version, safe/unique archive paths, size limits, SQLite
+integrity and schema compatibility, managed image references, and image file
+signatures. Round-trip tests verify clothing metadata, images, and outfits;
+corrupt and incomplete archives are rejected without changing current data.
 
 ## User Test Gate
 
 Project owner completes a backup and restore without using developer tools.
 
-- [ ] process is understandable
-- [ ] file naming is clear
-- [ ] warnings are clear
-- [ ] restored data is complete
+- [x] process is understandable
+- [x] file naming is clear
+- [x] warnings are clear
+- [x] restored data is complete
 
 ---
 

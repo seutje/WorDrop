@@ -1,3 +1,4 @@
+mod backup;
 mod database;
 mod image_store;
 mod outfits;
@@ -10,6 +11,40 @@ use tauri::{Manager, State};
 
 struct Database(Mutex<Connection>);
 struct AppDataDirectory(PathBuf);
+
+#[tauri::command]
+fn export_backup(
+    app_data: State<'_, AppDataDirectory>,
+    database: State<'_, Database>,
+    destination_path: String,
+) -> Result<backup::BackupSummary, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    backup::export(
+        &app_data.0,
+        &connection,
+        std::path::Path::new(&destination_path),
+    )
+}
+
+#[tauri::command]
+fn restore_backup(
+    app_data: State<'_, AppDataDirectory>,
+    database: State<'_, Database>,
+    source_path: String,
+) -> Result<backup::BackupSummary, String> {
+    let mut connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    backup::restore(
+        &app_data.0,
+        &mut connection,
+        std::path::Path::new(&source_path),
+    )
+}
 
 #[tauri::command]
 fn import_clothing_image(
@@ -204,7 +239,9 @@ pub fn run() {
             list_outfits,
             update_outfit,
             delete_outfit,
-            list_outfits_containing_item
+            list_outfits_containing_item,
+            export_backup,
+            restore_backup
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

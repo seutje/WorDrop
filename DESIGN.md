@@ -1117,16 +1117,37 @@ Preferred approach:
 - export database plus managed images into a single archive;
 - import that archive into the application.
 
-Possible extension:
+Archive structure:
 
 ```text
-wardrobe-backup.zip
+wordrop-backup-YYYY-MM-DD.wordrop
 ├── wardrobe.db
 ├── images/
 └── manifest.json
 ```
 
-The first implementation can be intentionally simple as long as restore behavior is safe.
+The implemented backup is a ZIP-compatible file using the `.wordrop` extension:
+
+```text
+wordrop-backup-YYYY-MM-DD.wordrop
+├── manifest.json
+├── wardrobe.db
+└── images/original/*
+```
+
+`manifest.json` records `formatVersion` (currently `1`), the application
+version, and a Unix creation timestamp. `wardrobe.db` is a consistent SQLite
+snapshot that includes clothing metadata and saved outfits. The `zip` Rust
+crate provides local Deflate archive handling and adds no runtime network
+requirement.
+
+Restore stages the archive before changing live data. It rejects unexpected,
+duplicate, or unsafe paths; excessive file counts or expanded size; unsupported
+manifest versions; newer or damaged databases; missing referenced images; and
+unsupported image contents. After validation, the app retains temporary
+rollback copies of the current database and image directory until both have
+been replaced successfully. The restore UI requires explicit confirmation and
+states that all current wardrobe data will be replaced.
 
 Import must not silently overwrite existing data without confirmation.
 

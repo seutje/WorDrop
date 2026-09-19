@@ -22,6 +22,11 @@ const outfitMocks = vi.hoisted(() => ({
   delete: vi.fn(),
   containingItem: vi.fn(),
 }));
+const backupMocks = vi.hoisted(() => ({
+  chooseAndExport: vi.fn(),
+  chooseRestore: vi.fn(),
+  restore: vi.fn(),
+}));
 
 vi.mock("./lib/database/clothingRepository", () => ({
   clothingRepository: {
@@ -39,6 +44,11 @@ vi.mock("./lib/images/managedImages", () => ({
 }));
 vi.mock("./lib/database/outfitRepository", () => ({
   outfitRepository: outfitMocks,
+}));
+vi.mock("./lib/backup", () => ({
+  chooseAndExportBackup: backupMocks.chooseAndExport,
+  chooseBackupToRestore: backupMocks.chooseRestore,
+  restoreBackup: backupMocks.restore,
 }));
 
 import App from "./App";
@@ -93,6 +103,17 @@ beforeEach(() => {
   outfitMocks.delete.mockResolvedValue(true);
   outfitMocks.get.mockResolvedValue(savedOutfit);
   outfitMocks.containingItem.mockResolvedValue([]);
+  const backupSummary = {
+    path: "C:/Backups/wordrop-backup.wordrop",
+    clothingItems: 3,
+    outfits: 2,
+    images: 3,
+  };
+  backupMocks.chooseAndExport.mockResolvedValue(backupSummary);
+  backupMocks.chooseRestore.mockResolvedValue(
+    "C:/Backups/wordrop-backup.wordrop",
+  );
+  backupMocks.restore.mockResolvedValue(backupSummary);
 });
 
 describe("App", () => {
@@ -103,6 +124,64 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Outfits" }));
     expect(
       screen.getByRole("heading", { name: "Saved Outfits" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Backup" }));
+    expect(
+      screen.getByRole("heading", { name: "Backup & Restore" }),
+    ).toBeInTheDocument();
+  });
+
+  it("exports a complete local backup", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Backup" }));
+    await user.click(
+      screen.getByRole("button", { name: "Choose backup location" }),
+    );
+    expect(
+      await screen.findByText(
+        "Backup saved with 3 clothing items, 3 images, and 2 outfits.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the specific reason when backup export fails", async () => {
+    backupMocks.chooseAndExport.mockRejectedValue(
+      "The finished backup could not be copied to the selected folder.",
+    );
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Backup" }));
+    await user.click(
+      screen.getByRole("button", { name: "Choose backup location" }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The finished backup could not be copied to the selected folder.",
+    );
+  });
+
+  it("requires confirmation before restoring a backup", async () => {
+    vi.spyOn(window, "confirm")
+      .mockReturnValueOnce(false)
+      .mockReturnValue(true);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Backup" }));
+    const restoreButton = screen.getByRole("button", {
+      name: "Choose backup to restore",
+    });
+    await user.click(restoreButton);
+    expect(backupMocks.restore).not.toHaveBeenCalled();
+    await user.click(restoreButton);
+    await waitFor(() =>
+      expect(backupMocks.restore).toHaveBeenCalledWith(
+        "C:/Backups/wordrop-backup.wordrop",
+      ),
+    );
+    expect(
+      screen.getByText(
+        "Backup restored with 3 clothing items, 3 images, and 2 outfits.",
+      ),
     ).toBeInTheDocument();
   });
 

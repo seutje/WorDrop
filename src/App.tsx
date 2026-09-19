@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { AppShell, type AppSection } from "./components/AppShell";
+import { BackupPage } from "./pages/BackupPage";
 import { ClosetPage } from "./pages/ClosetPage";
 import { OutfitsPage } from "./pages/OutfitsPage";
 import "./styles/global.css";
@@ -46,13 +47,15 @@ function App() {
     <AppShell activeSection={activeSection} onNavigate={navigate}>
       {activeSection === "closet" ? (
         <ClosetPage onStartOutfit={startOutfit} onOpenOutfit={openOutfit} />
-      ) : (
+      ) : activeSection === "outfits" ? (
         <OutfitsPage
           key={outfitRequestKey}
           initialItemIds={outfitItemIds}
           initialOutfitId={outfitId}
           onDirtyChange={handleDirtyChange}
         />
+      ) : (
+        <BackupPage />
       )}
     </AppShell>
   );

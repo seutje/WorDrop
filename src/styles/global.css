@@ -793,6 +793,72 @@ h1 {
   font-size: 12px;
   white-space: nowrap;
 }
+.backup-page {
+  max-width: 980px;
+}
+.backup-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 32px;
+}
+.backup-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 20px;
+  padding: 26px;
+  background: #f3f1ed;
+  border: 1px solid #e0ddd6;
+  border-radius: 14px;
+}
+.backup-restore-card {
+  background: #f6f0ef;
+  border-color: #e5d6d5;
+}
+.backup-card-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #42604a;
+  background: #e1eae2;
+  border-radius: 50%;
+  font-size: 24px;
+}
+.backup-restore-card .backup-card-icon {
+  color: #8b4b4f;
+  background: #eddfdf;
+}
+.backup-card h2,
+.backup-guidance h2 {
+  margin: 3px 0 10px;
+  font-family: Georgia, serif;
+  font-weight: 500;
+}
+.backup-card p,
+.backup-guidance p {
+  color: #666762;
+  line-height: 1.55;
+}
+.backup-card code {
+  padding: 2px 5px;
+  background: rgb(255 255 255 / 65%);
+  border-radius: 4px;
+}
+.backup-card button {
+  justify-self: start;
+}
+.backup-guidance {
+  margin-top: 22px;
+  padding: 20px 22px;
+  border-left: 3px solid #93a698;
+}
+.backup-guidance h2 {
+  font-size: 18px;
+}
+.backup-guidance p {
+  margin: 0;
+}
 .outfit-builder {
   max-width: 1180px;
 }
@@ -1231,6 +1297,9 @@ h1 {
 }
 
 @media (max-width: 780px) {
+  .backup-options {
+    grid-template-columns: 1fr;
+  }
   body {
     min-width: 560px;
   }
