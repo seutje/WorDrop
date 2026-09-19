@@ -123,6 +123,94 @@ h1 {
   background: #242525;
   border: 0;
   border-radius: 8px;
+  cursor: pointer;
+}
+.secondary-button,
+.icon-button {
+  color: #31322f;
+  background: transparent;
+  border: 1px solid #c9c6bf;
+  cursor: pointer;
+}
+.secondary-button {
+  padding: 10px 17px;
+  border-radius: 8px;
+}
+.icon-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 23px;
+  line-height: 1;
+}
+.dialog-backdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgb(24 25 24 / 42%);
+}
+.image-dialog {
+  width: min(560px, 100%);
+  padding: 28px;
+  border-radius: 18px;
+  background: #faf9f7;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 24%);
+}
+.dialog-heading,
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dialog-heading h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 29px;
+  font-weight: 500;
+}
+.image-preview {
+  display: grid;
+  place-items: center;
+  height: 330px;
+  margin: 25px 0 17px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #ece9e3;
+}
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.image-preview[data-empty="true"] {
+  border: 1px dashed #bdb9b1;
+  color: #6c6d68;
+  text-align: center;
+}
+.image-preview[data-empty="true"] span {
+  font-size: 42px;
+}
+.managed-note,
+.phase-note,
+.error-message {
+  margin: 0 0 17px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.managed-note {
+  color: #45624e;
+}
+.error-message {
+  color: #a13732;
+}
+.phase-note {
+  margin: 17px 0 0;
+  color: #77756f;
+  text-align: center;
 }
 .primary-button:disabled {
   cursor: not-allowed;

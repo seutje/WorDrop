@@ -13,4 +13,14 @@ describe("App", () => {
       screen.getByRole("heading", { name: "Outfits" }),
     ).toBeInTheDocument();
   });
+
+  it("opens the Phase 2 image import flow from Add item", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /add item/i }));
+    expect(
+      screen.getByRole("dialog", { name: "Import a clothing photo" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Choose photo" })).toBeEnabled();
+  });
 });

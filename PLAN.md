@@ -176,31 +176,31 @@ Allow clothing photos to be imported safely into application-managed storage.
 
 ## Deliverables
 
-- [ ] file picker for supported images
-- [ ] JPEG support
-- [ ] PNG support
-- [ ] WebP support if straightforward
-- [ ] imported image copied to application data directory
-- [ ] unique managed filenames
-- [ ] source image remains untouched
-- [ ] stored item references managed image
-- [ ] replacement image flow
-- [ ] cleanup when item/image is removed
-- [ ] image error handling
+- [x] file picker for supported images
+- [x] JPEG support
+- [x] PNG support
+- [x] WebP support if straightforward
+- [x] imported image copied to application data directory
+- [x] unique managed filenames
+- [x] source image remains untouched
+- [x] stored item references managed image
+- [x] replacement image flow
+- [x] cleanup when item/image is removed
+- [x] image error handling
 
 ## Suggested Steps
 
-- [ ] Implement image picker
-- [ ] Validate extension/type
-- [ ] Create image storage directory
-- [ ] Generate unique filename
-- [ ] Copy selected image
-- [ ] Return stable internal reference
-- [ ] Render imported image in frontend
-- [ ] Handle missing image file
-- [ ] Implement replace-image behavior
-- [ ] Implement managed-image cleanup
-- [ ] Add tests for path/filename utilities
+- [x] Implement image picker
+- [x] Validate extension/type
+- [x] Create image storage directory
+- [x] Generate unique filename
+- [x] Copy selected image
+- [x] Return stable internal reference
+- [x] Render imported image in frontend
+- [x] Handle missing image file
+- [x] Implement replace-image behavior
+- [x] Implement managed-image cleanup
+- [x] Add tests for path/filename utilities
 
 ## Optional Optimization
 
@@ -211,23 +211,29 @@ Do only if needed:
 
 ## Verification
 
-- [ ] importing an image does not alter source image
-- [ ] item still displays if source image is moved/deleted
-- [ ] replacing image does not leave obvious orphan files
-- [ ] deleting item removes unreferenced managed image
-- [ ] unsupported files show understandable error
+- [x] importing an image does not alter source image
+- [x] item still displays if source image is moved/deleted
+- [x] replacing image does not leave obvious orphan files
+- [x] deleting item removes unreferenced managed image
+- [x] unsupported files show understandable error
+
+Implementation note: imported originals are stored beneath
+`images/original` in the platform application-data directory. Managed image
+references are relative paths; the native layer validates, reads, replaces,
+and removes them. Thumbnail generation remains deferred until performance
+testing demonstrates a need.
 
 ## User Test Gate
 
 Project owner should:
 
-- [ ] import at least 5 different clothing images
-- [ ] move or rename the original files
-- [ ] confirm images still appear in app
-- [ ] replace one image
-- [ ] delete one clothing item
-- [ ] restart app
-- [ ] confirm remaining images still work
+- [x] import at least 5 different clothing images
+- [x] move or rename the original files
+- [x] confirm images still appear in app
+- [x] replace one image
+- [x] delete one clothing item
+- [x] restart app
+- [x] confirm remaining images still work
 
 ---
 

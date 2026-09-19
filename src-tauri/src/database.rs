@@ -190,6 +190,16 @@ pub fn delete(connection: &Connection, id: &str) -> Result<bool, String> {
         > 0)
 }
 
+pub fn image_reference_count(connection: &Connection, reference: &str) -> Result<i64, String> {
+    connection
+        .query_row(
+            "SELECT COUNT(*) FROM clothing_items WHERE image_path = ?1",
+            [reference],
+            |row| row.get(0),
+        )
+        .map_err(db_error)
+}
+
 fn replace_values(
     transaction: &Transaction<'_>,
     table: &str,

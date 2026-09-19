@@ -1,11 +1,45 @@
 mod database;
+mod image_store;
 
 use database::{ClothingItem, ClothingItemInput};
 use rusqlite::Connection;
-use std::sync::Mutex;
+use std::{path::PathBuf, sync::Mutex};
 use tauri::{Manager, State};
 
 struct Database(Mutex<Connection>);
+struct AppDataDirectory(PathBuf);
+
+#[tauri::command]
+fn import_clothing_image(
+    app_data: State<'_, AppDataDirectory>,
+    source_path: String,
+) -> Result<image_store::ManagedImage, String> {
+    image_store::import(&app_data.0, std::path::Path::new(&source_path))
+}
+
+#[tauri::command]
+fn load_clothing_image(
+    app_data: State<'_, AppDataDirectory>,
+    reference: String,
+) -> Result<image_store::ManagedImage, String> {
+    image_store::load(&app_data.0, &reference)
+}
+
+#[tauri::command]
+fn discard_clothing_image(
+    app_data: State<'_, AppDataDirectory>,
+    database: State<'_, Database>,
+    reference: String,
+) -> Result<bool, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    if database::image_reference_count(&connection, &reference)? > 0 {
+        return Ok(false);
+    }
+    image_store::remove(&app_data.0, &reference)
+}
 
 #[tauri::command]
 fn create_clothing_item(
@@ -42,6 +76,7 @@ fn list_clothing_items(database: State<'_, Database>) -> Result<Vec<ClothingItem
 
 #[tauri::command]
 fn update_clothing_item(
+    app_data: State<'_, AppDataDirectory>,
     database: State<'_, Database>,
     id: String,
     item: ClothingItemInput,
@@ -50,16 +85,34 @@ fn update_clothing_item(
         .0
         .lock()
         .map_err(|_| "The local database is unavailable.".to_string())?;
-    database::update(&mut connection, &id, item)
+    let previous = database::get(&connection, &id)?;
+    let updated = database::update(&mut connection, &id, item)?;
+    if let Some(previous) = previous.filter(|previous| previous.image_path != updated.image_path) {
+        if database::image_reference_count(&connection, &previous.image_path)? == 0 {
+            let _ = image_store::remove(&app_data.0, &previous.image_path);
+        }
+    }
+    Ok(updated)
 }
 
 #[tauri::command]
-fn delete_clothing_item(database: State<'_, Database>, id: String) -> Result<bool, String> {
+fn delete_clothing_item(
+    app_data: State<'_, AppDataDirectory>,
+    database: State<'_, Database>,
+    id: String,
+) -> Result<bool, String> {
     let connection = database
         .0
         .lock()
         .map_err(|_| "The local database is unavailable.".to_string())?;
-    database::delete(&connection, &id)
+    let previous = database::get(&connection, &id)?;
+    let deleted = database::delete(&connection, &id)?;
+    if let Some(previous) = previous {
+        if database::image_reference_count(&connection, &previous.image_path)? == 0 {
+            let _ = image_store::remove(&app_data.0, &previous.image_path);
+        }
+    }
+    Ok(deleted)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -70,14 +123,19 @@ pub fn run() {
             let connection =
                 database::open_database(&database_path).map_err(std::io::Error::other)?;
             app.manage(Database(Mutex::new(connection)));
+            app.manage(AppDataDirectory(app.path().app_data_dir()?));
             Ok(())
         })
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             create_clothing_item,
             get_clothing_item,
             list_clothing_items,
             update_clothing_item,
-            delete_clothing_item
+            delete_clothing_item,
+            import_clothing_image,
+            load_clothing_image,
+            discard_clothing_image
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

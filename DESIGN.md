@@ -1034,6 +1034,13 @@ The exact path is platform-managed.
 
 Imported images should be copied into app-managed storage.
 
+Implementation choice: the Tauri/Rust layer validates JPEG, PNG, and WebP
+content, copies imports to `images/original` beneath the application-data
+directory, and returns a relative managed reference for persistence. Image
+bytes are exposed to the frontend as data URLs so arbitrary filesystem access
+does not need to be granted to the webview. Replaced and deleted images are
+removed only when no clothing record still references them.
+
 Requirements:
 
 - never modify the source file;

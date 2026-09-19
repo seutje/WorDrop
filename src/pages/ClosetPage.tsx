@@ -1,4 +1,9 @@
+import { useState } from "react";
+import { ImageImportDialog } from "../features/wardrobe/ImageImportDialog";
+
 export function ClosetPage() {
+  const [isImportOpen, setImportOpen] = useState(false);
+
   return (
     <section className="page" aria-labelledby="closet-heading">
       <header className="page-header">
@@ -6,7 +11,11 @@ export function ClosetPage() {
           <p className="eyebrow">Your wardrobe</p>
           <h1 id="closet-heading">Closet</h1>
         </div>
-        <button className="primary-button" type="button" disabled>
+        <button
+          className="primary-button"
+          type="button"
+          onClick={() => setImportOpen(true)}
+        >
           + Add item
         </button>
       </header>
@@ -16,10 +25,13 @@ export function ClosetPage() {
         </div>
         <h2>Your closet is ready</h2>
         <p>
-          Clothing items will appear here once item creation is added in a later
-          phase.
+          Start by importing a clothing photo. The complete item form arrives in
+          the next phase.
         </p>
       </div>
+      {isImportOpen && (
+        <ImageImportDialog onClose={() => setImportOpen(false)} />
+      )}
     </section>
   );
 }
