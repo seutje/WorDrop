@@ -26,8 +26,10 @@ const titleCase = (value: string) =>
 
 export function ClosetPage({
   onStartOutfit,
+  onOpenOutfit,
 }: {
   onStartOutfit: (itemIds: string[]) => void;
+  onOpenOutfit: (outfitId: string) => void;
 }) {
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [editingItem, setEditingItem] = useState<ClothingItem>();
@@ -105,6 +107,7 @@ export function ClosetPage({
         onEdit={openEdit}
         onInspectItem={setSelectedItemId}
         onStartOutfit={onStartOutfit}
+        onOpenOutfit={onOpenOutfit}
         onDeleted={(message) => {
           setSelectedItemId(undefined);
           setNotice(message);

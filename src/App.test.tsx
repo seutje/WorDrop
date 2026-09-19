@@ -102,7 +102,7 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Closet" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Outfits" }));
     expect(
-      screen.getByRole("heading", { name: "Outfit Builder" }),
+      screen.getByRole("heading", { name: "Saved Outfits" }),
     ).toBeInTheDocument();
   });
 
@@ -378,6 +378,9 @@ describe("App", () => {
     render(<App />);
     await user.click(screen.getByRole("button", { name: "Outfits" }));
     await user.click(
+      await screen.findByRole("button", { name: "+ Create outfit" }),
+    );
+    await user.click(
       await screen.findByRole("button", { name: /Add clothing/ }),
     );
     await user.click(screen.getByRole("button", { name: /Blue jeans/ }));
@@ -436,7 +439,7 @@ describe("App", () => {
     render(<App />);
     await user.click(screen.getByRole("button", { name: "Outfits" }));
     await user.click(
-      await screen.findByRole("button", { name: /Weekend look/ }),
+      await screen.findByRole("button", { name: "Open Weekend look" }),
     );
     await user.click(screen.getByRole("button", { name: "Replace" }));
     await user.click(screen.getByRole("button", { name: /White tee/ }));
@@ -447,5 +450,66 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: /White tee/ }));
     await user.click(screen.getByRole("button", { name: "Save outfit" }));
     await waitFor(() => expect(outfitMocks.update).toHaveBeenCalledOnce());
+  });
+
+  it("shows outfit previews and can rename a saved outfit", async () => {
+    mocks.list.mockResolvedValue([sampleItem]);
+    outfitMocks.list.mockResolvedValue([savedOutfit]);
+    outfitMocks.update.mockResolvedValue({
+      ...savedOutfit,
+      name: "Sunday walk",
+    });
+    vi.spyOn(window, "prompt").mockReturnValue("Sunday walk");
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Outfits" }));
+    expect(
+      await screen.findByRole("button", { name: "Open Weekend look" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Rename" }));
+    await waitFor(() =>
+      expect(outfitMocks.update).toHaveBeenCalledWith(
+        "outfit-1",
+        expect.objectContaining({ name: "Sunday walk" }),
+      ),
+    );
+    expect(
+      screen.getByRole("button", { name: "Open Sunday walk" }),
+    ).toBeInTheDocument();
+  });
+
+  it("deletes an outfit without deleting clothing", async () => {
+    mocks.list.mockResolvedValue([sampleItem]);
+    outfitMocks.list.mockResolvedValue([savedOutfit]);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Outfits" }));
+    await user.click(await screen.findByRole("button", { name: "Delete" }));
+    await waitFor(() =>
+      expect(outfitMocks.delete).toHaveBeenCalledWith("outfit-1"),
+    );
+    expect(mocks.delete).not.toHaveBeenCalled();
+    expect(screen.getByText("Save your first look")).toBeInTheDocument();
+  });
+
+  it("opens an outfit containing the selected clothing item", async () => {
+    mocks.list.mockResolvedValue([sampleItem]);
+    outfitMocks.containingItem.mockResolvedValue([savedOutfit]);
+    outfitMocks.list.mockResolvedValue([savedOutfit]);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
+    );
+    await user.click(
+      await screen.findByRole("button", { name: /Weekend look/ }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Outfit Builder" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Outfit name" })).toHaveValue(
+      "Weekend look",
+    );
   });
 });

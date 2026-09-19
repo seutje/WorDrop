@@ -361,6 +361,13 @@ Functions:
 
 Browse saved outfits.
 
+Implementation choice: the Outfits destination opens to a responsive visual
+library. Each card uses a collage of up to four clothing images, with the name,
+item count, and optional notes for recognition. Opening a card reuses the
+visual builder for editing. Rename and confirmed delete actions live on each
+card; deleting an outfit never deletes its clothing. Clothing details list and
+deep-link to every saved outfit containing the selected item.
+
 Functions:
 
 - open outfit

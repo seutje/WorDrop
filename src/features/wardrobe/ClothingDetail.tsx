@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { clothingRepository } from "../../lib/database/clothingRepository";
+import { outfitRepository } from "../../lib/database/outfitRepository";
 import { loadManagedImage } from "../../lib/images/managedImages";
 import { rankMatches } from "../../lib/matching";
 import type { ClothingItem } from "../../types/clothing";
+import type { Outfit } from "../../types/outfit";
 import { RecommendationCard } from "./RecommendationCard";
 
 const titleCase = (value: string) =>
@@ -40,6 +42,7 @@ type Props = {
   onDeleted: (message: string) => void;
   onInspectItem: (itemId: string) => void;
   onStartOutfit: (itemIds: string[]) => void;
+  onOpenOutfit: (outfitId: string) => void;
 };
 
 export function ClothingDetail({
@@ -49,6 +52,7 @@ export function ClothingDetail({
   onDeleted,
   onInspectItem,
   onStartOutfit,
+  onOpenOutfit,
 }: Props) {
   const [item, setItem] = useState<ClothingItem | null>();
   const [candidates, setCandidates] = useState<ClothingItem[]>([]);
@@ -59,6 +63,9 @@ export function ClothingDetail({
   const [imageError, setImageError] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [relatedOutfits, setRelatedOutfits] = useState<Outfit[]>([]);
+  const [relatedOutfitsLoading, setRelatedOutfitsLoading] = useState(true);
+  const [relatedOutfitsError, setRelatedOutfitsError] = useState(false);
   const recommendations = useMemo(() => {
     if (!item) return [];
     const allowed = includeWishlist
@@ -72,6 +79,24 @@ export function ClothingDetail({
         return candidate ? [{ item: candidate, result }] : [];
       });
   }, [candidates, includeWishlist, item]);
+
+  useEffect(() => {
+    let active = true;
+    outfitRepository
+      .containingItem(itemId)
+      .then((outfits) => {
+        if (active) setRelatedOutfits(outfits);
+      })
+      .catch(() => {
+        if (active) setRelatedOutfitsError(true);
+      })
+      .finally(() => {
+        if (active) setRelatedOutfitsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [itemId]);
 
   useEffect(() => {
     let active = true;
@@ -311,15 +336,37 @@ export function ClothingDetail({
             </div>
           )}
         </section>
-        <section className="detail-panel">
+        <section className="detail-panel related-outfits-panel">
           <div>
-            <p className="eyebrow">Coming in Phase 10</p>
+            <p className="eyebrow">Worn together</p>
             <h2>Saved outfits</h2>
           </div>
-          <p>
-            Outfit persistence is ready. Saved outfits containing this item will
-            appear here when the outfit library UI is added.
-          </p>
+          {relatedOutfitsLoading && <p>Finding saved outfits…</p>}
+          {relatedOutfitsError && (
+            <p className="error-message">Saved outfits could not be loaded.</p>
+          )}
+          {!relatedOutfitsLoading &&
+            !relatedOutfitsError &&
+            relatedOutfits.length === 0 && (
+              <p>This item is not part of a saved outfit yet.</p>
+            )}
+          {relatedOutfits.length > 0 && (
+            <div className="related-outfits-list">
+              {relatedOutfits.map((outfit) => (
+                <button
+                  key={outfit.id}
+                  type="button"
+                  onClick={() => onOpenOutfit(outfit.id)}
+                >
+                  <strong>{outfit.name}</strong>
+                  <span>
+                    {outfit.itemIds.length}{" "}
+                    {outfit.itemIds.length === 1 ? "item" : "items"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </section>

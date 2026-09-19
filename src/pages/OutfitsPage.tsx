@@ -12,6 +12,59 @@ import type { Outfit } from "../types/outfit";
 const titleCase = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1);
 
+function OutfitPreview({
+  outfit,
+  wardrobe,
+}: {
+  outfit: Outfit;
+  wardrobe: ClothingItem[];
+}) {
+  const items = useMemo(
+    () =>
+      outfit.itemIds.flatMap((id) => {
+        const item = wardrobe.find((entry) => entry.id === id);
+        return item ? [item] : [];
+      }),
+    [outfit.itemIds, wardrobe],
+  );
+  const [images, setImages] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let active = true;
+    Promise.all(
+      items.slice(0, 4).map(async (item) => ({
+        id: item.id,
+        image: await loadManagedImage(item.imagePath),
+      })),
+    )
+      .then((loaded) => {
+        if (active)
+          setImages(
+            Object.fromEntries(
+              loaded.map(({ id, image }) => [id, image.dataUrl]),
+            ),
+          );
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [items, outfit.id]);
+  return (
+    <div className="outfit-preview" aria-hidden="true">
+      {items
+        .slice(0, 4)
+        .map((item) =>
+          images[item.id] ? (
+            <img key={item.id} src={images[item.id]} alt="" />
+          ) : (
+            <span key={item.id}>{titleCase(item.category)}</span>
+          ),
+        )}
+      {items.length === 0 && <span className="empty-preview">No items</span>}
+    </div>
+  );
+}
+
 function OutfitItemTile({
   item,
   onRemove,
@@ -156,12 +209,21 @@ function ItemPicker({
 
 type Props = {
   initialItemIds?: string[];
+  initialOutfitId?: string;
   onDirtyChange: (dirty: boolean) => void;
 };
 
-export function OutfitsPage({ initialItemIds = [], onDirtyChange }: Props) {
+export function OutfitsPage({
+  initialItemIds = [],
+  initialOutfitId,
+  onDirtyChange,
+}: Props) {
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<"library" | "builder">(
+    initialItemIds.length || initialOutfitId ? "builder" : "library",
+  );
   const [activeOutfitId, setActiveOutfitId] = useState<string>();
   const [selectedIds, setSelectedIds] = useState<string[]>(initialItemIds);
   const [name, setName] = useState("");
@@ -189,17 +251,30 @@ export function OutfitsPage({ initialItemIds = [], onDirtyChange }: Props) {
         if (!active) return;
         setWardrobe(items);
         setOutfits(saved);
+        if (initialOutfitId) {
+          const requested = saved.find(
+            (outfit) => outfit.id === initialOutfitId,
+          );
+          if (requested) openOutfitValues(requested);
+          else {
+            setView("library");
+            setError("That saved outfit could not be found.");
+          }
+        }
       })
       .catch(() => {
         if (active)
           setError(
             "The outfit builder could not load your saved data. Nothing was changed.",
           );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
     return () => {
       active = false;
     };
-  }, []);
+  }, [initialOutfitId]);
   useEffect(() => {
     onDirtyChange(dirty);
     return () => onDirtyChange(false);
@@ -215,17 +290,7 @@ export function OutfitsPage({ initialItemIds = [], onDirtyChange }: Props) {
   function confirmDiscard() {
     return !dirty || window.confirm("Discard your unsaved outfit changes?");
   }
-  function resetBuilder() {
-    if (!confirmDiscard()) return;
-    setActiveOutfitId(undefined);
-    setSelectedIds([]);
-    setName("");
-    setNotes("");
-    setSavedSnapshot(JSON.stringify({ name: "", notes: "", selectedIds: [] }));
-    setNotice(null);
-  }
-  function openOutfit(outfit: Outfit) {
-    if (!confirmDiscard()) return;
+  function openOutfitValues(outfit: Outfit) {
     setActiveOutfitId(outfit.id);
     setSelectedIds(outfit.itemIds);
     setName(outfit.name);
@@ -237,6 +302,26 @@ export function OutfitsPage({ initialItemIds = [], onDirtyChange }: Props) {
         selectedIds: outfit.itemIds,
       }),
     );
+    setView("builder");
+    setNotice(null);
+  }
+  function resetBuilder() {
+    if (!confirmDiscard()) return;
+    setActiveOutfitId(undefined);
+    setSelectedIds([]);
+    setName("");
+    setNotes("");
+    setSavedSnapshot(JSON.stringify({ name: "", notes: "", selectedIds: [] }));
+    setNotice(null);
+    setView("builder");
+  }
+  function openOutfit(outfit: Outfit) {
+    if (!confirmDiscard()) return;
+    openOutfitValues(outfit);
+  }
+  function showLibrary() {
+    if (!confirmDiscard()) return;
+    setView("library");
     setNotice(null);
   }
   function chooseItem(item: ClothingItem) {
@@ -317,6 +402,130 @@ export function OutfitsPage({ initialItemIds = [], onDirtyChange }: Props) {
     }
   }
 
+  async function renameOutfit(outfit: Outfit) {
+    const nextName = window.prompt("Rename outfit", outfit.name)?.trim();
+    if (!nextName || nextName === outfit.name) return;
+    setError(null);
+    try {
+      const renamed = await outfitRepository.update(outfit.id, {
+        ...outfit,
+        name: nextName,
+      });
+      setOutfits((current) =>
+        current.map((entry) => (entry.id === renamed.id ? renamed : entry)),
+      );
+      setNotice("Outfit renamed.");
+    } catch {
+      setError("The outfit could not be renamed. Nothing was changed.");
+    }
+  }
+
+  async function deleteOutfit(outfit: Outfit) {
+    if (
+      !window.confirm(`Delete “${outfit.name}”? Clothing items will be kept.`)
+    )
+      return;
+    setError(null);
+    try {
+      await outfitRepository.delete(outfit.id);
+      setOutfits((current) =>
+        current.filter((entry) => entry.id !== outfit.id),
+      );
+      setNotice("Outfit deleted. Your clothing items were kept.");
+    } catch {
+      setError("The outfit could not be deleted. Nothing was changed.");
+    }
+  }
+
+  if (view === "library")
+    return (
+      <section
+        className="page saved-outfits-page"
+        aria-labelledby="outfits-heading"
+      >
+        <header className="page-header">
+          <div>
+            <p className="eyebrow">Your looks</p>
+            <h1 id="outfits-heading">Saved Outfits</h1>
+          </div>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={resetBuilder}
+          >
+            + Create outfit
+          </button>
+        </header>
+        {notice && (
+          <p className="success-banner" role="status">
+            {notice}
+          </p>
+        )}
+        {error && (
+          <p className="error-banner" role="alert">
+            {error}
+          </p>
+        )}
+        {loading && <p className="loading-message">Opening your outfits…</p>}
+        {!loading && outfits.length === 0 && (
+          <div className="empty-state">
+            <div className="empty-icon" aria-hidden="true">
+              ◇
+            </div>
+            <h2>Save your first look</h2>
+            <p>
+              Combine clothing from your closet into an outfit you can revisit.
+            </p>
+            <button
+              className="secondary-button empty-action"
+              type="button"
+              onClick={resetBuilder}
+            >
+              Create an outfit
+            </button>
+          </div>
+        )}
+        {!loading && outfits.length > 0 && (
+          <div className="outfit-library-grid" aria-label="Saved outfits">
+            {outfits.map((outfit) => (
+              <article className="outfit-library-card" key={outfit.id}>
+                <button
+                  className="outfit-card-open"
+                  type="button"
+                  aria-label={`Open ${outfit.name}`}
+                  onClick={() => openOutfit(outfit)}
+                >
+                  <OutfitPreview outfit={outfit} wardrobe={wardrobe} />
+                  <span className="outfit-card-copy">
+                    <strong>{outfit.name}</strong>
+                    <small>
+                      {outfit.itemIds.length}{" "}
+                      {outfit.itemIds.length === 1 ? "item" : "items"}
+                    </small>
+                    {outfit.notes && <span>{outfit.notes}</span>}
+                  </span>
+                </button>
+                <div className="outfit-card-actions">
+                  <button
+                    type="button"
+                    onClick={() => void renameOutfit(outfit)}
+                  >
+                    Rename
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void deleteOutfit(outfit)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    );
+
   return (
     <section className="page outfit-builder" aria-labelledby="outfits-heading">
       <header className="page-header">
@@ -325,6 +534,13 @@ export function OutfitsPage({ initialItemIds = [], onDirtyChange }: Props) {
           <h1 id="outfits-heading">Outfit Builder</h1>
         </div>
         <div className="action-group">
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={showLibrary}
+          >
+            All outfits
+          </button>
           <button
             className="secondary-button"
             type="button"

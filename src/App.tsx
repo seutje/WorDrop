@@ -7,6 +7,7 @@ import "./styles/global.css";
 function App() {
   const [activeSection, setActiveSection] = useState<AppSection>("closet");
   const [outfitItemIds, setOutfitItemIds] = useState<string[]>([]);
+  const [outfitId, setOutfitId] = useState<string>();
   const [outfitRequestKey, setOutfitRequestKey] = useState(0);
   const [outfitDirty, setOutfitDirty] = useState(false);
   const handleDirtyChange = useCallback(
@@ -23,12 +24,20 @@ function App() {
       return;
     if (section === "outfits" && activeSection !== "outfits") {
       setOutfitItemIds([]);
+      setOutfitId(undefined);
       setOutfitRequestKey((key) => key + 1);
     }
     setActiveSection(section);
   }
   function startOutfit(itemIds: string[]) {
     setOutfitItemIds(itemIds);
+    setOutfitId(undefined);
+    setOutfitRequestKey((key) => key + 1);
+    setActiveSection("outfits");
+  }
+  function openOutfit(id: string) {
+    setOutfitItemIds([]);
+    setOutfitId(id);
     setOutfitRequestKey((key) => key + 1);
     setActiveSection("outfits");
   }
@@ -36,11 +45,12 @@ function App() {
   return (
     <AppShell activeSection={activeSection} onNavigate={navigate}>
       {activeSection === "closet" ? (
-        <ClosetPage onStartOutfit={startOutfit} />
+        <ClosetPage onStartOutfit={startOutfit} onOpenOutfit={openOutfit} />
       ) : (
         <OutfitsPage
           key={outfitRequestKey}
           initialItemIds={outfitItemIds}
+          initialOutfitId={outfitId}
           onDirtyChange={handleDirtyChange}
         />
       )}

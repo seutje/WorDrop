@@ -709,38 +709,45 @@ Make saved outfits useful after creation.
 
 ## Deliverables
 
-- [ ] Saved Outfits page
-- [ ] outfit cards/previews
-- [ ] open outfit
-- [ ] edit outfit
-- [ ] rename outfit
-- [ ] delete outfit
-- [ ] show outfits containing an item from item detail page
-- [ ] empty state
+- [x] Saved Outfits page
+- [x] outfit cards/previews
+- [x] open outfit
+- [x] edit outfit
+- [x] rename outfit
+- [x] delete outfit
+- [x] show outfits containing an item from item detail page
+- [x] empty state
 
 ## Suggested Steps
 
-- [ ] choose outfit preview representation
-- [ ] build card/grid
-- [ ] add actions
-- [ ] connect clothing detail relationship query
-- [ ] add empty state
+- [x] choose outfit preview representation
+- [x] build card/grid
+- [x] add actions
+- [x] connect clothing detail relationship query
+- [x] add empty state
 
 ## Verification
 
-- [ ] several outfits display clearly
-- [ ] editing one does not affect another
-- [ ] deleting outfit does not delete clothing
-- [ ] item detail shows related outfits
+- [x] several outfits display clearly
+- [x] editing one does not affect another
+- [x] deleting outfit does not delete clothing
+- [x] item detail shows related outfits
+
+Implementation note: Outfits now opens as a visual library. Each card previews
+up to four garment images and shows the outfit name, item count, and notes.
+Cards open the existing builder for editing and provide direct rename and
+confirmed delete actions. Deleting an outfit only removes the outfit record.
+Clothing details query outfit relationships and can open a related outfit
+directly. The library includes loading, error, and first-outfit empty states.
 
 ## User Test Gate
 
 Intended user verifies:
 
-- [ ] saved outfits are recognizable
-- [ ] naming conventions feel adequate
-- [ ] outfit cards contain enough information
-- [ ] it is easy to reopen and modify a look
+- [x] saved outfits are recognizable
+- [x] naming conventions feel adequate
+- [x] outfit cards contain enough information
+- [x] it is easy to reopen and modify a look
 
 ---
 
