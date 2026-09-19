@@ -797,6 +797,16 @@ optional explanation; centralized weights produce a clamped 0-100 result.
 Missing optional metadata is treated neutrally, and equal scores are ordered by
 stable item ID so repeated inputs always produce the same ranking.
 
+Whole-outfit feedback reuses these pair scores but includes only category pairs
+that meaningfully interact, such as top-bottom, garment-shoes, and
+garment-outerwear; accessories may pair with any non-accessory category. The
+displayed outfit score is the rounded average of those relevant pairs. Repeated
+high-contribution pair reasons are consolidated into at most three overall
+explanations. The application withholds a numeric result for fewer than two
+items, no useful category pair, or fewer than two jointly populated metadata
+dimensions per relevant pair. Compatibility is always advisory and never
+blocks saving an unusual or incomplete outfit.
+
 A candidate clothing item receives component scores.
 
 Recommended initial weighting:

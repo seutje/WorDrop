@@ -815,6 +815,55 @@ h1 {
 .outfit-fields textarea {
   resize: vertical;
 }
+.outfit-compatibility {
+  margin-bottom: 20px;
+  padding: 17px 19px;
+  color: #3e493f;
+  background: #eef3ed;
+  border: 1px solid #d1ddd0;
+  border-radius: 12px;
+}
+.compatibility-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.compatibility-heading h2 {
+  margin: 2px 0 0;
+  font-family: Georgia, serif;
+  font-size: 21px;
+  font-weight: 500;
+}
+.compatibility-heading > strong {
+  color: #49604d;
+  font-family: Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+}
+.compatibility-heading > strong small {
+  font-family: inherit;
+  font-size: 12px;
+}
+.outfit-compatibility > p {
+  margin: 10px 0 0;
+  color: #5f675f;
+  font-size: 13px;
+}
+.outfit-compatibility ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 18px;
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: #4d5b4f;
+  font-size: 13px;
+}
+.compatibility-note {
+  display: block;
+  margin-top: 11px;
+  color: #767c76;
+}
 .outfit-board {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));

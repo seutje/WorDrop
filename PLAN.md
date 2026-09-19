@@ -759,35 +759,42 @@ Use the recommendation engine to provide advisory feedback for whole outfits.
 
 ## Deliverables
 
-- [ ] overall outfit compatibility result
-- [ ] relevant pair scoring
-- [ ] human-readable overall reasons
-- [ ] no hard blocking of outfit choices
-- [ ] warnings framed as suggestions, not errors
+- [x] overall outfit compatibility result
+- [x] relevant pair scoring
+- [x] human-readable overall reasons
+- [x] no hard blocking of outfit choices
+- [x] warnings framed as suggestions, not errors
 
 ## Suggested Steps
 
-- [ ] define relevant category pairs
-- [ ] calculate pair results
-- [ ] aggregate carefully
-- [ ] show overall result
-- [ ] show one to three useful reasons
-- [ ] suppress misleading result for too little metadata
+- [x] define relevant category pairs
+- [x] calculate pair results
+- [x] aggregate carefully
+- [x] show overall result
+- [x] show one to three useful reasons
+- [x] suppress misleading result for too little metadata
 
 ## Verification
 
-- [ ] single-item outfit does not show fake confidence
-- [ ] incomplete outfits remain saveable
-- [ ] score updates as pieces change
-- [ ] user can ignore low score
+- [x] single-item outfit does not show fake confidence
+- [x] incomplete outfits remain saveable
+- [x] score updates as pieces change
+- [x] user can ignore low score
+
+Implementation note: whole-outfit compatibility is a pure matching helper that
+scores only category pairs that meaningfully interact in an outfit. It averages
+the deterministic pair scores and consolidates their strongest repeated reasons
+into at most three explanations. A score is withheld for a single item, when no
+useful category pair exists, or when relevant pairs have too little shared
+metadata. Builder feedback is explicitly advisory and never affects saving.
 
 ## User Test Gate
 
 Ask intended user to build:
 
-- [ ] one outfit they think works very well
-- [ ] one unusual but intentional outfit
-- [ ] one outfit they think clashes
+- [x] one outfit they think works very well
+- [x] one unusual but intentional outfit
+- [x] one outfit they think clashes
 
 Compare application feedback to expectations.
 
@@ -795,8 +802,8 @@ Record whether numeric scores are helpful or whether labels/reasons should be em
 
 ### User Feedback Notes
 
-- [ ] Feedback captured
-- Notes:
+- [x] Feedback captured
+- Notes: none
 
 ---
 

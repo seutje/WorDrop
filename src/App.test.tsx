@@ -398,6 +398,44 @@ describe("App", () => {
     });
   });
 
+  it("updates advisory compatibility as outfit pieces change", async () => {
+    const tee: ClothingItem = {
+      ...sampleItem,
+      id: "item-2",
+      name: "White tee",
+      category: "top",
+      colors: ["white"],
+      material: "Cotton",
+      imagePath: "images/original/tee.jpg",
+    };
+    mocks.list.mockResolvedValue([sampleItem, tee]);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Outfits" }));
+    await user.click(
+      await screen.findByRole("button", { name: "+ Create outfit" }),
+    );
+    expect(
+      screen.getByText("Add another item to see outfit compatibility."),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Add clothing/ }));
+    await user.click(screen.getByRole("button", { name: /Blue jeans/ }));
+    await user.click(screen.getByRole("button", { name: /Add clothing/ }));
+    await user.click(screen.getByRole("button", { name: /White tee/ }));
+    expect(
+      screen.getByLabelText(/Compatibility score \d+ out of 100/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "A style suggestion, not a rule. You can always save this outfit.",
+      ),
+    ).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    expect(
+      screen.getByText("Add another item to see outfit compatibility."),
+    ).toBeInTheDocument();
+  });
+
   it("starts an outfit from clothing details", async () => {
     mocks.list.mockResolvedValue([sampleItem]);
     const user = userEvent.setup();

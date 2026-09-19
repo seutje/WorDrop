@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { clothingRepository } from "../lib/database/clothingRepository";
 import { outfitRepository } from "../lib/database/outfitRepository";
 import { loadManagedImage } from "../lib/images/managedImages";
+import { scoreOutfit } from "../lib/matching";
 import {
   clothingCategories,
   type ClothingCategory,
@@ -243,6 +244,7 @@ export function OutfitsPage({
     const item = wardrobe.find((entry) => entry.id === id);
     return item ? [item] : [];
   });
+  const compatibility = scoreOutfit(selectedItems);
 
   useEffect(() => {
     let active = true;
@@ -620,6 +622,41 @@ export function OutfitsPage({
               />
             </label>
           </div>
+          <section className="outfit-compatibility" aria-live="polite">
+            <div className="compatibility-heading">
+              <div>
+                <p className="eyebrow">Compatibility guide</p>
+                <h2>
+                  {compatibility.status === "scored"
+                    ? compatibility.label
+                    : "Add a little more"}
+                </h2>
+              </div>
+              {compatibility.status === "scored" && (
+                <strong
+                  aria-label={`Compatibility score ${compatibility.score} out of 100`}
+                >
+                  {compatibility.score}
+                  <small>/100</small>
+                </strong>
+              )}
+            </div>
+            {compatibility.status === "insufficient" ? (
+              <p>{compatibility.message}</p>
+            ) : (
+              <>
+                <p>{compatibility.summary}</p>
+                <ul>
+                  {compatibility.reasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+            <small className="compatibility-note">
+              A style suggestion, not a rule. You can always save this outfit.
+            </small>
+          </section>
           <div className="outfit-board">
             {selectedItems.map((item, index) => (
               <OutfitItemTile
