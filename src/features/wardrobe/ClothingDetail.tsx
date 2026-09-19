@@ -1,7 +1,9 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { clothingRepository } from "../../lib/database/clothingRepository";
 import { loadManagedImage } from "../../lib/images/managedImages";
+import { rankMatches } from "../../lib/matching";
 import type { ClothingItem } from "../../types/clothing";
+import { RecommendationCard } from "./RecommendationCard";
 
 const titleCase = (value: string) =>
   value
@@ -36,15 +38,39 @@ type Props = {
   onBack: () => void;
   onEdit: (item: ClothingItem) => void;
   onDeleted: (message: string) => void;
+  onInspectItem: (itemId: string) => void;
 };
 
-export function ClothingDetail({ itemId, onBack, onEdit, onDeleted }: Props) {
+export function ClothingDetail({
+  itemId,
+  onBack,
+  onEdit,
+  onDeleted,
+  onInspectItem,
+}: Props) {
   const [item, setItem] = useState<ClothingItem | null>();
+  const [candidates, setCandidates] = useState<ClothingItem[]>([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(true);
+  const [recommendationsError, setRecommendationsError] = useState(false);
+  const [includeWishlist, setIncludeWishlist] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>();
   const [imageError, setImageError] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const recommendations = useMemo(() => {
+    if (!item) return [];
+    const allowed = includeWishlist
+      ? candidates
+      : candidates.filter((candidate) => candidate.ownership === "owned");
+    const byId = new Map(allowed.map((candidate) => [candidate.id, candidate]));
+    return rankMatches(item, allowed)
+      .slice(0, 8)
+      .flatMap((result) => {
+        const candidate = byId.get(result.itemId);
+        return candidate ? [{ item: candidate, result }] : [];
+      });
+  }, [candidates, includeWishlist, item]);
 
   useEffect(() => {
     let active = true;
@@ -58,6 +84,24 @@ export function ClothingDetail({ itemId, onBack, onEdit, onDeleted }: Props) {
           setError(
             "This clothing item could not be loaded. Your saved data was not changed.",
           );
+      });
+    return () => {
+      active = false;
+    };
+  }, [itemId]);
+
+  useEffect(() => {
+    let active = true;
+    clothingRepository
+      .list()
+      .then((loadedItems) => {
+        if (active) setCandidates(loadedItems);
+      })
+      .catch(() => {
+        if (active) setRecommendationsError(true);
+      })
+      .finally(() => {
+        if (active) setRecommendationsLoading(false);
       });
     return () => {
       active = false;
@@ -229,15 +273,55 @@ export function ClothingDetail({ itemId, onBack, onEdit, onDeleted }: Props) {
         </div>
       </div>
       <div className="detail-sections">
-        <section className="detail-panel">
-          <div>
-            <p className="eyebrow">Coming in Phase 7</p>
-            <h2>Looks good with</h2>
+        <section className="detail-panel recommendations-panel">
+          <div className="recommendations-heading">
+            <div>
+              <p className="eyebrow">Wardrobe matches</p>
+              <h2>Looks good with</h2>
+            </div>
+            <label className="wishlist-toggle">
+              <input
+                type="checkbox"
+                checked={includeWishlist}
+                onChange={(event) => setIncludeWishlist(event.target.checked)}
+              />
+              Include wishlist
+            </label>
           </div>
-          <p>
-            The recommendation engine is ready. Ranked matching items and
-            explanations will appear here when the recommendation UI is added.
-          </p>
+          {recommendationsLoading && (
+            <p className="recommendations-message">Finding compatible items…</p>
+          )}
+          {recommendationsError && (
+            <p className="recommendations-message error-message">
+              Suggestions could not be loaded. Your wardrobe data was not
+              changed.
+            </p>
+          )}
+          {!recommendationsLoading &&
+            !recommendationsError &&
+            recommendations.length === 0 && (
+              <p className="recommendations-message">
+                No {includeWishlist ? "other" : "owned"} items are available to
+                suggest yet.
+              </p>
+            )}
+          {recommendations.length > 0 && (
+            <div className="recommendations-grid">
+              {recommendations.map(({ item: candidate, result }) => (
+                <RecommendationCard
+                  key={candidate.id}
+                  item={candidate}
+                  result={result}
+                  onInspect={() => onInspectItem(candidate.id)}
+                  onStartOutfit={() =>
+                    setNotice(
+                      `“${candidate.name}” and “${item.name}” are ready for the outfit builder coming in Phase 9.`,
+                    )
+                  }
+                />
+              ))}
+            </div>
+          )}
         </section>
         <section className="detail-panel">
           <div>

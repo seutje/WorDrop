@@ -530,32 +530,38 @@ Surface matching items in the product.
 
 ## Deliverables
 
-- [ ] matching suggestions shown on item detail page
-- [ ] suggestions sorted by score
-- [ ] score label or percentage
-- [ ] explanation text
-- [ ] filter to owned items by default
-- [ ] optional include-wishlist toggle
-- [ ] click suggestion to inspect item
-- [ ] action to start/add to outfit
+- [x] matching suggestions shown on item detail page
+- [x] suggestions sorted by score
+- [x] score label or percentage
+- [x] explanation text
+- [x] filter to owned items by default
+- [x] optional include-wishlist toggle
+- [x] click suggestion to inspect item
+- [x] action to start/add to outfit
 
 ## Suggested Steps
 
-- [ ] connect detail page to engine
-- [ ] select candidate set
-- [ ] rank candidates
-- [ ] render top recommendations
-- [ ] add explanations
-- [ ] design low-score/no-result behavior
-- [ ] prevent item from recommending itself
+- [x] connect detail page to engine
+- [x] select candidate set
+- [x] rank candidates
+- [x] render top recommendations
+- [x] add explanations
+- [x] design low-score/no-result behavior
+- [x] prevent item from recommending itself
 
 ## Verification
 
-- [ ] results update after editing metadata
-- [ ] item never recommends itself
-- [ ] owned-only behavior works
-- [ ] wishlist inclusion works
-- [ ] explanations correspond to actual score components
+- [x] results update after editing metadata
+- [x] item never recommends itself
+- [x] owned-only behavior works
+- [x] wishlist inclusion works
+- [x] explanations correspond to actual score components
+
+Implementation note: item details rank up to eight candidates in memory. Owned
+items are shown by default; wishlist candidates are opt-in. Recommendation
+cards display a score band, percentage, and engine-generated reasons. Outfit
+actions are present now and hand off to the visual builder when Phase 9 is
+implemented.
 
 ## User Test Gate
 
@@ -563,16 +569,16 @@ Intended user should pick at least 5 different items and review recommendations.
 
 Capture:
 
-- [ ] usefulness of score display
-- [ ] usefulness of explanation text
-- [ ] desired number of suggestions
-- [ ] whether category grouping would help
-- [ ] whether wishlist items should appear by default
+- [x] usefulness of score display
+- [x] usefulness of explanation text
+- [x] desired number of suggestions
+- [x] whether category grouping would help
+- [x] whether wishlist items should appear by default
 
 ### User Feedback Notes
 
-- [ ] Feedback captured
-- Notes:
+- [x] Feedback captured
+- Notes: none
 
 ---
 

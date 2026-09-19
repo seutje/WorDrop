@@ -283,4 +283,66 @@ describe("App", () => {
     await waitFor(() => expect(mocks.delete).toHaveBeenCalledWith("item-1"));
     expect(screen.getByRole("heading", { name: "Closet" })).toBeInTheDocument();
   });
+
+  it("shows owned recommendations by default and can include wishlist matches", async () => {
+    const ownedMatch: ClothingItem = {
+      ...sampleItem,
+      id: "owned-match",
+      name: "White cotton tee",
+      category: "top",
+      colors: ["white"],
+      material: "Cotton",
+      imagePath: "images/original/tee.jpg",
+    };
+    const wishlistMatch: ClothingItem = {
+      ...sampleItem,
+      id: "wishlist-match",
+      name: "Navy sneakers",
+      category: "shoes",
+      colors: ["navy"],
+      ownership: "wishlist",
+      imagePath: "images/original/shoes.jpg",
+    };
+    const wardrobe = [sampleItem, wishlistMatch, ownedMatch];
+    mocks.list.mockResolvedValue(wardrobe);
+    mocks.get.mockImplementation(
+      async (id: string) => wardrobe.find((item) => item.id === id) ?? null,
+    );
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
+    );
+    expect(
+      await screen.findByRole("button", {
+        name: "Inspect recommendation White cotton tee",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: "Inspect recommendation Navy sneakers",
+      }),
+    ).not.toBeInTheDocument();
+    await user.click(
+      screen.getByRole("checkbox", { name: "Include wishlist" }),
+    );
+    expect(
+      screen.getByRole("button", {
+        name: "Inspect recommendation Navy sneakers",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: "Inspect recommendation Blue jeans",
+      }),
+    ).not.toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", {
+        name: "Inspect recommendation White cotton tee",
+      }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "White cotton tee" }),
+    ).toBeInTheDocument();
+  });
 });

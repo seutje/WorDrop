@@ -95,9 +95,11 @@ export function ClosetPage() {
   if (selectedItemId && !isFormOpen)
     return (
       <ClothingDetail
+        key={selectedItemId}
         itemId={selectedItemId}
         onBack={() => setSelectedItemId(undefined)}
         onEdit={openEdit}
+        onInspectItem={setSelectedItemId}
         onDeleted={(message) => {
           setSelectedItemId(undefined);
           setNotice(message);

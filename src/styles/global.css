@@ -518,6 +518,114 @@ h1 {
   color: #6b6c68;
   line-height: 1.55;
 }
+.recommendations-panel {
+  grid-column: 1 / -1;
+}
+.recommendations-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.wishlist-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #5d5e5a;
+  font-size: 13px;
+  cursor: pointer;
+}
+.recommendations-message {
+  margin: 28px 0 4px;
+  color: #6b6c68;
+}
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+.recommendation-card {
+  display: grid;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dfdcd6;
+  border-radius: 11px;
+}
+.recommendation-main {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.recommendation-main:focus-visible,
+.recommendation-action:focus-visible {
+  outline: 3px solid #98b3a0;
+  outline-offset: -3px;
+}
+.recommendation-image {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 165px;
+  overflow: hidden;
+  color: #77756f;
+  background: #e9e7e2;
+  font-size: 12px;
+}
+.recommendation-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.recommendation-image > strong {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  place-items: center;
+  min-width: 43px;
+  height: 43px;
+  padding: 4px;
+  color: #24452e;
+  background: rgb(244 250 245 / 94%);
+  border: 3px solid #5b9468;
+  border-radius: 50%;
+  font-size: 12px;
+}
+.recommendation-copy {
+  display: grid;
+  gap: 4px;
+  padding: 0 11px 10px;
+}
+.recommendation-copy b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.recommendation-copy small {
+  color: #42634a;
+  font-weight: 650;
+}
+.recommendation-copy > span {
+  min-height: 54px;
+  color: #6b6c68;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.recommendation-action {
+  margin: 0 10px 10px;
+  padding: 8px;
+  color: #3f5143;
+  background: #f1f5f1;
+  border: 1px solid #c9d7cb;
+  border-radius: 7px;
+  cursor: pointer;
+}
 .detail-alert {
   margin-bottom: 18px;
 }
