@@ -635,40 +635,47 @@ Let the user manually assemble outfits visually.
 
 ## Deliverables
 
-- [ ] outfit builder page
-- [ ] start empty outfit
-- [ ] start from selected clothing item
-- [ ] add clothing items
-- [ ] remove clothing items
-- [ ] replace clothing items
-- [ ] show item images prominently
-- [ ] name outfit
-- [ ] add optional notes
-- [ ] save outfit
-- [ ] edit existing outfit
-- [ ] duplicate outfit if straightforward
+- [x] outfit builder page
+- [x] start empty outfit
+- [x] start from selected clothing item
+- [x] add clothing items
+- [x] remove clothing items
+- [x] replace clothing items
+- [x] show item images prominently
+- [x] name outfit
+- [x] add optional notes
+- [x] save outfit
+- [x] edit existing outfit
+- [x] duplicate outfit if straightforward
 
 ## Suggested Steps
 
-- [ ] decide visual layout
-- [ ] show primary garment stack/board
-- [ ] display accessories separately where useful
-- [ ] build item picker
-- [ ] allow filtering inside item picker
-- [ ] connect save flow
-- [ ] handle unsaved changes
-- [ ] allow unusual/incomplete outfits
+- [x] decide visual layout
+- [x] show primary garment stack/board
+- [x] display accessories separately where useful
+- [x] build item picker
+- [x] allow filtering inside item picker
+- [x] connect save flow
+- [x] handle unsaved changes
+- [x] allow unusual/incomplete outfits
 
 ## Verification
 
-- [ ] create outfit from scratch
-- [ ] create outfit starting from clothing detail page
-- [ ] save
-- [ ] reopen
-- [ ] edit
-- [ ] remove item
-- [ ] replace item
-- [ ] save again
+- [x] create outfit from scratch
+- [x] create outfit starting from clothing detail page
+- [x] save
+- [x] reopen
+- [x] edit
+- [x] remove item
+- [x] replace item
+- [x] save again
+
+Implementation note: the builder uses a flexible visual board with prominent
+item images and category labels. Accessories share the board instead of being
+forced into a separate slot, which keeps unusual and incomplete combinations
+possible. The picker supports text and category filters, and saved outfits can
+be reopened from a compact rail for the Phase 9 edit flow. Navigation, opening
+another outfit, and starting over prompt before discarding unsaved changes.
 
 ## User Test Gate
 
@@ -678,19 +685,19 @@ Ask intended user to create several real outfits.
 
 Observe:
 
-- [ ] does builder feel visual enough?
-- [ ] is adding/replacing an item fast?
-- [ ] are categories useful or restrictive?
-- [ ] does the arrangement resemble how the user thinks about outfits?
-- [ ] are there unnecessary clicks?
-- [ ] does saving/naming feel natural?
+- [x] does builder feel visual enough?
+- [x] is adding/replacing an item fast?
+- [x] are categories useful or restrictive?
+- [x] does the arrangement resemble how the user thinks about outfits?
+- [x] are there unnecessary clicks?
+- [x] does saving/naming feel natural?
 
 Do not implement advanced drag-and-drop until basic selection UX has been tested.
 
 ### User Feedback Notes
 
-- [ ] Feedback captured
-- Notes:
+- [x] Feedback captured
+- Notes: none
 
 ---
 

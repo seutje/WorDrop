@@ -39,6 +39,7 @@ type Props = {
   onEdit: (item: ClothingItem) => void;
   onDeleted: (message: string) => void;
   onInspectItem: (itemId: string) => void;
+  onStartOutfit: (itemIds: string[]) => void;
 };
 
 export function ClothingDetail({
@@ -47,6 +48,7 @@ export function ClothingDetail({
   onEdit,
   onDeleted,
   onInspectItem,
+  onStartOutfit,
 }: Props) {
   const [item, setItem] = useState<ClothingItem | null>();
   const [candidates, setCandidates] = useState<ClothingItem[]>([]);
@@ -56,7 +58,6 @@ export function ClothingDetail({
   const [imageUrl, setImageUrl] = useState<string>();
   const [imageError, setImageError] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const recommendations = useMemo(() => {
     if (!item) return [];
@@ -182,11 +183,6 @@ export function ClothingDetail({
           {error}
         </p>
       )}
-      {notice && (
-        <p className="success-banner" role="status">
-          {notice}
-        </p>
-      )}
       <div className="detail-hero">
         <div className="detail-image">
           {imageUrl ? (
@@ -261,11 +257,7 @@ export function ClothingDetail({
             <button
               className="primary-button"
               type="button"
-              onClick={() =>
-                setNotice(
-                  "The visual outfit builder arrives in Phase 9. This item will be ready to use there.",
-                )
-              }
+              onClick={() => onStartOutfit([item.id])}
             >
               Build outfit from this item
             </button>
@@ -313,11 +305,7 @@ export function ClothingDetail({
                   item={candidate}
                   result={result}
                   onInspect={() => onInspectItem(candidate.id)}
-                  onStartOutfit={() =>
-                    setNotice(
-                      `“${candidate.name}” and “${item.name}” are ready for the outfit builder coming in Phase 9.`,
-                    )
-                  }
+                  onStartOutfit={() => onStartOutfit([item.id, candidate.id])}
                 />
               ))}
             </div>

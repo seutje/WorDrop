@@ -626,6 +626,193 @@ h1 {
   border-radius: 7px;
   cursor: pointer;
 }
+.outfit-builder {
+  max-width: 1180px;
+}
+.outfit-builder-layout {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 24px;
+  margin-top: 30px;
+}
+.saved-outfits-rail {
+  padding: 16px;
+  background: #f1efeb;
+  border-radius: 12px;
+}
+.saved-outfits-rail h2 {
+  margin: 0 0 12px;
+  font-family: Georgia, serif;
+  font-size: 20px;
+  font-weight: 500;
+}
+.saved-outfits-rail > button {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  margin-bottom: 7px;
+  padding: 10px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+.saved-outfits-rail > button:hover,
+.saved-outfits-rail > button[data-active="true"] {
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+.saved-outfits-rail small,
+.saved-outfits-rail p {
+  color: #77756f;
+  font-size: 12px;
+}
+.outfit-workspace {
+  min-width: 0;
+}
+.outfit-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.outfit-fields label {
+  display: grid;
+  gap: 6px;
+  color: #474844;
+  font-size: 13px;
+  font-weight: 650;
+}
+.outfit-fields input,
+.outfit-fields textarea,
+.picker-filters input,
+.picker-filters select {
+  width: 100%;
+  padding: 10px 11px;
+  background: #fff;
+  border: 1px solid #cfccc5;
+  border-radius: 8px;
+}
+.outfit-fields textarea {
+  resize: vertical;
+}
+.outfit-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 15px;
+  min-height: 340px;
+  padding: 18px;
+  background: #f4f2ee;
+  border: 1px solid #e3e0da;
+  border-radius: 14px;
+  align-content: start;
+}
+.outfit-item-tile {
+  overflow: hidden;
+  background: #fff;
+  border-radius: 11px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+.outfit-item-image {
+  display: grid;
+  place-items: center;
+  height: 220px;
+  overflow: hidden;
+  color: #77756f;
+  background: #e7e4de;
+}
+.outfit-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.outfit-item-copy {
+  display: grid;
+  gap: 10px;
+  padding: 11px;
+}
+.outfit-item-copy > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+.outfit-item-copy > div:first-child {
+  display: grid;
+}
+.outfit-item-copy small {
+  color: #77756f;
+}
+.outfit-item-copy button {
+  padding: 3px 0;
+  color: #59645b;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 12px;
+  text-decoration: underline;
+}
+.add-outfit-item {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 9px;
+  min-height: 290px;
+  color: #657067;
+  background: transparent;
+  border: 1px dashed #aaa69e;
+  border-radius: 11px;
+  cursor: pointer;
+}
+.add-outfit-item span {
+  font-size: 35px;
+  font-weight: 300;
+}
+.builder-guidance {
+  margin: 12px 2px 0;
+  color: #77756f;
+  font-size: 13px;
+}
+.item-picker {
+  width: min(720px, 100%);
+  max-height: calc(100vh - 50px);
+  overflow: auto;
+  padding: 26px;
+  background: #faf9f7;
+  border-radius: 16px;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 24%);
+}
+.picker-filters {
+  display: grid;
+  grid-template-columns: 1fr 190px;
+  gap: 10px;
+  margin: 20px 0;
+}
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 10px;
+}
+.picker-grid button {
+  display: grid;
+  gap: 5px;
+  min-height: 90px;
+  padding: 13px;
+  color: inherit;
+  background: #f0eee9;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  text-align: left;
+}
+.picker-grid button:hover {
+  background: #e5ebe5;
+  border-color: #aabbaa;
+}
+.picker-grid small {
+  color: #77756f;
+}
 .detail-alert {
   margin-bottom: 18px;
 }
@@ -853,6 +1040,24 @@ h1 {
     min-height: 360px;
   }
   .detail-sections {
+    grid-template-columns: 1fr;
+  }
+  .outfit-builder-layout {
+    grid-template-columns: 1fr;
+  }
+  .saved-outfits-rail {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+  }
+  .saved-outfits-rail h2,
+  .saved-outfits-rail p {
+    min-width: max-content;
+  }
+  .saved-outfits-rail > button {
+    min-width: 150px;
+  }
+  .outfit-fields {
     grid-template-columns: 1fr;
   }
 }

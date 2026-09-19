@@ -2,6 +2,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClothingItem } from "./types/clothing";
+import type { Outfit } from "./types/outfit";
 
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),
@@ -12,6 +13,14 @@ const mocks = vi.hoisted(() => ({
   chooseImage: vi.fn(),
   loadImage: vi.fn(),
   discardImage: vi.fn(),
+}));
+const outfitMocks = vi.hoisted(() => ({
+  create: vi.fn(),
+  get: vi.fn(),
+  list: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+  containingItem: vi.fn(),
 }));
 
 vi.mock("./lib/database/clothingRepository", () => ({
@@ -28,6 +37,9 @@ vi.mock("./lib/images/managedImages", () => ({
   loadManagedImage: mocks.loadImage,
   discardManagedImage: mocks.discardImage,
 }));
+vi.mock("./lib/database/outfitRepository", () => ({
+  outfitRepository: outfitMocks,
+}));
 
 import App from "./App";
 
@@ -43,6 +55,14 @@ const sampleItem: ClothingItem = {
   styleTags: ["classic"],
   ownership: "owned",
   imagePath: "images/original/item.jpg",
+  createdAt: "2026-01-01T00:00:00Z",
+  updatedAt: "2026-01-01T00:00:00Z",
+};
+const savedOutfit: Outfit = {
+  id: "outfit-1",
+  name: "Weekend look",
+  itemIds: ["item-1"],
+  notes: "Relaxed",
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
 };
@@ -67,6 +87,12 @@ beforeEach(() => {
     dataUrl: "data:image/jpeg;base64,/9j/",
   });
   mocks.discardImage.mockResolvedValue(true);
+  outfitMocks.list.mockResolvedValue([]);
+  outfitMocks.create.mockResolvedValue(savedOutfit);
+  outfitMocks.update.mockResolvedValue(savedOutfit);
+  outfitMocks.delete.mockResolvedValue(true);
+  outfitMocks.get.mockResolvedValue(savedOutfit);
+  outfitMocks.containingItem.mockResolvedValue([]);
 });
 
 describe("App", () => {
@@ -76,7 +102,7 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Closet" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Outfits" }));
     expect(
-      screen.getByRole("heading", { name: "Outfits" }),
+      screen.getByRole("heading", { name: "Outfit Builder" }),
     ).toBeInTheDocument();
   });
 
@@ -344,5 +370,82 @@ describe("App", () => {
     expect(
       await screen.findByRole("heading", { name: "White cotton tee" }),
     ).toBeInTheDocument();
+  });
+
+  it("creates an outfit from scratch", async () => {
+    mocks.list.mockResolvedValue([sampleItem]);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Outfits" }));
+    await user.click(
+      await screen.findByRole("button", { name: /Add clothing/ }),
+    );
+    await user.click(screen.getByRole("button", { name: /Blue jeans/ }));
+    await user.type(
+      screen.getByRole("textbox", { name: "Outfit name" }),
+      "Weekend look",
+    );
+    await user.type(screen.getByRole("textbox", { name: "Notes" }), "Relaxed");
+    await user.click(screen.getByRole("button", { name: "Save outfit" }));
+    await waitFor(() => expect(outfitMocks.create).toHaveBeenCalledOnce());
+    expect(outfitMocks.create.mock.calls[0][0]).toEqual({
+      name: "Weekend look",
+      notes: "Relaxed",
+      itemIds: ["item-1"],
+    });
+  });
+
+  it("starts an outfit from clothing details", async () => {
+    mocks.list.mockResolvedValue([sampleItem]);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
+    );
+    await user.click(
+      await screen.findByRole("button", {
+        name: "Build outfit from this item",
+      }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Outfit Builder" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Started an outfit from your selection."),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole("img", { name: "Blue jeans" }),
+    ).toBeInTheDocument();
+  });
+
+  it("reopens, replaces, removes, and updates a saved outfit", async () => {
+    const tee: ClothingItem = {
+      ...sampleItem,
+      id: "item-2",
+      name: "White tee",
+      category: "top",
+      imagePath: "images/original/tee.jpg",
+    };
+    mocks.list.mockResolvedValue([sampleItem, tee]);
+    outfitMocks.list.mockResolvedValue([savedOutfit]);
+    outfitMocks.update.mockResolvedValue({
+      ...savedOutfit,
+      itemIds: ["item-2"],
+    });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Outfits" }));
+    await user.click(
+      await screen.findByRole("button", { name: /Weekend look/ }),
+    );
+    await user.click(screen.getByRole("button", { name: "Replace" }));
+    await user.click(screen.getByRole("button", { name: /White tee/ }));
+    expect(screen.getByText("White tee")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    expect(screen.queryByText("White tee")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Add clothing/ }));
+    await user.click(screen.getByRole("button", { name: /White tee/ }));
+    await user.click(screen.getByRole("button", { name: "Save outfit" }));
+    await waitFor(() => expect(outfitMocks.update).toHaveBeenCalledOnce());
   });
 });

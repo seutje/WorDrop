@@ -338,6 +338,15 @@ Functions:
 
 Compose an outfit manually.
 
+Implementation choice: the builder uses a flexible card board rather than
+fixed category slots or drag-and-drop. Every selected item keeps its image and
+category visible, and accessories participate in the same board so categories
+guide selection without restricting unusual or incomplete outfits. An item
+picker provides text and category filtering. The builder may start empty or be
+seeded from clothing details and recommendations, and it warns before replacing
+unsaved work. A compact saved-outfit rail supports reopening and editing here;
+the full browsing and management experience remains Phase 10 scope.
+
 Functions:
 
 - add clothing items

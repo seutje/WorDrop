@@ -24,7 +24,11 @@ const titleCase = (value: string) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 
-export function ClosetPage() {
+export function ClosetPage({
+  onStartOutfit,
+}: {
+  onStartOutfit: (itemIds: string[]) => void;
+}) {
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [editingItem, setEditingItem] = useState<ClothingItem>();
   const [selectedItemId, setSelectedItemId] = useState<string>();
@@ -100,6 +104,7 @@ export function ClosetPage() {
         onBack={() => setSelectedItemId(undefined)}
         onEdit={openEdit}
         onInspectItem={setSelectedItemId}
+        onStartOutfit={onStartOutfit}
         onDeleted={(message) => {
           setSelectedItemId(undefined);
           setNotice(message);
