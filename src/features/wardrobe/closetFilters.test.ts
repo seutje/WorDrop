@@ -73,10 +73,10 @@ describe("filterClothingItems", () => {
     expect(filterClothingItems(wardrobe, emptyClosetFilters)).toHaveLength(3);
   });
 
-  it("handles a representative wardrobe of more than 100 items", () => {
-    const largeWardrobe = Array.from({ length: 150 }, (_, index) =>
+  it("filters a representative 1,000-item wardrobe", () => {
+    const largeWardrobe = Array.from({ length: 1_000 }, (_, index) =>
       item(String(index), {
-        name: index === 149 ? "Target jacket" : `Generated item ${index}`,
+        name: index === 999 ? "Target jacket" : `Generated item ${index}`,
       }),
     );
     expect(
@@ -84,6 +84,6 @@ describe("filterClothingItems", () => {
         ...emptyClosetFilters,
         search: "target",
       }).map(({ id }) => id),
-    ).toEqual(["149"]);
+    ).toEqual(["999"]);
   });
 });

@@ -57,10 +57,15 @@ export const ClothingCard = memo(function ClothingCard({
         ) : (
           <div
             className="card-placeholder"
+            data-loading={!missing}
             role={missing ? "img" : undefined}
             aria-label={missing ? "Image unavailable" : undefined}
           >
-            {missing ? "Image unavailable" : "Loading…"}
+            {missing ? (
+              "Image unavailable"
+            ) : (
+              <span className="sr-only">Loading image</span>
+            )}
           </div>
         )}
       </div>

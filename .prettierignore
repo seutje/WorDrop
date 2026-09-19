@@ -4,6 +4,7 @@ src-tauri/target
 src-tauri/gen
 package-lock.json
 *.tsbuildinfo
+src-tauri/icons/wordrop-icon.svg
 AGENTS.md
 DESIGN.md
 PLAN.md

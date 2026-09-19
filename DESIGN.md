@@ -1221,6 +1221,16 @@ Dark mode is desirable but not required for the first functional MVP.
 
 It belongs in the polish phase unless trivial to support from the start.
 
+Phase 14 implementation choice: retain the warm light theme as the single
+fully supported theme rather than ship a partial dark mode. Interactive
+controls share a visible sage focus treatment and consistent hover/disabled
+states, dialogs can be dismissed with Escape when no operation is active, and
+reduced-motion preferences suppress decorative animation. Image cards use
+viewport-based managed-image loading with skeleton placeholders; generated
+1,000-item rendering and filtering tests provide the MVP performance guard.
+The Windows application icon is a dark rounded WorDrop “W” monogram with a
+sage hanger detail, matching the in-app brand mark and visual direction.
+
 ---
 
 ## 21. Filtering and Search

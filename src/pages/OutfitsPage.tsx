@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { clothingRepository } from "../lib/database/clothingRepository";
 import { outfitRepository } from "../lib/database/outfitRepository";
 import { loadManagedImage } from "../lib/images/managedImages";
@@ -29,7 +29,26 @@ function OutfitPreview({
     [outfit.itemIds, wardrobe],
   );
   const [images, setImages] = useState<Record<string, string>>({});
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(
+    () => typeof IntersectionObserver === "undefined",
+  );
   useEffect(() => {
+    if (shouldLoad || !previewRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "300px" },
+    );
+    observer.observe(previewRef.current);
+    return () => observer.disconnect();
+  }, [shouldLoad]);
+  useEffect(() => {
+    if (!shouldLoad) return;
     let active = true;
     Promise.all(
       items.slice(0, 4).map(async (item) => ({
@@ -49,9 +68,9 @@ function OutfitPreview({
     return () => {
       active = false;
     };
-  }, [items, outfit.id]);
+  }, [items, outfit.id, shouldLoad]);
   return (
-    <div className="outfit-preview" aria-hidden="true">
+    <div ref={previewRef} className="outfit-preview" aria-hidden="true">
       {items
         .slice(0, 4)
         .map((item) =>
@@ -93,7 +112,9 @@ function OutfitItemTile({
         {imageUrl ? (
           <img src={imageUrl} alt={item.name} />
         ) : (
-          <span>Loading…</span>
+          <span className="image-loading">
+            <span className="sr-only">Loading image</span>
+          </span>
         )}
       </div>
       <div className="outfit-item-copy">
@@ -147,6 +168,9 @@ function ItemPicker({
         role="dialog"
         aria-modal="true"
         aria-labelledby="item-picker-heading"
+        onKeyDown={(event) => {
+          if (event.key === "Escape") onClose();
+        }}
       >
         <div className="dialog-heading">
           <div>

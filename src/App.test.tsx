@@ -331,6 +331,27 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders and searches a 1,000-item wardrobe", async () => {
+    const largeWardrobe = Array.from({ length: 1_000 }, (_, index) => ({
+      ...sampleItem,
+      id: `large-${index}`,
+      name: index === 999 ? "Target performance coat" : `Garment ${index}`,
+      imagePath: `images/original/large-${index}.jpg`,
+    }));
+    mocks.list.mockResolvedValue(largeWardrobe);
+    const user = userEvent.setup();
+    render(<App />);
+    expect(await screen.findByText("1000 items")).toBeInTheDocument();
+    await user.type(
+      screen.getByRole("searchbox", { name: "Search by item name" }),
+      "target performance",
+    );
+    expect(
+      screen.getByRole("button", { name: "Open Target performance coat" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("1 item")).toBeInTheDocument();
+  });
+
   it("shows a fully tagged item detail and its future sections", async () => {
     const fullItem: ClothingItem = {
       ...sampleItem,

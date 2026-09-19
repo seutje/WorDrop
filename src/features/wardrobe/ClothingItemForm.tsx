@@ -211,6 +211,9 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="item-form-title"
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && !busy) void cancel();
+        }}
       >
         <form onSubmit={submit}>
           <div className="dialog-heading sticky-heading">

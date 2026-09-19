@@ -48,7 +48,13 @@ export function RecommendationCard({
           {imageUrl ? (
             <img src={imageUrl} alt="" loading="lazy" decoding="async" />
           ) : (
-            <span>{imageMissing ? "Image unavailable" : "Loading…"}</span>
+            <span className={imageMissing ? undefined : "image-loading"}>
+              {imageMissing ? (
+                "Image unavailable"
+              ) : (
+                <span className="sr-only">Loading image</span>
+              )}
+            </span>
           )}
           <strong>{result.score}%</strong>
         </span>
