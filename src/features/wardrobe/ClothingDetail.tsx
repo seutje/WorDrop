@@ -231,12 +231,12 @@ export function ClothingDetail({ itemId, onBack, onEdit, onDeleted }: Props) {
       <div className="detail-sections">
         <section className="detail-panel">
           <div>
-            <p className="eyebrow">Coming in Phase 6</p>
+            <p className="eyebrow">Coming in Phase 7</p>
             <h2>Looks good with</h2>
           </div>
           <p>
-            Matching items and plain-language reasons will appear here after the
-            recommendation engine is added.
+            The recommendation engine is ready. Ranked matching items and
+            explanations will appear here when the recommendation UI is added.
           </p>
         </section>
         <section className="detail-panel">

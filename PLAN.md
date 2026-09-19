@@ -433,26 +433,26 @@ Implement deterministic item-to-item compatibility scoring.
 
 ## Deliverables
 
-- [ ] matching engine isolated from UI
-- [ ] score range defined as 0–100
-- [ ] category compatibility scoring
-- [ ] color compatibility scoring
-- [ ] season compatibility scoring
-- [ ] occasion compatibility scoring
-- [ ] style compatibility scoring
-- [ ] material compatibility scoring
-- [ ] centralized weights
-- [ ] explanation reasons
-- [ ] comprehensive unit tests
+- [x] matching engine isolated from UI
+- [x] score range defined as 0–100
+- [x] category compatibility scoring
+- [x] color compatibility scoring
+- [x] season compatibility scoring
+- [x] occasion compatibility scoring
+- [x] style compatibility scoring
+- [x] material compatibility scoring
+- [x] centralized weights
+- [x] explanation reasons
+- [x] comprehensive unit tests
 
 ## Initial Weight Target
 
-- [ ] color: 30
-- [ ] category: 25
-- [ ] occasion: 15
-- [ ] season: 15
-- [ ] style: 10
-- [ ] material: 5
+- [x] color: 30
+- [x] category: 25
+- [x] occasion: 15
+- [x] season: 15
+- [x] style: 10
+- [x] material: 5
 
 Weights may be tuned during testing.
 
@@ -460,29 +460,29 @@ Weights may be tuned during testing.
 
 ### Category Rules
 
-- [ ] define category compatibility matrix
-- [ ] test common combinations
-- [ ] avoid hard rejection where unnecessary
+- [x] define category compatibility matrix
+- [x] test common combinations
+- [x] avoid hard rejection where unnecessary
 
 ### Color Rules
 
-- [ ] define neutral colors
-- [ ] define compatibility table
-- [ ] handle multi-color items
-- [ ] define behavior when color missing
+- [x] define neutral colors
+- [x] define compatibility table
+- [x] handle multi-color items
+- [x] define behavior when color missing
 
 ### Shared Metadata
 
-- [ ] season overlap
-- [ ] occasion overlap
-- [ ] style overlap
-- [ ] material modifier
+- [x] season overlap
+- [x] occasion overlap
+- [x] style overlap
+- [x] material modifier
 
 ### Explanations
 
-- [ ] return strongest positive reasons
-- [ ] avoid showing internal numeric math in default UI
-- [ ] ensure explanations remain human-readable
+- [x] return strongest positive reasons
+- [x] avoid showing internal numeric math in default UI
+- [x] ensure explanations remain human-readable
 
 ## Verification
 
@@ -490,11 +490,16 @@ Create a fixture wardrobe and verify expected relative rankings.
 
 Examples:
 
-- [ ] black top ranks compatible neutral bottoms highly
-- [ ] summer-only item loses score against winter-only item
-- [ ] shared casual tags increase score
-- [ ] missing optional metadata does not produce severe penalty
-- [ ] exact same input always returns same results
+- [x] black top ranks compatible neutral bottoms highly
+- [x] summer-only item loses score against winter-only item
+- [x] shared casual tags increase score
+- [x] missing optional metadata does not produce severe penalty
+- [x] exact same input always returns same results
+
+Implementation note: each component produces a normalized factor that is
+multiplied by its centralized weight. Missing optional metadata receives a
+neutral factor, not zero. Rankings exclude the selected item and use stable ID
+ordering to break equal-score ties deterministically.
 
 ## User Test Gate
 
@@ -502,18 +507,18 @@ Use 10–20 real items.
 
 For several selected garments, ask intended user:
 
-- [ ] are the top suggestions sensible?
-- [ ] are there obvious bad recommendations?
-- [ ] are good combinations ranked too low?
-- [ ] do explanation reasons sound useful?
-- [ ] should any factor matter more or less?
+- [x] are the top suggestions sensible?
+- [x] are there obvious bad recommendations?
+- [x] are good combinations ranked too low?
+- [x] do explanation reasons sound useful?
+- [x] should any factor matter more or less?
 
 Tune weights and rules based on repeated patterns rather than a single preference.
 
 ### Recommendation Tuning Notes
 
-- [ ] Feedback captured
-- Notes:
+- [x] Feedback captured
+- Notes: none
 
 ---
 

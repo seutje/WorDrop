@@ -771,6 +771,12 @@ These numbers should remain clearly heuristic.
 
 The initial engine is rule-based.
 
+Implementation choice: matching is a pure TypeScript module with no React or
+database dependency. Each scoring component returns a normalized factor and an
+optional explanation; centralized weights produce a clamped 0-100 result.
+Missing optional metadata is treated neutrally, and equal scores are ordered by
+stable item ID so repeated inputs always produce the same ranking.
+
 A candidate clothing item receives component scores.
 
 Recommended initial weighting:
