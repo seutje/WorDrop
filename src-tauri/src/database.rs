@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
 
 const INITIAL_MIGRATION: &str = include_str!("../migrations/0001_clothing_items.sql");
+const OUTFITS_MIGRATION: &str = include_str!("../migrations/0002_outfits.sql");
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -59,7 +60,7 @@ pub fn open_database(path: &Path) -> Result<Connection, String> {
     Ok(connection)
 }
 
-fn migrate(connection: &mut Connection) -> Result<(), String> {
+pub(crate) fn migrate(connection: &mut Connection) -> Result<(), String> {
     let version: i64 = connection
         .query_row("PRAGMA user_version", [], |row| row.get(0))
         .map_err(db_error)?;
@@ -70,6 +71,16 @@ fn migrate(connection: &mut Connection) -> Result<(), String> {
             .map_err(db_error)?;
         transaction
             .pragma_update(None, "user_version", 1)
+            .map_err(db_error)?;
+        transaction.commit().map_err(db_error)?;
+    }
+    if version < 2 {
+        let transaction = connection.transaction().map_err(db_error)?;
+        transaction
+            .execute_batch(OUTFITS_MIGRATION)
+            .map_err(db_error)?;
+        transaction
+            .pragma_update(None, "user_version", 2)
             .map_err(db_error)?;
         transaction.commit().map_err(db_error)?;
     }
@@ -338,5 +349,25 @@ mod tests {
         let _ = std::fs::remove_file(&path);
         let _ = std::fs::remove_file(format!("{}-wal", path.display()));
         let _ = std::fs::remove_file(format!("{}-shm", path.display()));
+    }
+
+    #[test]
+    fn existing_phase_one_database_upgrades_to_outfit_schema() {
+        let mut db = Connection::open_in_memory().unwrap();
+        db.execute_batch(INITIAL_MIGRATION).unwrap();
+        db.pragma_update(None, "user_version", 1).unwrap();
+        migrate(&mut db).unwrap();
+        let version: i64 = db
+            .query_row("PRAGMA user_version", [], |row| row.get(0))
+            .unwrap();
+        let outfit_table: String = db
+            .query_row(
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'outfits'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(version, 2);
+        assert_eq!(outfit_table, "outfits");
     }
 }

@@ -325,12 +325,12 @@ export function ClothingDetail({
         </section>
         <section className="detail-panel">
           <div>
-            <p className="eyebrow">Coming in Phase 8</p>
+            <p className="eyebrow">Coming in Phase 10</p>
             <h2>Saved outfits</h2>
           </div>
           <p>
-            Outfits containing this item will appear here once saved outfits are
-            available.
+            Outfit persistence is ready. Saved outfits containing this item will
+            appear here when the outfit library UI is added.
           </p>
         </section>
       </div>

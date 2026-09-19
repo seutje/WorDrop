@@ -630,6 +630,10 @@ Optional future fields:
 
 The initial model should remain simple.
 
+Implementation choice: outfits are stored in an `outfits` table with ordered
+clothing references in `outfit_items`. Deleting clothing cascades only its
+relationship rows, preserving the outfit and every other referenced item.
+
 ---
 
 ## 12. User Flows

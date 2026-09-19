@@ -1,7 +1,9 @@
 mod database;
 mod image_store;
+mod outfits;
 
 use database::{ClothingItem, ClothingItemInput};
+use outfits::{Outfit, OutfitInput};
 use rusqlite::Connection;
 use std::{path::PathBuf, sync::Mutex};
 use tauri::{Manager, State};
@@ -115,6 +117,67 @@ fn delete_clothing_item(
     Ok(deleted)
 }
 
+#[tauri::command]
+fn create_outfit(database: State<'_, Database>, outfit: OutfitInput) -> Result<Outfit, String> {
+    let mut connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    outfits::create(&mut connection, outfit)
+}
+
+#[tauri::command]
+fn get_outfit(database: State<'_, Database>, id: String) -> Result<Option<Outfit>, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    outfits::get(&connection, &id)
+}
+
+#[tauri::command]
+fn list_outfits(database: State<'_, Database>) -> Result<Vec<Outfit>, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    outfits::list(&connection)
+}
+
+#[tauri::command]
+fn update_outfit(
+    database: State<'_, Database>,
+    id: String,
+    outfit: OutfitInput,
+) -> Result<Outfit, String> {
+    let mut connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    outfits::update(&mut connection, &id, outfit)
+}
+
+#[tauri::command]
+fn delete_outfit(database: State<'_, Database>, id: String) -> Result<bool, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    outfits::delete(&connection, &id)
+}
+
+#[tauri::command]
+fn list_outfits_containing_item(
+    database: State<'_, Database>,
+    clothing_item_id: String,
+) -> Result<Vec<Outfit>, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    outfits::containing_item(&connection, &clothing_item_id)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -135,7 +198,13 @@ pub fn run() {
             delete_clothing_item,
             import_clothing_image,
             load_clothing_image,
-            discard_clothing_image
+            discard_clothing_image,
+            create_outfit,
+            get_outfit,
+            list_outfits,
+            update_outfit,
+            delete_outfit,
+            list_outfits_containing_item
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

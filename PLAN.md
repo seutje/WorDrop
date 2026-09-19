@@ -590,35 +590,40 @@ Add persistent saved outfits.
 
 ## Deliverables
 
-- [ ] outfit table
-- [ ] outfit-item relationship table
-- [ ] migrations
-- [ ] typed Outfit model
-- [ ] outfit repository functions
-- [ ] outfit CRUD tests
-- [ ] behavior defined for deleted clothing references
+- [x] outfit table
+- [x] outfit-item relationship table
+- [x] migrations
+- [x] typed Outfit model
+- [x] outfit repository functions
+- [x] outfit CRUD tests
+- [x] behavior defined for deleted clothing references
 
 ## Suggested Steps
 
-- [ ] create migration
-- [ ] create `outfits`
-- [ ] create `outfit_items`
-- [ ] implement create
-- [ ] implement read
-- [ ] implement list
-- [ ] implement update
-- [ ] implement delete
-- [ ] implement query for outfits containing a clothing item
-- [ ] remove deleted item references while preserving outfit
+- [x] create migration
+- [x] create `outfits`
+- [x] create `outfit_items`
+- [x] implement create
+- [x] implement read
+- [x] implement list
+- [x] implement update
+- [x] implement delete
+- [x] implement query for outfits containing a clothing item
+- [x] remove deleted item references while preserving outfit
 
 ## Verification
 
-- [ ] save outfit
-- [ ] restart app
-- [ ] outfit persists
-- [ ] edit outfit
-- [ ] delete clothing item used in outfit
-- [ ] outfit remains valid with reference removed
+- [x] save outfit
+- [x] restart app
+- [x] outfit persists
+- [x] edit outfit
+- [x] delete clothing item used in outfit
+- [x] outfit remains valid with reference removed
+
+Implementation note: migration 2 adds normalized `outfits` and `outfit_items`
+tables. Clothing references use cascading deletion, so removing a garment
+removes only its relationship rows; the saved outfit and its remaining items
+are preserved.
 
 ---
 
