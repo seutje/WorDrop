@@ -384,40 +384,44 @@ Create the main inspection screen for a clothing item.
 
 ## Deliverables
 
-- [ ] large item image
-- [ ] metadata display
-- [ ] owned/wishlist state display
-- [ ] edit action
-- [ ] delete action
-- [ ] placeholder section for matching items
-- [ ] placeholder section for saved outfits containing item
-- [ ] Build Outfit From This Item action
+- [x] large item image
+- [x] metadata display
+- [x] owned/wishlist state display
+- [x] edit action
+- [x] delete action
+- [x] placeholder section for matching items
+- [x] placeholder section for saved outfits containing item
+- [x] Build Outfit From This Item action
 
 ## Suggested Steps
 
-- [ ] Create detail page
-- [ ] Load item by stable ID
-- [ ] Format metadata clearly
-- [ ] Hide empty optional metadata gracefully
-- [ ] Connect edit action
-- [ ] Connect deletion
-- [ ] Handle missing/deleted item route
+- [x] Create detail page
+- [x] Load item by stable ID
+- [x] Format metadata clearly
+- [x] Hide empty optional metadata gracefully
+- [x] Connect edit action
+- [x] Connect deletion
+- [x] Handle missing/deleted item route
 
 ## Verification
 
-- [ ] detail view works for sparse item
-- [ ] detail view works for fully tagged item
-- [ ] edits are immediately reflected
-- [ ] deleted item does not leave broken navigation
+- [x] detail view works for sparse item
+- [x] detail view works for fully tagged item
+- [x] edits are immediately reflected
+- [x] deleted item does not leave broken navigation
+
+Implementation note: closet selection stores only the stable item ID. The
+detail view reloads the current record through the repository, which prevents
+stale card data and provides an explicit not-found state for deleted items.
 
 ## User Test Gate
 
 Intended user verifies:
 
-- [ ] important item information is easy to scan
-- [ ] page does not feel cluttered
-- [ ] Build Outfit action is obvious
-- [ ] editing is easy to discover
+- [x] important item information is easy to scan
+- [x] page does not feel cluttered
+- [x] Build Outfit action is obvious
+- [x] editing is easy to discover
 
 ---
 

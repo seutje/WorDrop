@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ClothingCard } from "../features/wardrobe/ClothingCard";
+import { ClothingDetail } from "../features/wardrobe/ClothingDetail";
 import { ClothingItemForm } from "../features/wardrobe/ClothingItemForm";
 import {
   emptyClosetFilters,
@@ -7,7 +8,6 @@ import {
   hasActiveFilters,
   type ClosetFilters,
 } from "../features/wardrobe/closetFilters";
-import { ItemPreview } from "../features/wardrobe/ItemPreview";
 import { clothingRepository } from "../lib/database/clothingRepository";
 import {
   clothingCategories,
@@ -27,7 +27,7 @@ const titleCase = (value: string) =>
 export function ClosetPage() {
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [editingItem, setEditingItem] = useState<ClothingItem>();
-  const [selectedItem, setSelectedItem] = useState<ClothingItem>();
+  const [selectedItemId, setSelectedItemId] = useState<string>();
   const [isFormOpen, setFormOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -87,17 +87,22 @@ export function ClosetPage() {
   async function finishForm(message: string) {
     setFormOpen(false);
     setEditingItem(undefined);
-    setSelectedItem(undefined);
+    setSelectedItemId(undefined);
     setNotice(message);
     await loadItems();
   }
 
-  if (selectedItem && !isFormOpen)
+  if (selectedItemId && !isFormOpen)
     return (
-      <ItemPreview
-        item={selectedItem}
-        onBack={() => setSelectedItem(undefined)}
-        onEdit={() => openEdit(selectedItem)}
+      <ClothingDetail
+        itemId={selectedItemId}
+        onBack={() => setSelectedItemId(undefined)}
+        onEdit={openEdit}
+        onDeleted={(message) => {
+          setSelectedItemId(undefined);
+          setNotice(message);
+          void loadItems();
+        }}
       />
     );
 
@@ -282,7 +287,7 @@ export function ClosetPage() {
                 <ClothingCard
                   item={item}
                   key={item.id}
-                  onOpen={() => setSelectedItem(item)}
+                  onOpen={() => setSelectedItemId(item.id)}
                 />
               ))}
             </div>

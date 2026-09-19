@@ -54,6 +54,7 @@ afterEach(() => {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.list.mockResolvedValue([]);
+  mocks.get.mockResolvedValue(sampleItem);
   mocks.create.mockResolvedValue(sampleItem);
   mocks.update.mockResolvedValue(sampleItem);
   mocks.delete.mockResolvedValue(true);
@@ -118,7 +119,7 @@ describe("App", () => {
     await user.click(
       await screen.findByRole("button", { name: "Open Blue jeans" }),
     );
-    await user.click(screen.getByRole("button", { name: "Edit item" }));
+    await user.click(await screen.findByRole("button", { name: "Edit" }));
     const name = screen.getByRole("textbox", { name: /name/i });
     await user.clear(name);
     await user.type(name, "Dark jeans");
@@ -149,7 +150,7 @@ describe("App", () => {
     await user.click(
       await screen.findByRole("button", { name: "Open Blue jeans" }),
     );
-    await user.click(screen.getByRole("button", { name: "Edit item" }));
+    await user.click(await screen.findByRole("button", { name: "Edit" }));
     const name = screen.getByRole("textbox", { name: /name/i });
     await user.clear(name);
     await user.type(name, "Unsaved name");
@@ -166,7 +167,7 @@ describe("App", () => {
     await user.click(
       await screen.findByRole("button", { name: "Open Blue jeans" }),
     );
-    await user.click(screen.getByRole("button", { name: "Edit item" }));
+    await user.click(await screen.findByRole("button", { name: "Edit" }));
     await user.click(screen.getByRole("button", { name: "Delete item" }));
     await waitFor(() => expect(mocks.delete).toHaveBeenCalledWith("item-1"));
   });
@@ -223,5 +224,63 @@ describe("App", () => {
     expect(
       screen.getByRole("button", { name: "Open Blue jeans" }),
     ).toBeInTheDocument();
+  });
+
+  it("shows a fully tagged item detail and its future sections", async () => {
+    const fullItem: ClothingItem = {
+      ...sampleItem,
+      pattern: "Solid",
+      seasons: ["spring", "summer", "autumn"],
+      occasions: ["casual", "travel"],
+      styleTags: ["classic", "minimalist"],
+      notes: "A dependable everyday pair.",
+    };
+    mocks.list.mockResolvedValue([fullItem]);
+    mocks.get.mockResolvedValue(fullItem);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Blue jeans" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Denim")).toBeInTheDocument();
+    expect(screen.getByText("Solid")).toBeInTheDocument();
+    expect(screen.getByText("A dependable everyday pair.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Looks good with" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Saved outfits" }),
+    ).toBeInTheDocument();
+  });
+
+  it("handles a missing item without broken navigation", async () => {
+    mocks.list.mockResolvedValue([sampleItem]);
+    mocks.get.mockResolvedValue(null);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Item not found" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Back to Closet" }));
+    expect(screen.getByRole("heading", { name: "Closet" })).toBeInTheDocument();
+  });
+
+  it("deletes directly from item details and returns to the closet", async () => {
+    mocks.list.mockResolvedValue([sampleItem]);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
+    );
+    await user.click(await screen.findByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(mocks.delete).toHaveBeenCalledWith("item-1"));
+    expect(screen.getByRole("heading", { name: "Closet" })).toBeInTheDocument();
   });
 });
