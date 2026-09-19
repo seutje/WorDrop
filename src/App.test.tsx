@@ -116,8 +116,9 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(
-      await screen.findByRole("button", { name: "Edit Blue jeans" }),
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
     );
+    await user.click(screen.getByRole("button", { name: "Edit item" }));
     const name = screen.getByRole("textbox", { name: /name/i });
     await user.clear(name);
     await user.type(name, "Dark jeans");
@@ -146,8 +147,9 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(
-      await screen.findByRole("button", { name: "Edit Blue jeans" }),
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
     );
+    await user.click(screen.getByRole("button", { name: "Edit item" }));
     const name = screen.getByRole("textbox", { name: /name/i });
     await user.clear(name);
     await user.type(name, "Unsaved name");
@@ -162,9 +164,64 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(
-      await screen.findByRole("button", { name: "Edit Blue jeans" }),
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
     );
+    await user.click(screen.getByRole("button", { name: "Edit item" }));
     await user.click(screen.getByRole("button", { name: "Delete item" }));
     await waitFor(() => expect(mocks.delete).toHaveBeenCalledWith("item-1"));
+  });
+
+  it("combines closet filters and clears them", async () => {
+    const wishlistDress: ClothingItem = {
+      ...sampleItem,
+      id: "item-2",
+      name: "Black summer dress",
+      category: "dress",
+      subtype: "Midi dress",
+      colors: ["black"],
+      seasons: ["summer"],
+      occasions: ["party"],
+      ownership: "wishlist",
+      imagePath: "images/original/dress.jpg",
+    };
+    mocks.list.mockResolvedValue([sampleItem, wishlistDress]);
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("button", { name: "Open Black summer dress" });
+    await user.type(
+      screen.getByRole("searchbox", { name: "Search by item name" }),
+      "black",
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Category" }),
+      "dress",
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Ownership" }),
+      "wishlist",
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Color" }),
+      "black",
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Season" }),
+      "summer",
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Occasion" }),
+      "party",
+    );
+    expect(
+      screen.getByRole("button", { name: "Open Black summer dress" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open Blue jeans" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("♥ Wishlist")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(
+      screen.getByRole("button", { name: "Open Blue jeans" }),
+    ).toBeInTheDocument();
   });
 });

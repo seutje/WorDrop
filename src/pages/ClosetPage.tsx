@@ -1,16 +1,43 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ClothingCard } from "../features/wardrobe/ClothingCard";
 import { ClothingItemForm } from "../features/wardrobe/ClothingItemForm";
+import {
+  emptyClosetFilters,
+  filterClothingItems,
+  hasActiveFilters,
+  type ClosetFilters,
+} from "../features/wardrobe/closetFilters";
+import { ItemPreview } from "../features/wardrobe/ItemPreview";
 import { clothingRepository } from "../lib/database/clothingRepository";
-import type { ClothingItem } from "../types/clothing";
+import {
+  clothingCategories,
+  clothingColors,
+  occasions,
+  ownershipStates,
+  seasons,
+  type ClothingItem,
+} from "../types/clothing";
+
+const titleCase = (value: string) =>
+  value
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 
 export function ClosetPage() {
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [editingItem, setEditingItem] = useState<ClothingItem>();
+  const [selectedItem, setSelectedItem] = useState<ClothingItem>();
   const [isFormOpen, setFormOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [filters, setFilters] = useState<ClosetFilters>(emptyClosetFilters);
+  const visibleItems = useMemo(
+    () => filterClothingItems(items, filters),
+    [items, filters],
+  );
+  const filtersActive = hasActiveFilters(filters);
 
   async function loadItems() {
     setLoading(true);
@@ -46,6 +73,7 @@ export function ClosetPage() {
       active = false;
     };
   }, []);
+
   function openAdd() {
     setEditingItem(undefined);
     setNotice(null);
@@ -59,9 +87,19 @@ export function ClosetPage() {
   async function finishForm(message: string) {
     setFormOpen(false);
     setEditingItem(undefined);
+    setSelectedItem(undefined);
     setNotice(message);
     await loadItems();
   }
+
+  if (selectedItem && !isFormOpen)
+    return (
+      <ItemPreview
+        item={selectedItem}
+        onBack={() => setSelectedItem(undefined)}
+        onEdit={() => openEdit(selectedItem)}
+      />
+    );
 
   return (
     <section className="page" aria-labelledby="closet-heading">
@@ -107,15 +145,161 @@ export function ClosetPage() {
         </div>
       )}
       {!loading && items.length > 0 && (
-        <div className="closet-grid" aria-label="Clothing items">
-          {items.map((item) => (
-            <ClothingCard
-              item={item}
-              key={item.id}
-              onEdit={() => openEdit(item)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="closet-controls">
+            <label className="search-control">
+              <span className="sr-only">Search by item name</span>
+              <span aria-hidden="true">⌕</span>
+              <input
+                type="search"
+                placeholder="Search your closet…"
+                value={filters.search}
+                onChange={(event) =>
+                  setFilters((current) => ({
+                    ...current,
+                    search: event.target.value,
+                  }))
+                }
+              />
+            </label>
+            <div className="filter-row" aria-label="Closet filters">
+              <label>
+                <span className="sr-only">Category</span>
+                <select
+                  value={filters.category}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      category: event.target.value as ClosetFilters["category"],
+                    }))
+                  }
+                >
+                  <option value="">All categories</option>
+                  {clothingCategories.map((value) => (
+                    <option value={value} key={value}>
+                      {titleCase(value)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className="sr-only">Ownership</span>
+                <select
+                  value={filters.ownership}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      ownership: event.target
+                        .value as ClosetFilters["ownership"],
+                    }))
+                  }
+                >
+                  <option value="">Owned & wishlist</option>
+                  {ownershipStates.map((value) => (
+                    <option value={value} key={value}>
+                      {titleCase(value)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className="sr-only">Color</span>
+                <select
+                  value={filters.color}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      color: event.target.value as ClosetFilters["color"],
+                    }))
+                  }
+                >
+                  <option value="">All colors</option>
+                  {clothingColors.map((value) => (
+                    <option value={value} key={value}>
+                      {titleCase(value)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className="sr-only">Season</span>
+                <select
+                  value={filters.season}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      season: event.target.value as ClosetFilters["season"],
+                    }))
+                  }
+                >
+                  <option value="">All seasons</option>
+                  {seasons.map((value) => (
+                    <option value={value} key={value}>
+                      {titleCase(value)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className="sr-only">Occasion</span>
+                <select
+                  value={filters.occasion}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      occasion: event.target.value as ClosetFilters["occasion"],
+                    }))
+                  }
+                >
+                  <option value="">All occasions</option>
+                  {occasions.map((value) => (
+                    <option value={value} key={value}>
+                      {titleCase(value)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {filtersActive && (
+                <button
+                  className="clear-filters"
+                  type="button"
+                  onClick={() => setFilters(emptyClosetFilters)}
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="closet-results-heading">
+            <p>
+              {visibleItems.length}{" "}
+              {visibleItems.length === 1 ? "item" : "items"}
+            </p>
+          </div>
+          {visibleItems.length > 0 ? (
+            <div className="closet-grid" aria-label="Clothing items">
+              {visibleItems.map((item) => (
+                <ClothingCard
+                  item={item}
+                  key={item.id}
+                  onOpen={() => setSelectedItem(item)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="no-results">
+              <h2>No matching items</h2>
+              <p>Try a different search or clear your filters.</p>
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => setFilters(emptyClosetFilters)}
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+        </>
       )}
       {isFormOpen && (
         <ClothingItemForm

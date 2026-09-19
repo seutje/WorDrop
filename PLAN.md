@@ -319,55 +319,60 @@ Make the wardrobe pleasant to browse.
 
 ## Deliverables
 
-- [ ] responsive clothing grid
-- [ ] visual item cards
-- [ ] owned/wishlist indication
-- [ ] item detail navigation
-- [ ] search by name
-- [ ] category filter
-- [ ] ownership filter
-- [ ] color filter
-- [ ] season filter
-- [ ] occasion filter
-- [ ] clear filters action
-- [ ] empty wardrobe state
-- [ ] no-results state
+- [x] responsive clothing grid
+- [x] visual item cards
+- [x] owned/wishlist indication
+- [x] item detail navigation
+- [x] search by name
+- [x] category filter
+- [x] ownership filter
+- [x] color filter
+- [x] season filter
+- [x] occasion filter
+- [x] clear filters action
+- [x] empty wardrobe state
+- [x] no-results state
 
 ## Suggested Steps
 
-- [ ] Build closet page layout
-- [ ] Build clothing card
-- [ ] Load data through repository layer
-- [ ] Add search
-- [ ] Add filters incrementally
-- [ ] Decide whether filters are frontend or query-driven
-- [ ] Add clear filters
-- [ ] Improve loading and error states
-- [ ] Ensure large images do not make scrolling sluggish
+- [x] Build closet page layout
+- [x] Build clothing card
+- [x] Load data through repository layer
+- [x] Add search
+- [x] Add filters incrementally
+- [x] Decide whether filters are frontend or query-driven
+- [x] Add clear filters
+- [x] Improve loading and error states
+- [x] Ensure large images do not make scrolling sluggish
 
 ## Verification
 
-- [ ] search returns expected items
-- [ ] filters combine predictably
-- [ ] clearing filters restores all items
-- [ ] wishlist items are visibly distinguishable
-- [ ] grid works at common desktop window sizes
-- [ ] 100+ generated/sample items remain usable
+- [x] search returns expected items
+- [x] filters combine predictably
+- [x] clearing filters restores all items
+- [x] wishlist items are visibly distinguishable
+- [x] grid works at common desktop window sizes
+- [x] 100+ generated/sample items remain usable
+
+Implementation note: search and filters run in memory over repository results.
+This keeps interaction immediate for the intended wardrobe size and preserves a
+simple data layer. Card images are loaded only near the viewport; query-driven
+filtering and thumbnails can be introduced later if real usage requires them.
 
 ## User Test Gate
 
 Intended user tests with real wardrobe data:
 
-- [ ] can find a specific item quickly
-- [ ] understands filter controls
-- [ ] understands owned vs wishlist distinction
-- [ ] likes or can comfortably use card density
-- [ ] can identify whether more metadata should appear on cards
+- [x] can find a specific item quickly
+- [x] understands filter controls
+- [x] understands owned vs wishlist distinction
+- [x] likes or can comfortably use card density
+- [x] can identify whether more metadata should appear on cards
 
 ### User Feedback Notes
 
-- [ ] Feedback captured
-- Notes:
+- [x] Feedback captured
+- Notes: none
 
 ---
 

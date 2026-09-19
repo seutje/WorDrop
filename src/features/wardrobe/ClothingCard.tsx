@@ -1,17 +1,36 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { loadManagedImage } from "../../lib/images/managedImages";
 import type { ClothingItem } from "../../types/clothing";
 
-export function ClothingCard({
+export const ClothingCard = memo(function ClothingCard({
   item,
-  onEdit,
+  onOpen,
 }: {
   item: ClothingItem;
-  onEdit: () => void;
+  onOpen: () => void;
 }) {
+  const cardRef = useRef<HTMLButtonElement>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [missing, setMissing] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(
+    () => typeof IntersectionObserver === "undefined",
+  );
   useEffect(() => {
+    if (shouldLoad || !cardRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "300px" },
+    );
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, [shouldLoad]);
+  useEffect(() => {
+    if (!shouldLoad) return;
     let active = true;
     loadManagedImage(item.imagePath)
       .then((image) => {
@@ -23,17 +42,18 @@ export function ClothingCard({
     return () => {
       active = false;
     };
-  }, [item.imagePath]);
+  }, [item.imagePath, shouldLoad]);
   return (
     <button
+      ref={cardRef}
       className="clothing-card"
       type="button"
-      onClick={onEdit}
-      aria-label={`Edit ${item.name}`}
+      onClick={onOpen}
+      aria-label={`Open ${item.name}`}
     >
       <div className="card-image">
         {imageUrl ? (
-          <img src={imageUrl} alt="" />
+          <img src={imageUrl} alt="" loading="lazy" decoding="async" />
         ) : (
           <div
             className="card-placeholder"
@@ -53,4 +73,4 @@ export function ClothingCard({
       </div>
     </button>
   );
-}
+});
