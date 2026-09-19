@@ -24,7 +24,6 @@ required even when `cl.exe` happens to be present on `PATH`; running Cargo from
 an uninitialized terminal otherwise leaves the C/C++ include and library paths
 unset.
 
-The desktop window opens with placeholder navigation for Closet and Outfits.
 On startup, the native layer creates or migrates `wardrobe.db` in the operating
 system's application-data directory. Core workflows remain offline-first and
 do not require an account.
@@ -41,6 +40,8 @@ cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
 Use `npm run format` to apply formatting.
+On Windows, `npm run test:native` runs the Rust suite inside the initialized
+MSVC environment.
 
 ## Windows production build
 
@@ -49,6 +50,46 @@ npm run tauri build
 ```
 
 Tauri writes the application binary and configured installer bundles beneath `src-tauri/target/release`.
+
+## Publishing a Windows release
+
+GitHub Actions publishes an unsigned NSIS installer whenever a version tag is
+pushed. Before tagging, update the same semantic version in:
+
+- `package.json`
+- `src-tauri/Cargo.toml`
+- `src-tauri/tauri.conf.json`
+
+Verify the versions and quality checks locally:
+
+```powershell
+npm run version:check
+npm run format:check
+npm run lint
+npm run typecheck
+npm test
+npm run test:native
+```
+
+Commit the version change, then create and push the matching tag:
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The tag must match the configured version exactly, including the leading `v`.
+The workflow builds on `windows-latest`, creates a public GitHub Release, and
+attaches a file named like `WorDrop_0.1.0_x64-setup.exe`. This is the file end
+users should download. The same installer is retained as a workflow artifact.
+
+Windows may show an “unknown publisher” or SmartScreen warning because code
+signing is intentionally out of scope. No signing secrets or certificates are
+required by the release workflow.
+
+After publishing, test the installer on a clean or reasonably clean Windows
+machine: install, launch, add an item with an image, restart to verify
+persistence, and uninstall through Windows Settings.
 
 ## Project structure
 

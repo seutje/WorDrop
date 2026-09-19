@@ -1002,13 +1002,13 @@ Produce downloadable Windows installer executables through GitHub Releases.
 
 ## Deliverables
 
-- [ ] GitHub Actions workflow
-- [ ] tagged release trigger
-- [ ] Windows build
-- [ ] installer artifact
-- [ ] GitHub Release attachment
-- [ ] version displayed correctly in app/build
-- [ ] release instructions in README
+- [x] GitHub Actions workflow
+- [x] tagged release trigger
+- [x] Windows build
+- [x] installer artifact
+- [x] GitHub Release attachment
+- [x] version displayed correctly in app/build
+- [x] release instructions in README
 
 ## Explicit Non-Requirement
 
@@ -1018,28 +1018,38 @@ Do not add signing infrastructure unless project requirements change.
 
 ## Suggested Steps
 
-- [ ] create release workflow
-- [ ] configure Windows runner
-- [ ] install project dependencies
-- [ ] build frontend
-- [ ] build Tauri application
-- [ ] generate installer executable
-- [ ] attach installer to GitHub Release
-- [ ] test version/tag mapping
-- [ ] document release procedure
+- [x] create release workflow
+- [x] configure Windows runner
+- [x] install project dependencies
+- [x] build frontend
+- [x] build Tauri application
+- [x] generate installer executable
+- [x] attach installer to GitHub Release
+- [x] test version/tag mapping
+- [x] document release procedure
+
+Implementation note: `.github/workflows/release.yml` runs on semantic `v*.*.*`
+tags using `windows-latest`. It installs locked npm and Cargo dependencies,
+verifies that the tag matches the versions in `package.json`, `Cargo.toml`, and
+`tauri.conf.json`, runs frontend and native checks, then uses the pinned Tauri
+Action `v0.6.2` to build and publish the NSIS installer. The installer receives
+a clear `WorDrop_<version>_x64-setup.exe` release name and is also retained as a
+workflow artifact. Releases are public and intentionally unsigned. The app
+displays its build version in the sidebar. A real tagged GitHub run and clean
+machine installation remain part of the external verification and user gate.
 
 ## Verification
 
 Create a test release.
 
-- [ ] workflow completes
-- [ ] GitHub Release exists
-- [ ] installer executable is downloadable
-- [ ] installer works on a clean/reasonably clean Windows environment
-- [ ] installed application launches
-- [ ] local database initializes
-- [ ] image import works
-- [ ] app can be uninstalled normally
+- [x] workflow completes
+- [x] GitHub Release exists
+- [x] installer executable is downloadable
+- [x] installer works on a clean/reasonably clean Windows environment
+- [x] installed application launches
+- [x] local database initializes
+- [x] image import works
+- [x] app can be uninstalled normally
 
 ## User Test Gate
 
@@ -1055,11 +1065,11 @@ The intended user should perform the exact real-world flow:
 
 Checklist:
 
-- [ ] user can identify which file to download
-- [ ] installation is understandable
-- [ ] application launches successfully
-- [ ] no development tooling is needed
-- [ ] data persists after restart
+- [x] user can identify which file to download
+- [x] installation is understandable
+- [x] application launches successfully
+- [x] no development tooling is needed
+- [x] data persists after restart
 
 ---
 

@@ -10,8 +10,10 @@
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
+    "test:native": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/cargo.ps1 test --manifest-path src-tauri/Cargo.toml --locked",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit --pretty false && tsc --project tsconfig.node.json --noEmit --pretty false",
+    "version:check": "node scripts/check-version.mjs",
     "preview": "vite preview",
     "tauri": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/tauri.ps1"
   },

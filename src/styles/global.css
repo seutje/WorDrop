@@ -116,12 +116,21 @@ button:disabled {
   outline-offset: 2px;
 }
 .sidebar-note {
-  margin: auto 10px 0;
+  margin: 0;
   color: #77756f;
   font-family: Georgia, serif;
   font-size: 14px;
   font-style: italic;
   line-height: 1.5;
+}
+.sidebar-footer {
+  display: grid;
+  gap: 10px;
+  margin: auto 10px 0;
+}
+.sidebar-footer small {
+  color: #8b8983;
+  font-size: 11px;
 }
 .main-content {
   padding: 54px clamp(36px, 6vw, 88px);

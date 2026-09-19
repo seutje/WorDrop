@@ -1388,7 +1388,15 @@ Desired release experience:
 
 No Windows code-signing work is required.
 
-The build process should be documented in the repository README once implemented.
+Implementation choice: pushing a semantic tag such as `v0.1.0` starts the
+Windows-only release workflow. A preflight script requires the tag and the
+versions in `package.json`, `src-tauri/Cargo.toml`, and
+`src-tauri/tauri.conf.json` to agree. The workflow runs frontend and Rust tests,
+builds the configured NSIS target, creates a public GitHub Release, uploads a
+clearly named setup executable, and retains the same installer as a workflow
+artifact. The Tauri release action is pinned to an explicit published version;
+no signing secrets or certificates are used. The full process and clean-machine
+test checklist are documented in the repository README.
 
 ---
 

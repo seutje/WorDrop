@@ -43,7 +43,10 @@ export function AppShell({
             </button>
           ))}
         </nav>
-        <p className="sidebar-note">Your wardrobe, thoughtfully organized.</p>
+        <div className="sidebar-footer">
+          <p className="sidebar-note">Your wardrobe, thoughtfully organized.</p>
+          <small>Version {__APP_VERSION__}</small>
+        </div>
       </aside>
       <main className="main-content">{children}</main>
     </div>
