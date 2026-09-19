@@ -783,6 +783,14 @@ Possible supporting metrics:
 
 These numbers should remain clearly heuristic.
 
+Implementation choice: wishlist integration uses the existing deterministic
+pair scorer against owned clothing only. A score of 70 or above is counted as
+an estimated strong match; scores of 55 or above may appear as compatible
+examples grouped by category, with up to four displayed per group. The summary
+always includes the number of owned items evaluated and labels the result as a
+rule-based estimate. No potential-outfit total is extrapolated because pair
+counts do not reliably describe complete outfits.
+
 ---
 
 ## 13. Recommendation System

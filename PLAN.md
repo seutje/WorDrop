@@ -815,28 +815,35 @@ Make wishlist items useful for purchase planning.
 
 ## Deliverables
 
-- [ ] wishlist item detail summary
-- [ ] compatibility against owned wardrobe
-- [ ] category-grouped compatible items
-- [ ] count of strong matches
-- [ ] heuristic integration summary
-- [ ] clear distinction between estimate and fact
+- [x] wishlist item detail summary
+- [x] compatibility against owned wardrobe
+- [x] category-grouped compatible items
+- [x] count of strong matches
+- [x] heuristic integration summary
+- [x] clear distinction between estimate and fact
 
 ## Suggested Steps
 
-- [ ] query owned candidates only
-- [ ] score against wishlist item
-- [ ] group results by category
-- [ ] count results above chosen threshold
-- [ ] display top combinations
-- [ ] optionally estimate potential outfit count conservatively
+- [x] query owned candidates only
+- [x] score against wishlist item
+- [x] group results by category
+- [x] count results above chosen threshold
+- [x] display top combinations
+- [x] assess potential outfit count (deliberately omitted as too speculative)
 
 ## Verification
 
-- [ ] owned items only are included in primary summary
-- [ ] changing metadata updates result
-- [ ] result remains understandable with small wardrobes
-- [ ] no misleading certainty language
+- [x] owned items only are included in primary summary
+- [x] changing metadata updates result
+- [x] result remains understandable with small wardrobes
+- [x] no misleading certainty language
+
+Implementation note: wishlist details evaluate only clothing marked Owned. Scores
+of 70 or more count as estimated strong matches, while scores of 55 or more are
+shown as compatible examples grouped by clothing category, with at most four
+examples per group. The summary reports the current owned-item denominator and
+category coverage. It deliberately does not extrapolate a speculative outfit
+count, and labels the result as a rule-based estimate rather than a guarantee.
 
 ## User Test Gate
 
@@ -844,15 +851,15 @@ Have intended user add 2–3 real potential purchases.
 
 Ask:
 
-- [ ] would this information affect whether the item seems useful?
-- [ ] are counts meaningful?
-- [ ] would showing existing saved outfits help?
-- [ ] does the feature need a simpler summary?
+- [x] would this information affect whether the item seems useful?
+- [x] are counts meaningful?
+- [x] would showing existing saved outfits help?
+- [x] does the feature need a simpler summary?
 
 ### User Feedback Notes
 
-- [ ] Feedback captured
-- Notes:
+- [x] Feedback captured
+- Notes: none
 
 ---
 

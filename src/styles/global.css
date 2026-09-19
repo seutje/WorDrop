@@ -521,6 +521,56 @@ h1 {
 .recommendations-panel {
   grid-column: 1 / -1;
 }
+.wishlist-integration-panel {
+  grid-column: 1 / -1;
+  background: #f5f0ef;
+  border-color: #e4d4d5;
+}
+.wishlist-integration-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.wishlist-match-count {
+  display: grid;
+  justify-items: end;
+  color: #8d4d54;
+}
+.wishlist-match-count strong {
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: 500;
+}
+.wishlist-match-count span {
+  font-size: 12px;
+}
+.wishlist-integration-summary {
+  max-width: 760px;
+  margin: 18px 0 0;
+  color: #5e5d59;
+  line-height: 1.55;
+}
+.wishlist-category-groups {
+  display: grid;
+  gap: 24px;
+  margin-top: 24px;
+}
+.wishlist-category-groups h3 {
+  margin: 0;
+  color: #555651;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.wishlist-category-groups .recommendations-grid {
+  margin-top: 10px;
+}
+.wishlist-estimate-note {
+  display: block;
+  margin-top: 18px;
+  color: #7a7471;
+}
 .recommendations-heading {
   display: flex;
   align-items: center;

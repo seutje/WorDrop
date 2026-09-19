@@ -372,6 +372,62 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
+  it("summarizes how a wishlist item fits owned clothing", async () => {
+    const wishlistBottom: ClothingItem = {
+      ...sampleItem,
+      id: "wishlist-bottom",
+      name: "Olive trousers",
+      category: "bottom",
+      colors: ["olive"],
+      ownership: "wishlist",
+      imagePath: "images/original/trousers.jpg",
+    };
+    const ownedTop: ClothingItem = {
+      ...sampleItem,
+      id: "owned-top",
+      name: "Cream shirt",
+      category: "top",
+      colors: ["cream"],
+      imagePath: "images/original/shirt.jpg",
+    };
+    const wishlistShoes: ClothingItem = {
+      ...sampleItem,
+      id: "wishlist-shoes",
+      name: "Wishlist boots",
+      category: "shoes",
+      ownership: "wishlist",
+      imagePath: "images/original/boots.jpg",
+    };
+    const wardrobe = [wishlistBottom, ownedTop, wishlistShoes];
+    mocks.list.mockResolvedValue(wardrobe);
+    mocks.get.mockImplementation(
+      async (id: string) => wardrobe.find((entry) => entry.id === id) ?? null,
+    );
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(
+      await screen.findByRole("button", { name: "Open Olive trousers" }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "How it fits your closet" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("1", { selector: ".wishlist-match-count strong" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/1 of 1 owned items/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Top", level: 3 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Only clothing marked Owned is counted/),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: "Inspect recommendation Wishlist boots",
+      }),
+    ).not.toBeInTheDocument();
+  });
+
   it("creates an outfit from scratch", async () => {
     mocks.list.mockResolvedValue([sampleItem]);
     const user = userEvent.setup();

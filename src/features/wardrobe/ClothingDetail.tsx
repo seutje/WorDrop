@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { clothingRepository } from "../../lib/database/clothingRepository";
 import { outfitRepository } from "../../lib/database/outfitRepository";
 import { loadManagedImage } from "../../lib/images/managedImages";
-import { rankMatches } from "../../lib/matching";
+import { evaluateWishlistIntegration, rankMatches } from "../../lib/matching";
 import type { ClothingItem } from "../../types/clothing";
 import type { Outfit } from "../../types/outfit";
 import { RecommendationCard } from "./RecommendationCard";
@@ -79,6 +79,13 @@ export function ClothingDetail({
         return candidate ? [{ item: candidate, result }] : [];
       });
   }, [candidates, includeWishlist, item]);
+  const wishlistIntegration = useMemo(
+    () =>
+      item?.ownership === "wishlist"
+        ? evaluateWishlistIntegration(item, candidates)
+        : null,
+    [candidates, item],
+  );
 
   useEffect(() => {
     let active = true;
@@ -290,6 +297,70 @@ export function ClothingDetail({
         </div>
       </div>
       <div className="detail-sections">
+        {wishlistIntegration && (
+          <section className="detail-panel wishlist-integration-panel">
+            <div className="wishlist-integration-heading">
+              <div>
+                <p className="eyebrow">Purchase planning</p>
+                <h2>How it fits your closet</h2>
+              </div>
+              <div className="wishlist-match-count">
+                <strong>{wishlistIntegration.strongMatchCount}</strong>
+                <span>estimated strong matches</span>
+              </div>
+            </div>
+            {recommendationsLoading ? (
+              <p className="recommendations-message">
+                Comparing with clothing you own…
+              </p>
+            ) : wishlistIntegration.ownedItemCount === 0 ? (
+              <p className="recommendations-message">
+                Add owned clothing to see how this wishlist item could fit your
+                closet.
+              </p>
+            ) : (
+              <>
+                <p className="wishlist-integration-summary">
+                  {wishlistIntegration.strongMatchCount > 0
+                    ? `Based on its current details, this item matches strongly with ${wishlistIntegration.strongMatchCount} of ${wishlistIntegration.ownedItemCount} owned items across ${wishlistIntegration.categoryCount} ${wishlistIntegration.categoryCount === 1 ? "category" : "categories"}.`
+                    : `No strong matches are estimated among your ${wishlistIntegration.ownedItemCount} owned items yet. Adding or refining item details may change this result.`}
+                </p>
+                {wishlistIntegration.groups.length > 0 ? (
+                  <div className="wishlist-category-groups">
+                    {wishlistIntegration.groups.map((group) => (
+                      <section key={group.category}>
+                        <h3>{titleCase(group.category)}</h3>
+                        <div className="recommendations-grid">
+                          {group.matches
+                            .slice(0, 4)
+                            .map(({ item: match, result }) => (
+                              <RecommendationCard
+                                key={match.id}
+                                item={match}
+                                result={result}
+                                onInspect={() => onInspectItem(match.id)}
+                                onStartOutfit={() =>
+                                  onStartOutfit([item.id, match.id])
+                                }
+                              />
+                            ))}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="recommendations-message">
+                    No compatible category groups are estimated yet.
+                  </p>
+                )}
+              </>
+            )}
+            <small className="wishlist-estimate-note">
+              Rule-based estimate using current item details—not a guarantee.
+              Only clothing marked Owned is counted.
+            </small>
+          </section>
+        )}
         <section className="detail-panel recommendations-panel">
           <div className="recommendations-heading">
             <div>
