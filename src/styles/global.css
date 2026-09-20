@@ -1323,9 +1323,11 @@ h1 {
 }
 .picker-grid button {
   display: grid;
-  gap: 5px;
-  min-height: 90px;
-  padding: 13px;
+  grid-template-rows: auto 1fr;
+  gap: 0;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
   color: inherit;
   background: #f0eee9;
   border: 1px solid transparent;
@@ -1336,6 +1338,45 @@ h1 {
 .picker-grid button:hover {
   background: #e5ebe5;
   border-color: #aabbaa;
+}
+.picker-item-image {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #e7e4de;
+}
+.picker-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.picker-item-placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  padding: 12px;
+  color: #77756f;
+  font-size: 12px;
+  text-align: center;
+}
+.picker-item-placeholder[data-loading="true"] {
+  animation: image-pulse 1.4s ease-in-out infinite;
+  background: #dedbd4;
+}
+.picker-item-copy {
+  display: grid;
+  gap: 5px;
+  align-content: start;
+  min-width: 0;
+  padding: 11px 13px 13px;
+}
+.picker-item-copy strong,
+.picker-item-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .picker-grid small {
   color: #77756f;

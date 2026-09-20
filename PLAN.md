@@ -677,6 +677,9 @@ possible. The picker supports text and category filters, and saved outfits can
 be reopened from a compact rail for the Phase 9 edit flow. Navigation, opening
 another outfit, and starting over prompt before discarding unsaved changes.
 
+Follow-up: item-picker tiles now show each clothing item's framed managed image
+above its name and subtype/category, with loading and unavailable-image states.
+
 ## User Test Gate
 
 This is another major real-user gate.

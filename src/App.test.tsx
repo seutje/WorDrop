@@ -612,7 +612,15 @@ describe("App", () => {
     await user.click(
       await screen.findByRole("button", { name: /Add clothing/ }),
     );
-    await user.click(screen.getByRole("button", { name: /Blue jeans/ }));
+    const pickerItem = screen.getByRole("button", { name: /Blue jeans/ });
+    await waitFor(() =>
+      expect(pickerItem.querySelector("img")).toHaveAttribute(
+        "src",
+        "data:image/jpeg;base64,/9j/",
+      ),
+    );
+    expect(mocks.loadImage).toHaveBeenCalledWith("images/display/item.jpg");
+    await user.click(pickerItem);
     await user.type(
       screen.getByRole("textbox", { name: "Outfit name" }),
       "Weekend look",

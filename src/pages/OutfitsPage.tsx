@@ -149,6 +149,58 @@ function OutfitItemTile({
   );
 }
 
+function ItemPickerTile({
+  item,
+  onChoose,
+}: {
+  item: ClothingItem;
+  onChoose: () => void;
+}) {
+  const [imageUrl, setImageUrl] = useState<string>();
+  const [missing, setMissing] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    loadManagedImage(item.displayImagePath ?? item.imagePath)
+      .then((image) => {
+        if (active) setImageUrl(image.dataUrl);
+      })
+      .catch(() => {
+        if (active) setMissing(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [item.displayImagePath, item.imagePath]);
+
+  return (
+    <button type="button" onClick={onChoose}>
+      <span className="picker-item-image">
+        {imageUrl ? (
+          <img src={imageUrl} alt="" loading="lazy" decoding="async" />
+        ) : (
+          <span
+            className="picker-item-placeholder"
+            data-loading={!missing}
+            role={missing ? "img" : undefined}
+            aria-label={missing ? "Image unavailable" : undefined}
+          >
+            {missing ? (
+              "Image unavailable"
+            ) : (
+              <span className="sr-only">Loading image</span>
+            )}
+          </span>
+        )}
+      </span>
+      <span className="picker-item-copy">
+        <strong>{item.name}</strong>
+        <small>{item.subtype || titleCase(item.category)}</small>
+      </span>
+    </button>
+  );
+}
+
 function ItemPicker({
   items,
   excludedIds,
@@ -233,10 +285,11 @@ function ItemPicker({
         </div>
         <div className="picker-grid">
           {visible.map((item) => (
-            <button type="button" key={item.id} onClick={() => onChoose(item)}>
-              <span>{item.name}</span>
-              <small>{item.subtype || titleCase(item.category)}</small>
-            </button>
+            <ItemPickerTile
+              item={item}
+              key={item.id}
+              onChoose={() => onChoose(item)}
+            />
           ))}
         </div>
         {visible.length === 0 && (
