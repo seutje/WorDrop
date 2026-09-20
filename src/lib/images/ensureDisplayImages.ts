@@ -13,6 +13,7 @@ function changesFor(item: ClothingItem): ClothingItemChanges {
     name: item.name,
     category: item.category,
     subtype: item.subtype,
+    size: item.size,
     colors: item.colors,
     material: item.material,
     pattern: item.pattern,

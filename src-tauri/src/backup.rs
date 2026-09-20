@@ -391,6 +391,7 @@ mod tests {
             name: "Blue jeans".into(),
             category: "bottom".into(),
             subtype: Some("Jeans".into()),
+            size: Some("M".into()),
             colors: vec!["blue".into()],
             material: Some("Denim".into()),
             pattern: None,

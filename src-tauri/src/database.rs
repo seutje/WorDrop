@@ -2,12 +2,13 @@ use rusqlite::{params, Connection, OptionalExtension, Transaction};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
 
-pub const CURRENT_SCHEMA_VERSION: i64 = 4;
+pub const CURRENT_SCHEMA_VERSION: i64 = 5;
 
 const INITIAL_MIGRATION: &str = include_str!("../migrations/0001_clothing_items.sql");
 const OUTFITS_MIGRATION: &str = include_str!("../migrations/0002_outfits.sql");
 const SETTINGS_MIGRATION: &str = include_str!("../migrations/0003_settings.sql");
 const IMAGE_FRAMING_MIGRATION: &str = include_str!("../migrations/0004_image_framing.sql");
+const CLOTHING_SIZE_MIGRATION: &str = include_str!("../migrations/0005_clothing_size.sql");
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -16,6 +17,7 @@ pub struct ClothingItem {
     pub name: String,
     pub category: String,
     pub subtype: Option<String>,
+    pub size: Option<String>,
     pub colors: Vec<String>,
     pub material: Option<String>,
     pub pattern: Option<String>,
@@ -40,6 +42,7 @@ pub struct ClothingItemInput {
     pub name: String,
     pub category: String,
     pub subtype: Option<String>,
+    pub size: Option<String>,
     #[serde(default)]
     pub colors: Vec<String>,
     pub material: Option<String>,
@@ -119,6 +122,16 @@ pub(crate) fn migrate(connection: &mut Connection) -> Result<(), String> {
             .map_err(db_error)?;
         transaction.commit().map_err(db_error)?;
     }
+    if version < 5 {
+        let transaction = connection.transaction().map_err(db_error)?;
+        transaction
+            .execute_batch(CLOTHING_SIZE_MIGRATION)
+            .map_err(db_error)?;
+        transaction
+            .pragma_update(None, "user_version", 5)
+            .map_err(db_error)?;
+        transaction.commit().map_err(db_error)?;
+    }
     Ok(())
 }
 
@@ -129,9 +142,9 @@ pub fn create(
     validate(&input)?;
     let transaction = connection.transaction().map_err(db_error)?;
     transaction.execute(
-        "INSERT INTO clothing_items (id, name, category, subtype, material, pattern, ownership, image_path, display_image_path, crop_zoom, crop_x, crop_y, notes, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))",
-        params![input.id, input.name.trim(), input.category, clean(&input.subtype), clean(&input.material), clean(&input.pattern), input.ownership, input.image_path.trim(), clean(&input.display_image_path), input.crop_zoom, input.crop_x, input.crop_y, clean(&input.notes)],
+        "INSERT INTO clothing_items (id, name, category, subtype, size, material, pattern, ownership, image_path, display_image_path, crop_zoom, crop_x, crop_y, notes, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))",
+        params![input.id, input.name.trim(), input.category, clean(&input.subtype), clean(&input.size), clean(&input.material), clean(&input.pattern), input.ownership, input.image_path.trim(), clean(&input.display_image_path), input.crop_zoom, input.crop_x, input.crop_y, clean(&input.notes)],
     ).map_err(db_error)?;
     replace_values(
         &transaction,
@@ -164,9 +177,9 @@ pub fn create(
 
 pub fn get(connection: &Connection, id: &str) -> Result<Option<ClothingItem>, String> {
     let base: Option<ClothingItem> = connection.query_row(
-        "SELECT id, name, category, subtype, material, pattern, ownership, image_path, display_image_path, crop_zoom, crop_x, crop_y, notes, created_at, updated_at FROM clothing_items WHERE id = ?1",
+        "SELECT id, name, category, subtype, size, material, pattern, ownership, image_path, display_image_path, crop_zoom, crop_x, crop_y, notes, created_at, updated_at FROM clothing_items WHERE id = ?1",
         [id],
-        |row| Ok(ClothingItem { id: row.get(0)?, name: row.get(1)?, category: row.get(2)?, subtype: row.get(3)?, colors: Vec::new(), material: row.get(4)?, pattern: row.get(5)?, seasons: Vec::new(), occasions: Vec::new(), style_tags: Vec::new(), ownership: row.get(6)?, image_path: row.get(7)?, display_image_path: row.get(8)?, crop_zoom: row.get(9)?, crop_x: row.get(10)?, crop_y: row.get(11)?, notes: row.get(12)?, created_at: row.get(13)?, updated_at: row.get(14)? }),
+        |row| Ok(ClothingItem { id: row.get(0)?, name: row.get(1)?, category: row.get(2)?, subtype: row.get(3)?, size: row.get(4)?, colors: Vec::new(), material: row.get(5)?, pattern: row.get(6)?, seasons: Vec::new(), occasions: Vec::new(), style_tags: Vec::new(), ownership: row.get(7)?, image_path: row.get(8)?, display_image_path: row.get(9)?, crop_zoom: row.get(10)?, crop_x: row.get(11)?, crop_y: row.get(12)?, notes: row.get(13)?, created_at: row.get(14)?, updated_at: row.get(15)? }),
     ).optional().map_err(db_error)?;
     base.map(|mut item| {
         item.colors = values(connection, "clothing_item_colors", &item.id)?;
@@ -205,8 +218,8 @@ pub fn update(
     }
     let transaction = connection.transaction().map_err(db_error)?;
     let changed = transaction.execute(
-        "UPDATE clothing_items SET name=?2, category=?3, subtype=?4, material=?5, pattern=?6, ownership=?7, image_path=?8, display_image_path=?9, crop_zoom=?10, crop_x=?11, crop_y=?12, notes=?13, updated_at=strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id=?1",
-        params![id, input.name.trim(), input.category, clean(&input.subtype), clean(&input.material), clean(&input.pattern), input.ownership, input.image_path.trim(), clean(&input.display_image_path), input.crop_zoom, input.crop_x, input.crop_y, clean(&input.notes)],
+        "UPDATE clothing_items SET name=?2, category=?3, subtype=?4, size=?5, material=?6, pattern=?7, ownership=?8, image_path=?9, display_image_path=?10, crop_zoom=?11, crop_x=?12, crop_y=?13, notes=?14, updated_at=strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id=?1",
+        params![id, input.name.trim(), input.category, clean(&input.subtype), clean(&input.size), clean(&input.material), clean(&input.pattern), input.ownership, input.image_path.trim(), clean(&input.display_image_path), input.crop_zoom, input.crop_x, input.crop_y, clean(&input.notes)],
     ).map_err(db_error)?;
     if changed == 0 {
         return Err("Clothing item not found.".into());
@@ -303,6 +316,11 @@ fn validate(input: &ClothingItemInput) -> Result<(), String> {
     if !["owned", "wishlist"].contains(&input.ownership.as_str()) {
         return Err("Choose owned or wishlist.".into());
     }
+    if let Some(size) = clean(&input.size) {
+        if !["XS", "S", "M", "L", "XL", "XXL", "XXXL"].contains(&size) {
+            return Err("Choose a valid clothing size.".into());
+        }
+    }
     if input.image_path.trim().is_empty() {
         return Err("Choose an image for the clothing item.".into());
     }
@@ -343,6 +361,7 @@ mod tests {
             name: "Blue jeans".into(),
             category: "bottom".into(),
             subtype: Some("Jeans".into()),
+            size: Some("M".into()),
             colors: vec!["blue".into(), "navy".into()],
             material: Some("Denim".into()),
             pattern: None,
@@ -365,6 +384,7 @@ mod tests {
         migrate(&mut db).unwrap();
         let created = create(&mut db, sample()).unwrap();
         assert_eq!(created.colors, vec!["blue", "navy"]);
+        assert_eq!(created.size.as_deref(), Some("M"));
         assert_eq!(list(&db).unwrap().len(), 1);
         let mut changed = sample();
         changed.name = "Dark jeans".into();
@@ -390,6 +410,15 @@ mod tests {
                 &mut db,
                 ClothingItemInput {
                     name: " ".into(),
+                    ..sample()
+                }
+            )
+            .is_err());
+            assert!(create(
+                &mut db,
+                ClothingItemInput {
+                    id: "bad-size".into(),
+                    size: Some("Medium".into()),
                     ..sample()
                 }
             )
@@ -420,7 +449,7 @@ mod tests {
                 |row| row.get(0),
             )
             .unwrap();
-        assert_eq!(version, 4);
+        assert_eq!(version, 5);
         assert_eq!(outfit_table, "outfits");
         let settings_table: String = db
             .query_row(

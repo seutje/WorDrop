@@ -179,6 +179,7 @@ mod tests {
             name: format!("Item {id}"),
             category: "top".into(),
             subtype: None,
+            size: None,
             colors: vec![],
             material: None,
             pattern: None,

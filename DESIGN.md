@@ -34,6 +34,7 @@ Each clothing item can contain:
 - a name
 - a clothing category
 - optional subtype
+- optional size (XS through XXXL)
 - one or more colors
 - optional material
 - optional pattern
@@ -460,6 +461,7 @@ type ClothingItem = {
 
   category: ClothingCategory;
   subtype?: string;
+  size?: "XS" | "S" | "M" | "L" | "XL" | "XXL" | "XXXL";
 
   colors: ClothingColor[];
   material?: string;

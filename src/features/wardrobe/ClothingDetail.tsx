@@ -238,6 +238,7 @@ export function ClothingDetail({
             {item.subtype && (
               <MetadataRow label="Subtype">{item.subtype}</MetadataRow>
             )}
+            {item.size && <MetadataRow label="Size">{item.size}</MetadataRow>}
             {item.colors.length > 0 && (
               <MetadataRow label="Colors">
                 <TagList values={item.colors} />

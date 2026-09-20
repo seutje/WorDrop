@@ -1278,6 +1278,9 @@ These must remain optional.
 
 # Development Health Checklist
 
+Implemented follow-up: wardrobe items now support an optional, validated size
+from XS through XXXL in creation, editing, persistence, and item details.
+
 Run periodically:
 
 - [ ] migrations remain reproducible
