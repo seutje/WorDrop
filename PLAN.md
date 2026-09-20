@@ -1216,7 +1216,7 @@ manual installation of the first updater-enabled release.
 - [x] favorites
 - [ ] recent outfits
 - [ ] outfit duplication improvements
-- [ ] sorting options
+- [x] sorting options
 - [ ] custom tag management
 - [ ] recently added items
 - [ ] archive status
@@ -1225,6 +1225,9 @@ Implementation note: every clothing item now stores a local favorite flag.
 Closet cards show an accessible heart button in a white circle; the outlined
 state marks a regular item and the filled red state marks a favorite. Toggling
 updates immediately and rolls back with a clear error if persistence fails.
+Closet sorting supports newest (the default), oldest, alphabetical, and
+favorites-first order. Newest is the secondary order except when it is the
+primary order, where item name is used to break ties.
 
 ## Wardrobe Insights
 

@@ -3,6 +3,7 @@ import type { ClothingItem } from "../../types/clothing";
 import {
   emptyClosetFilters,
   filterClothingItems,
+  sortClothingItems,
   type ClosetFilters,
 } from "./closetFilters";
 
@@ -20,6 +21,59 @@ const item = (id: string, values: Partial<ClothingItem>): ClothingItem => ({
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
   ...values,
+});
+
+describe("sortClothingItems", () => {
+  const sortableWardrobe = [
+    item("1", { name: "Zebra coat", createdAt: "2026-02-01T00:00:00Z" }),
+    item("2", { name: "Amber dress", createdAt: "2026-03-01T00:00:00Z" }),
+    item("3", {
+      name: "Blue shirt",
+      createdAt: "2026-03-01T00:00:00Z",
+      favorite: true,
+    }),
+    item("4", {
+      name: "Coral shoes",
+      createdAt: "2026-01-01T00:00:00Z",
+      favorite: true,
+    }),
+  ];
+
+  it("sorts newest first and uses name as the secondary order", () => {
+    expect(
+      sortClothingItems(sortableWardrobe, "newest").map(({ id }) => id),
+    ).toEqual(["2", "3", "1", "4"]);
+  });
+
+  it("sorts oldest first", () => {
+    expect(
+      sortClothingItems(sortableWardrobe, "oldest").map(({ id }) => id),
+    ).toEqual(["4", "1", "2", "3"]);
+  });
+
+  it("sorts alphabetically and uses newest as the secondary order", () => {
+    expect(
+      sortClothingItems(
+        [
+          item("old", { name: "Same", createdAt: "2026-01-01T00:00:00Z" }),
+          item("new", { name: "same", createdAt: "2026-02-01T00:00:00Z" }),
+        ],
+        "alphabetical",
+      ).map(({ id }) => id),
+    ).toEqual(["new", "old"]);
+  });
+
+  it("puts favorites first and orders each group newest first", () => {
+    expect(
+      sortClothingItems(sortableWardrobe, "favorite").map(({ id }) => id),
+    ).toEqual(["3", "4", "2", "1"]);
+  });
+
+  it("does not mutate the source array", () => {
+    const source = [...sortableWardrobe];
+    sortClothingItems(source, "newest");
+    expect(source).toEqual(sortableWardrobe);
+  });
 });
 
 const wardrobe = [

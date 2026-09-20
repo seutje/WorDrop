@@ -6,7 +6,10 @@ import {
   emptyClosetFilters,
   filterClothingItems,
   hasActiveFilters,
+  sortClothingItems,
+  defaultClosetSort,
   type ClosetFilters,
+  type ClosetSort,
 } from "../features/wardrobe/closetFilters";
 import { clothingRepository } from "../lib/database/clothingRepository";
 import { ensureDisplayImages } from "../lib/images/ensureDisplayImages";
@@ -40,9 +43,10 @@ export function ClosetPage({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [filters, setFilters] = useState<ClosetFilters>(emptyClosetFilters);
+  const [sort, setSort] = useState<ClosetSort>(defaultClosetSort);
   const visibleItems = useMemo(
-    () => filterClothingItems(items, filters),
-    [items, filters],
+    () => sortClothingItems(filterClothingItems(items, filters), sort),
+    [items, filters, sort],
   );
   const filtersActive = hasActiveFilters(filters);
 
@@ -302,6 +306,21 @@ export function ClosetPage({
                       {titleCase(value)}
                     </option>
                   ))}
+                </select>
+              </label>
+              <label>
+                <span className="sr-only">Sort closet</span>
+                <select
+                  aria-label="Sort closet"
+                  value={sort}
+                  onChange={(event) =>
+                    setSort(event.target.value as ClosetSort)
+                  }
+                >
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="alphabetical">Alphabetical</option>
+                  <option value="favorite">Favorite</option>
                 </select>
               </label>
               {filtersActive && (

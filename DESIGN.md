@@ -710,6 +710,7 @@ Each card should show:
 The interface should support:
 
 - search
+- sorting by newest, oldest, alphabetical, or favorite
 - category filter
 - ownership filter
 - color filter
