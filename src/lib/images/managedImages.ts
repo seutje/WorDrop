@@ -19,6 +19,10 @@ export function loadManagedImage(reference: string): Promise<ManagedImage> {
   return invoke("load_clothing_image", { reference });
 }
 
+export function saveDisplayImage(dataUrl: string): Promise<ManagedImage> {
+  return invoke("save_display_image", { dataUrl });
+}
+
 export function discardManagedImage(reference: string): Promise<boolean> {
   return invoke("discard_clothing_image", { reference });
 }

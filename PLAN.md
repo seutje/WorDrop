@@ -916,6 +916,12 @@ as a second tab. A backed-up local preference limits new outfit selections to
 one Bottom by default while allowing multiple Tops. Users may disable the rule,
 and existing saved outfits are preserved unchanged.
 
+Image-framing follow-up: imported originals are retained unchanged. Add/Edit
+offers a 4:5 drag-and-zoom editor that can fit the complete image, and saving
+creates one 800 x 1000 display JPEG per item. All non-editor views use that
+smaller rendered file, with a safe original-image fallback for legacy records.
+Crop metadata and both managed files are included in backups.
+
 ## User Test Gate
 
 Project owner completes a backup and restore without using developer tools.

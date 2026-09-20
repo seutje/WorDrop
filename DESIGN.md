@@ -1066,7 +1066,7 @@ app-data/
 ├── wardrobe.db
 ├── images/
 │   ├── original/
-│   └── thumbnails/
+│   └── display/
 └── exports/
 ```
 
@@ -1085,6 +1085,13 @@ bytes are exposed to the frontend as data URLs so arbitrary filesystem access
 does not need to be granted to the webview. Replaced and deleted images are
 removed only when no clothing record still references them.
 
+Each item also has one 800 x 1000 JPEG display image in `images/display`.
+Add/Edit loads the unchanged original into a 4:5 framing editor with drag,
+zoom, fit, and reset controls. Saving regenerates the display image and stores
+normalized framing metadata. Closet cards, details, recommendations, and outfit
+views use only the display image, with an original-image fallback for legacy
+records until they are edited.
+
 Requirements:
 
 - never modify the source file;
@@ -1096,10 +1103,8 @@ Requirements:
 
 Optional future image features:
 
-- crop
 - rotate
 - background removal
-- automatic thumbnail generation
 - dominant color extraction
 
 Background removal is not part of the first MVP.

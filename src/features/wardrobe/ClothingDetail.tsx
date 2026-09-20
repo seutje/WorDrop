@@ -144,7 +144,7 @@ export function ClothingDetail({
   useEffect(() => {
     if (!item) return;
     let active = true;
-    loadManagedImage(item.imagePath)
+    loadManagedImage(item.displayImagePath ?? item.imagePath)
       .then((image) => {
         if (active) setImageUrl(image.dataUrl);
       })

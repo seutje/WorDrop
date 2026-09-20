@@ -187,6 +187,10 @@ mod tests {
             style_tags: vec![],
             ownership: "owned".into(),
             image_path: format!("images/{id}.jpg"),
+            display_image_path: None,
+            crop_zoom: 1.0,
+            crop_x: 0.0,
+            crop_y: 0.0,
             notes: None,
         }
     }

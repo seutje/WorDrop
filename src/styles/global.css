@@ -245,6 +245,54 @@ h1 {
   height: 360px;
   margin: 0 0 12px;
 }
+.crop-editor {
+  margin-bottom: 12px;
+}
+.crop-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #f0eee9;
+  border-radius: 14px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.crop-frame:active {
+  cursor: grabbing;
+}
+.crop-frame img {
+  position: absolute;
+  max-width: none;
+  pointer-events: none;
+}
+.crop-zoom {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.crop-zoom input {
+  width: 100%;
+  accent-color: #54705b;
+}
+.crop-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.crop-actions button {
+  padding: 5px 8px;
+  color: #4f6555;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 12px;
+  text-decoration: underline;
+}
 .full-button {
   width: 100%;
 }
@@ -677,7 +725,7 @@ h1 {
   position: relative;
   display: grid;
   place-items: center;
-  height: 165px;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   color: #77756f;
   background: #e9e7e2;
@@ -1134,7 +1182,7 @@ h1 {
 .outfit-item-image {
   display: grid;
   place-items: center;
-  height: 220px;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   color: #77756f;
   background: #e7e4de;
@@ -1264,7 +1312,7 @@ h1 {
   outline-offset: 4px;
 }
 .card-image {
-  height: 235px;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   background: #ece9e3;
   border-radius: 12px;

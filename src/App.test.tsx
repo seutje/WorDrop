@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   chooseImage: vi.fn(),
   loadImage: vi.fn(),
   discardImage: vi.fn(),
+  saveDisplayImage: vi.fn(),
 }));
 const outfitMocks = vi.hoisted(() => ({
   create: vi.fn(),
@@ -45,7 +46,18 @@ vi.mock("./lib/images/managedImages", () => ({
   chooseAndImportImage: mocks.chooseImage,
   loadManagedImage: mocks.loadImage,
   discardManagedImage: mocks.discardImage,
+  saveDisplayImage: mocks.saveDisplayImage,
 }));
+vi.mock("./lib/images/imageFraming", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("./lib/images/imageFraming")>();
+  return {
+    ...original,
+    renderDisplayImage: vi
+      .fn()
+      .mockResolvedValue("data:image/jpeg;base64,/9j/"),
+  };
+});
 vi.mock("./lib/database/outfitRepository", () => ({
   outfitRepository: outfitMocks,
 }));
@@ -73,6 +85,7 @@ const sampleItem: ClothingItem = {
   styleTags: ["classic"],
   ownership: "owned",
   imagePath: "images/original/item.jpg",
+  displayImagePath: "images/display/item.jpg",
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
 };
@@ -105,6 +118,10 @@ beforeEach(() => {
     dataUrl: "data:image/jpeg;base64,/9j/",
   });
   mocks.discardImage.mockResolvedValue(true);
+  mocks.saveDisplayImage.mockResolvedValue({
+    reference: "images/display/framed.jpg",
+    dataUrl: "data:image/jpeg;base64,/9j/",
+  });
   outfitMocks.list.mockResolvedValue([]);
   outfitMocks.create.mockResolvedValue(savedOutfit);
   outfitMocks.update.mockResolvedValue(savedOutfit);

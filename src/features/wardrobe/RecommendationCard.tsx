@@ -25,7 +25,7 @@ export function RecommendationCard({
   const [imageMissing, setImageMissing] = useState(false);
   useEffect(() => {
     let active = true;
-    loadManagedImage(item.imagePath)
+    loadManagedImage(item.displayImagePath ?? item.imagePath)
       .then((image) => {
         if (active) setImageUrl(image.dataUrl);
       })
@@ -35,7 +35,7 @@ export function RecommendationCard({
     return () => {
       active = false;
     };
-  }, [item.imagePath]);
+  }, [item.displayImagePath, item.imagePath]);
   return (
     <article className="recommendation-card">
       <button

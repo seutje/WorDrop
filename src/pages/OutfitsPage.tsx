@@ -54,7 +54,7 @@ function OutfitPreview({
     Promise.all(
       items.slice(0, 4).map(async (item) => ({
         id: item.id,
-        image: await loadManagedImage(item.imagePath),
+        image: await loadManagedImage(item.displayImagePath ?? item.imagePath),
       })),
     )
       .then((loaded) => {
@@ -98,7 +98,7 @@ function OutfitItemTile({
   const [imageUrl, setImageUrl] = useState<string>();
   useEffect(() => {
     let active = true;
-    loadManagedImage(item.imagePath)
+    loadManagedImage(item.displayImagePath ?? item.imagePath)
       .then((image) => {
         if (active) setImageUrl(image.dataUrl);
       })
@@ -106,7 +106,7 @@ function OutfitItemTile({
     return () => {
       active = false;
     };
-  }, [item.imagePath]);
+  }, [item.displayImagePath, item.imagePath]);
   return (
     <article className="outfit-item-tile">
       <div className="outfit-item-image">

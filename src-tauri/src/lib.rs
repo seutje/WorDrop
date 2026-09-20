@@ -64,6 +64,14 @@ fn load_clothing_image(
 }
 
 #[tauri::command]
+fn save_display_image(
+    app_data: State<'_, AppDataDirectory>,
+    data_url: String,
+) -> Result<image_store::ManagedImage, String> {
+    image_store::save_display(&app_data.0, &data_url)
+}
+
+#[tauri::command]
 fn discard_clothing_image(
     app_data: State<'_, AppDataDirectory>,
     database: State<'_, Database>,
@@ -125,9 +133,18 @@ fn update_clothing_item(
         .map_err(|_| "The local database is unavailable.".to_string())?;
     let previous = database::get(&connection, &id)?;
     let updated = database::update(&mut connection, &id, item)?;
-    if let Some(previous) = previous.filter(|previous| previous.image_path != updated.image_path) {
-        if database::image_reference_count(&connection, &previous.image_path)? == 0 {
-            let _ = image_store::remove(&app_data.0, &previous.image_path);
+    if let Some(previous) = previous {
+        for reference in [Some(previous.image_path), previous.display_image_path]
+            .into_iter()
+            .flatten()
+            .filter(|reference| {
+                reference != &updated.image_path
+                    && updated.display_image_path.as_ref() != Some(reference)
+            })
+        {
+            if database::image_reference_count(&connection, &reference)? == 0 {
+                let _ = image_store::remove(&app_data.0, &reference);
+            }
         }
     }
     Ok(updated)
@@ -146,8 +163,13 @@ fn delete_clothing_item(
     let previous = database::get(&connection, &id)?;
     let deleted = database::delete(&connection, &id)?;
     if let Some(previous) = previous {
-        if database::image_reference_count(&connection, &previous.image_path)? == 0 {
-            let _ = image_store::remove(&app_data.0, &previous.image_path);
+        for reference in [Some(previous.image_path), previous.display_image_path]
+            .into_iter()
+            .flatten()
+        {
+            if database::image_reference_count(&connection, &reference)? == 0 {
+                let _ = image_store::remove(&app_data.0, &reference);
+            }
         }
     }
     Ok(deleted)
@@ -255,6 +277,7 @@ pub fn run() {
             delete_clothing_item,
             import_clothing_image,
             load_clothing_image,
+            save_display_image,
             discard_clothing_image,
             create_outfit,
             get_outfit,

@@ -4,8 +4,11 @@ import {
   chooseAndImportImage,
   discardManagedImage,
   loadManagedImage,
+  saveDisplayImage,
   type ManagedImage,
 } from "../../lib/images/managedImages";
+import { renderDisplayImage } from "../../lib/images/imageFraming";
+import { ImageCropEditor } from "./ImageCropEditor";
 import {
   clothingCategories,
   clothingColors,
@@ -98,6 +101,11 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
   const [pendingImageReference, setPendingImageReference] = useState<
     string | null
   >(null);
+  const [framing, setFraming] = useState({
+    zoom: item?.cropZoom ?? 1,
+    x: item?.cropX ?? 0,
+    y: item?.cropY ?? 0,
+  });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -124,6 +132,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
       if (!imported) return;
       const previousPending = pendingImageReference;
       setImage(imported);
+      setFraming({ zoom: 1, x: 0, y: 0 });
       setPendingImageReference(imported.reference);
       if (previousPending) await discardManagedImage(previousPending);
     } catch (cause) {
@@ -151,6 +160,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
       return;
     }
     setBusy(true);
+    let createdDisplayReference: string | null = null;
     const values = {
       name: name.trim(),
       category,
@@ -170,15 +180,27 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
       ],
       ownership,
       imagePath: image.reference,
+      displayImagePath: item?.displayImagePath,
+      cropZoom: framing.zoom,
+      cropX: framing.x,
+      cropY: framing.y,
       notes: notes.trim() || undefined,
     };
     try {
+      const rendered = await renderDisplayImage(image.dataUrl, framing);
+      const display = await saveDisplayImage(rendered);
+      createdDisplayReference = display.reference;
+      values.displayImagePath = display.reference;
       if (item)
         await clothingRepository.update(item.id, { ...values, id: item.id });
       else await clothingRepository.create(values);
       setPendingImageReference(null);
       onSaved(item ? "Item updated." : "Item added to your closet.");
     } catch (cause) {
+      if (createdDisplayReference)
+        await discardManagedImage(createdDisplayReference).catch(
+          () => undefined,
+        );
       setError(errorMessage(cause));
     } finally {
       setBusy(false);
@@ -234,19 +256,20 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
           </div>
           <div className="item-form-layout">
             <div className="form-photo-column">
-              <div
-                className="image-preview form-image-preview"
-                data-empty={!image}
-              >
-                {image ? (
-                  <img src={image.dataUrl} alt="Clothing preview" />
-                ) : (
+              {image ? (
+                <ImageCropEditor
+                  source={image.dataUrl}
+                  framing={framing}
+                  onChange={setFraming}
+                />
+              ) : (
+                <div className="image-preview form-image-preview" data-empty>
                   <div>
                     <span aria-hidden="true">◇</span>
                     <p>JPEG, PNG, or WebP</p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
               <button
                 className="secondary-button full-button"
                 type="button"

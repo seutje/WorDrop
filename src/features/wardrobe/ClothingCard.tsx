@@ -32,7 +32,7 @@ export const ClothingCard = memo(function ClothingCard({
   useEffect(() => {
     if (!shouldLoad) return;
     let active = true;
-    loadManagedImage(item.imagePath)
+    loadManagedImage(item.displayImagePath ?? item.imagePath)
       .then((image) => {
         if (active) setImageUrl(image.dataUrl);
       })
@@ -42,7 +42,7 @@ export const ClothingCard = memo(function ClothingCard({
     return () => {
       active = false;
     };
-  }, [item.imagePath, shouldLoad]);
+  }, [item.displayImagePath, item.imagePath, shouldLoad]);
   return (
     <button
       ref={cardRef}

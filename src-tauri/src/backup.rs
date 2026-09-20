@@ -193,7 +193,8 @@ fn extract_and_validate_archive(source: &Path, destination: &Path) -> Result<(),
         let valid = safe_components
             && (name == "manifest.json"
                 || name == "wardrobe.db"
-                || name.starts_with("images/original/"));
+                || name.starts_with("images/original/")
+                || name.starts_with("images/display/"));
         if !valid || entry.enclosed_name().is_none() || !names.insert(name.clone()) {
             return Err("The backup contains an invalid or duplicate file path.".into());
         }
@@ -238,15 +239,18 @@ fn validate_database(connection: &Connection, root: &Path) -> Result<(), String>
         return Err("The backup database is damaged.".into());
     }
     for item in database::list(connection)? {
-        let reference = Path::new(&item.image_path);
+      for image_reference in [Some(item.image_path.clone()), item.display_image_path.clone()]
+          .into_iter()
+          .flatten()
+      {
+        let reference = Path::new(&image_reference);
         if reference.is_absolute()
             || !reference
                 .components()
                 .all(|part| matches!(part, std::path::Component::Normal(_)))
-            || !item
-                .image_path
+            || !image_reference
                 .replace('\\', "/")
-                .starts_with("images/original/")
+                .starts_with("images/")
         {
             return Err("The backup contains an invalid managed image reference.".into());
         }
@@ -255,6 +259,7 @@ fn validate_database(connection: &Connection, root: &Path) -> Result<(), String>
         if image_store::detect_image(&bytes).is_none() {
             return Err(format!("The backup image for ‘{}’ is damaged.", item.name));
         }
+      }
     }
     Ok(())
 }
@@ -394,6 +399,10 @@ mod tests {
             style_tags: vec!["classic".into()],
             ownership: "owned".into(),
             image_path: "images/original/item.png".into(),
+            display_image_path: Some("images/display/item.jpg".into()),
+            crop_zoom: 1.5,
+            crop_x: 0.2,
+            crop_y: -0.1,
             notes: Some("Favorite".into()),
         }
     }
@@ -407,6 +416,10 @@ mod tests {
         fs::create_dir_all(image_path.parent().unwrap()).unwrap();
         let image_bytes = [0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A, 1];
         fs::write(&image_path, image_bytes).unwrap();
+        let display_path = root.join("images/display/item.jpg");
+        fs::create_dir_all(display_path.parent().unwrap()).unwrap();
+        let display_bytes = [0xFF, 0xD8, 0xFF, 0xD9];
+        fs::write(&display_path, display_bytes).unwrap();
         let mut connection = database::open_database(&database_path).unwrap();
         database::create(&mut connection, clothing()).unwrap();
         crate::outfits::create(
@@ -423,21 +436,28 @@ mod tests {
         let exported = export(&root, &connection, &archive_path).unwrap();
         assert_eq!(exported.clothing_items, 1);
         assert_eq!(exported.outfits, 1);
-        assert_eq!(exported.images, 1);
+        assert_eq!(exported.images, 2);
         let replaced = export(&root, &connection, &archive_path).unwrap();
         assert_eq!(replaced.clothing_items, 1);
         assert!(ZipArchive::new(File::open(&archive_path).unwrap()).is_ok());
 
         database::delete(&connection, "item-1").unwrap();
         fs::remove_file(&image_path).unwrap();
+        fs::remove_file(&display_path).unwrap();
         let restored = restore(&root, &mut connection, &archive_path).unwrap();
         assert_eq!(restored.clothing_items, 1);
         assert_eq!(restored.outfits, 1);
-        assert_eq!(restored.images, 1);
+        assert_eq!(restored.images, 2);
         let restored_item = database::get(&connection, "item-1").unwrap().unwrap();
         assert_eq!(restored_item.colors, vec!["blue"]);
         assert_eq!(restored_item.notes.as_deref(), Some("Favorite"));
+        assert_eq!(restored_item.crop_zoom, 1.5);
+        assert_eq!(
+            restored_item.display_image_path.as_deref(),
+            Some("images/display/item.jpg")
+        );
         assert_eq!(fs::read(image_path).unwrap(), image_bytes);
+        assert_eq!(fs::read(display_path).unwrap(), display_bytes);
         assert_eq!(
             crate::outfits::list(&connection).unwrap()[0].name,
             "Weekend"

@@ -9,6 +9,7 @@ import {
   type ClosetFilters,
 } from "../features/wardrobe/closetFilters";
 import { clothingRepository } from "../lib/database/clothingRepository";
+import { ensureDisplayImages } from "../lib/images/ensureDisplayImages";
 import {
   clothingCategories,
   clothingColors,
@@ -64,7 +65,11 @@ export function ClosetPage({
     clothingRepository
       .list()
       .then((loadedItems) => {
-        if (active) setItems(loadedItems);
+        if (!active) return;
+        setItems(loadedItems);
+        void ensureDisplayImages(loadedItems).then((withDisplayImages) => {
+          if (active) setItems(withDisplayImages);
+        });
       })
       .catch(() => {
         if (active)

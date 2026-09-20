@@ -9,6 +9,7 @@ use std::{
 
 static FILE_COUNTER: AtomicU64 = AtomicU64::new(0);
 const MAX_IMAGE_BYTES: u64 = 25 * 1024 * 1024;
+const MAX_DISPLAY_IMAGE_BYTES: usize = 5 * 1024 * 1024;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -66,6 +67,32 @@ pub fn load(root: &Path, reference: &str) -> Result<ManagedImage, String> {
     })
 }
 
+pub fn save_display(root: &Path, data_url_value: &str) -> Result<ManagedImage, String> {
+    let encoded = data_url_value
+        .strip_prefix("data:image/jpeg;base64,")
+        .ok_or_else(|| "The framed image is not a JPEG image.".to_string())?;
+    let bytes = STANDARD
+        .decode(encoded)
+        .map_err(|_| "The framed image data is invalid.".to_string())?;
+    if bytes.len() > MAX_DISPLAY_IMAGE_BYTES {
+        return Err("The framed image is unexpectedly large.".into());
+    }
+    if detect_image(&bytes).map(|value| value.0) != Some("jpg") {
+        return Err("The framed image data is damaged.".into());
+    }
+    let directory = root.join("images").join("display");
+    fs::create_dir_all(&directory)
+        .map_err(|_| "The display image folder could not be created.".to_string())?;
+    let filename = unique_filename("jpg");
+    let destination = directory.join(&filename);
+    fs::write(&destination, &bytes)
+        .map_err(|_| "The display image could not be saved.".to_string())?;
+    Ok(ManagedImage {
+        reference: format!("images/display/{filename}"),
+        data_url: data_url("image/jpeg", &bytes),
+    })
+}
+
 pub fn remove(root: &Path, reference: &str) -> Result<bool, String> {
     let path = managed_path(root, reference)?;
     match fs::remove_file(path) {
@@ -81,7 +108,10 @@ fn managed_path(root: &Path, reference: &str) -> Result<PathBuf, String> {
         && relative
             .components()
             .all(|part| matches!(part, std::path::Component::Normal(_)))
-        && reference.replace('\\', "/").starts_with("images/original/");
+        && matches!(
+            reference.replace('\\', "/"),
+            value if value.starts_with("images/original/") || value.starts_with("images/display/")
+        );
     if !valid {
         return Err("The managed image reference is invalid.".into());
     }
@@ -159,6 +189,17 @@ mod tests {
         let jpeg = root.join("wrong.png");
         fs::write(&jpeg, [0xFF, 0xD8, 0xFF, 0]).unwrap();
         assert!(import(&root, &jpeg).unwrap_err().contains("does not match"));
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn saves_display_images_separately_from_originals() {
+        let root = test_directory();
+        let jpeg = [0xFF, 0xD8, 0xFF, 0xD9];
+        let encoded = format!("data:image/jpeg;base64,{}", STANDARD.encode(jpeg));
+        let saved = save_display(&root, &encoded).unwrap();
+        assert!(saved.reference.starts_with("images/display/"));
+        assert_eq!(fs::read(root.join(&saved.reference)).unwrap(), jpeg);
         fs::remove_dir_all(root).unwrap();
     }
 }
