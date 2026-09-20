@@ -1083,61 +1083,61 @@ Validate the entire MVP as one coherent product.
 
 ### Installation
 
-- [ ] downloadable Windows installer
-- [ ] installs without development tooling
-- [ ] launches successfully
+- [x] downloadable Windows installer
+- [x] installs without development tooling
+- [x] launches successfully
 
 ### Wardrobe
 
-- [ ] add clothing item
-- [ ] edit clothing item
-- [ ] delete clothing item
-- [ ] import photo
-- [ ] browse grid
-- [ ] search
-- [ ] filters
-- [ ] owned/wishlist distinction
+- [x] add clothing item
+- [x] edit clothing item
+- [x] delete clothing item
+- [x] import photo
+- [x] browse grid
+- [x] search
+- [x] filters
+- [x] owned/wishlist distinction
 
 ### Suggestions
 
-- [ ] select item
-- [ ] see ranked matches
-- [ ] explanations shown
-- [ ] results are deterministic
-- [ ] no internet required
+- [x] select item
+- [x] see ranked matches
+- [x] explanations shown
+- [x] results are deterministic
+- [x] no internet required
 
 ### Outfits
 
-- [ ] build outfit manually
-- [ ] save outfit
-- [ ] reopen outfit
-- [ ] edit outfit
-- [ ] delete outfit
-- [ ] outfit compatibility feedback
+- [x] build outfit manually
+- [x] save outfit
+- [x] reopen outfit
+- [x] edit outfit
+- [x] delete outfit
+- [x] outfit compatibility feedback
 
 ### Wishlist
 
-- [ ] wishlist item can be created
-- [ ] owned-item compatibility shown
-- [ ] integration summary shown
+- [x] wishlist item can be created
+- [x] owned-item compatibility shown
+- [x] integration summary shown
 
 ### Persistence and Safety
 
-- [ ] restart preserves data
-- [ ] imported images remain available
-- [ ] backup export works
-- [ ] restore works
-- [ ] deletion behavior is safe
+- [x] restart preserves data
+- [x] imported images remain available
+- [x] backup export works
+- [x] restore works
+- [x] deletion behavior is safe
 
 ### Quality
 
-- [ ] lint passes
-- [ ] typecheck passes
-- [ ] tests pass
-- [ ] production build passes
-- [ ] no debug placeholders
-- [ ] no known data-loss bug
-- [ ] README download/install instructions complete
+- [x] lint passes
+- [x] typecheck passes
+- [x] tests pass
+- [x] production build passes
+- [x] no debug placeholders
+- [x] no known data-loss bug
+- [x] README download/install instructions complete
 
 ## Final User Acceptance Test
 
@@ -1145,31 +1145,31 @@ Ask intended user to use the release candidate with at least 20 real items.
 
 They should complete without developer help:
 
-- [ ] install app
-- [ ] add clothing
-- [ ] edit clothing
-- [ ] browse/filter
-- [ ] open detail view
-- [ ] use suggestions
-- [ ] build outfit
-- [ ] save outfit
-- [ ] reopen outfit
-- [ ] inspect wishlist compatibility
-- [ ] close/reopen app
+- [x] install app
+- [x] add clothing
+- [x] edit clothing
+- [x] browse/filter
+- [x] open detail view
+- [x] use suggestions
+- [x] build outfit
+- [x] save outfit
+- [x] reopen outfit
+- [x] inspect wishlist compatibility
+- [x] close/reopen app
 
 Capture issues by severity:
 
 ### Blockers
 
-- [ ] none remaining
+- [x] none remaining
 
 ### Major usability issues
 
-- [ ] none remaining or consciously deferred
+- [x] none remaining or consciously deferred
 
 ### Minor issues
 
-- [ ] documented for post-MVP
+- [x] documented for post-MVP
 
 When all MVP acceptance criteria are satisfied, tag the first stable release.
 
