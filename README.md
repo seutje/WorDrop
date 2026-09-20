@@ -93,31 +93,6 @@ signing is intentionally out of scope. Tauri updater signing is separate from
 Windows publisher signing: it verifies that automatic updates came from this
 project, but it does not remove the Windows warning.
 
-### Updater signing setup
-
-The public updater key is committed in `src-tauri/tauri.conf.json`. The matching
-private key was generated locally at
-`%USERPROFILE%\.tauri\wordrop-updater.key`; keep a secure backup outside the
-repository. Losing it prevents installed copies from accepting future updates.
-
-Add the complete contents of that private-key file as the GitHub Actions
-repository secret `TAURI_SIGNING_PRIVATE_KEY`. The generated key has no
-password, so `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` may be absent or empty. Never
-commit the private key.
-
-Each published release must contain `latest.json`, the NSIS installer, and its
-`.sig` signature. Test automatic updating with two real versions: install the
-older version, publish the newer version, launch the older app, accept the
-prompt, and confirm the new version launches while wardrobe data remains.
-
-The first version containing updater support is a bootstrap release. Copies of
-older WorDrop versions must install that release manually once; subsequent
-versions can update from inside the app.
-
-After publishing, test the installer on a clean or reasonably clean Windows
-machine: install, launch, add an item with an image, restart to verify
-persistence, and uninstall through Windows Settings.
-
 ## Project structure
 
 - `src/components`: reusable UI components and the application shell
