@@ -6,6 +6,7 @@ import type {
   Ownership,
   Season,
 } from "../../types/clothing";
+import { clothingCategories } from "../../types/clothing";
 
 export type ClosetFilters = {
   search: string;
@@ -16,7 +17,8 @@ export type ClosetFilters = {
   occasion: Occasion | "";
 };
 
-export type ClosetSort = "newest" | "oldest" | "alphabetical" | "favorite";
+export type ClosetSort =
+  "newest" | "oldest" | "alphabetical" | "type" | "favorite";
 
 export const defaultClosetSort: ClosetSort = "newest";
 
@@ -55,6 +57,17 @@ const compareNewest = (left: ClothingItem, right: ClothingItem) =>
 const compareAlphabetical = (left: ClothingItem, right: ClothingItem) =>
   left.name.localeCompare(right.name, undefined, { sensitivity: "base" });
 
+const compareType = (left: ClothingItem, right: ClothingItem) => {
+  const categoryOrder =
+    clothingCategories.indexOf(left.category) -
+    clothingCategories.indexOf(right.category);
+  if (categoryOrder !== 0) return categoryOrder;
+
+  return (left.subtype ?? "").localeCompare(right.subtype ?? "", undefined, {
+    sensitivity: "base",
+  });
+};
+
 export function sortClothingItems(
   items: readonly ClothingItem[],
   sort: ClosetSort,
@@ -66,6 +79,7 @@ export function sortClothingItems(
     if (sort === "oldest")
       primary = left.createdAt.localeCompare(right.createdAt);
     if (sort === "alphabetical") primary = compareAlphabetical(left, right);
+    if (sort === "type") primary = compareType(left, right);
     if (sort === "favorite")
       primary = Number(right.favorite) - Number(left.favorite);
 

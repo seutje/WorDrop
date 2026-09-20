@@ -1235,9 +1235,10 @@ Implementation note: every clothing item now stores a local favorite flag.
 Closet cards show an accessible heart button in a white circle; the outlined
 state marks a regular item and the filled red state marks a favorite. Toggling
 updates immediately and rolls back with a clear error if persistence fails.
-Closet sorting supports newest (the default), oldest, alphabetical, and
-favorites-first order. Newest is the secondary order except when it is the
-primary order, where item name is used to break ties.
+Closet sorting supports newest (the default), oldest, alphabetical, type, and
+favorites-first order. Type follows the wardrobe's category order, then subtype.
+Newest is the secondary order except when it is the primary order, where item
+name is used to break ties.
 
 ## Automated website parsing
 

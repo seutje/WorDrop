@@ -775,7 +775,7 @@ Each card should show:
 The interface should support:
 
 - search
-- sorting by newest, oldest, alphabetical, or favorite
+- sorting by newest, oldest, alphabetical, type, or favorite
 - category filter
 - ownership filter
 - color filter

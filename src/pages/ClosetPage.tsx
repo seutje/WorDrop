@@ -320,6 +320,7 @@ export function ClosetPage({
                   <option value="newest">Newest</option>
                   <option value="oldest">Oldest</option>
                   <option value="alphabetical">Alphabetical</option>
+                  <option value="type">Type</option>
                   <option value="favorite">Favorite</option>
                 </select>
               </label>

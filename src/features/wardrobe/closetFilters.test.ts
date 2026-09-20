@@ -63,6 +63,29 @@ describe("sortClothingItems", () => {
     ).toEqual(["new", "old"]);
   });
 
+  it("sorts by category, then subtype, then newest", () => {
+    expect(
+      sortClothingItems(
+        [
+          item("shoes", { category: "shoes", subtype: "Sneakers" }),
+          item("top-new", {
+            category: "top",
+            subtype: "T-shirt",
+            createdAt: "2026-03-01T00:00:00Z",
+          }),
+          item("bottom", { category: "bottom", subtype: "Jeans" }),
+          item("top-old", {
+            category: "top",
+            subtype: "T-shirt",
+            createdAt: "2026-02-01T00:00:00Z",
+          }),
+          item("top-shirt", { category: "top", subtype: "Shirt" }),
+        ],
+        "type",
+      ).map(({ id }) => id),
+    ).toEqual(["top-shirt", "top-new", "top-old", "bottom", "shoes"]);
+  });
+
   it("puts favorites first and orders each group newest first", () => {
     expect(
       sortClothingItems(sortableWardrobe, "favorite").map(({ id }) => id),
