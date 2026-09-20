@@ -1236,6 +1236,23 @@ Closet sorting supports newest (the default), oldest, alphabetical, and
 favorites-first order. Newest is the secondary order except when it is the
 primary order, where item name is used to break ties.
 
+## Automated website parsing
+- [ ] aritzia.com
+- [ ] athleta.gapcanada.ca
+- [ ] abercrombie.com
+- [ ] quince.com
+- [ ] gapcanada.ca
+- [ ] ae.com
+- [ ] simons.ca
+- [ ] dynamiteclothing.com
+- [ ] rw-co.com
+- [ ] oldnavy.gapcanada.ca
+- [ ] hm.com
+- [ ] zara.com
+- [ ] callitspring.com
+- [ ] halara.com
+- [ ] talbots.com
+
 ## Wardrobe Insights
 
 - [ ] items rarely used in outfits
