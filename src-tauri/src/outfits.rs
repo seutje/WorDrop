@@ -187,6 +187,7 @@ mod tests {
             occasions: vec![],
             style_tags: vec![],
             ownership: "owned".into(),
+            favorite: false,
             image_path: format!("images/{id}.jpg"),
             display_image_path: None,
             crop_zoom: 1.0,

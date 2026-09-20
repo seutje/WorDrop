@@ -12,6 +12,7 @@ function item(id: string, values: Partial<ClothingItem> = {}): ClothingItem {
     occasions: [],
     styleTags: [],
     ownership: "owned",
+    favorite: false,
     imagePath: `images/original/${id}.jpg`,
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",

@@ -103,6 +103,31 @@ export function ClosetPage({
     await loadItems();
   }
 
+  async function toggleFavorite(item: ClothingItem) {
+    const favorite = !item.favorite;
+    setError(null);
+    setItems((current) =>
+      current.map((entry) =>
+        entry.id === item.id ? { ...entry, favorite } : entry,
+      ),
+    );
+    try {
+      const updated = await clothingRepository.setFavorite(item.id, favorite);
+      setItems((current) =>
+        current.map((entry) => (entry.id === item.id ? updated : entry)),
+      );
+    } catch {
+      setItems((current) =>
+        current.map((entry) =>
+          entry.id === item.id ? { ...entry, favorite: item.favorite } : entry,
+        ),
+      );
+      setError(
+        "The favorite could not be updated. Your item is still safely stored.",
+      );
+    }
+  }
+
   if (selectedItemId && !isFormOpen)
     return (
       <ClothingDetail
@@ -303,6 +328,7 @@ export function ClosetPage({
                   item={item}
                   key={item.id}
                   onOpen={() => setSelectedItemId(item.id)}
+                  onToggleFavorite={() => toggleFavorite(item)}
                 />
               ))}
             </div>

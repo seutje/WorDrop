@@ -1213,13 +1213,18 @@ manual installation of the first updater-enabled release.
 
 ## Convenience Features
 
-- [ ] favorites
+- [x] favorites
 - [ ] recent outfits
 - [ ] outfit duplication improvements
 - [ ] sorting options
 - [ ] custom tag management
 - [ ] recently added items
 - [ ] archive status
+
+Implementation note: every clothing item now stores a local favorite flag.
+Closet cards show an accessible heart button in a white circle; the outlined
+state marks a regular item and the filled red state marks a favorite. Toggling
+updates immediately and rolls back with a clear error if persistence fails.
 
 ## Wardrobe Insights
 

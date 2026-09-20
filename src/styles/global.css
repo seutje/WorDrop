@@ -1358,7 +1358,11 @@ h1 {
   line-height: 1.55;
 }
 .clothing-card {
+  position: relative;
+}
+.clothing-card-open {
   display: grid;
+  width: 100%;
   gap: 11px;
   padding: 0;
   overflow: hidden;
@@ -1369,7 +1373,7 @@ h1 {
   cursor: pointer;
   text-align: left;
 }
-.clothing-card:focus-visible {
+.clothing-card-open:focus-visible {
   outline: 3px solid #98b3a0;
   outline-offset: 4px;
 }
@@ -1385,8 +1389,52 @@ h1 {
   object-fit: cover;
   transition: transform 180ms ease;
 }
-.clothing-card:hover .card-image img {
+.clothing-card-open:hover .card-image img {
   transform: scale(1.025);
+}
+.favorite-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  padding: 10px;
+  place-items: center;
+  color: #676b69;
+  background: rgba(255, 255, 255, 0.94);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 2px 10px rgba(35, 37, 34, 0.12);
+  cursor: pointer;
+}
+.favorite-button svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.4;
+}
+.favorite-button[data-favorite="true"] {
+  color: #ed3345;
+}
+.favorite-button[data-favorite="true"] svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+.favorite-button:hover:not(:disabled) {
+  transform: scale(1.06);
+}
+.favorite-button:focus-visible {
+  outline: 3px solid #98b3a0;
+  outline-offset: 3px;
+}
+.favorite-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
 }
 .card-placeholder {
   display: grid;

@@ -77,6 +77,7 @@ export type ClothingItem = {
   occasions: Occasion[];
   styleTags: string[];
   ownership: Ownership;
+  favorite: boolean;
   imagePath: string;
   displayImagePath?: string;
   cropZoom?: number;

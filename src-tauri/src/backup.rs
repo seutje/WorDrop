@@ -399,6 +399,7 @@ mod tests {
             occasions: vec!["casual".into()],
             style_tags: vec!["classic".into()],
             ownership: "owned".into(),
+            favorite: false,
             image_path: "images/original/item.png".into(),
             display_image_path: Some("images/display/item.jpg".into()),
             crop_zoom: 1.5,

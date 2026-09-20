@@ -183,6 +183,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
         ),
       ],
       ownership,
+      favorite: item?.favorite ?? false,
       imagePath: image.reference,
       displayImagePath: item?.displayImagePath,
       cropZoom: framing.zoom,

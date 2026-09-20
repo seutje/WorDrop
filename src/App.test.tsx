@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   get: vi.fn(),
   list: vi.fn(),
   update: vi.fn(),
+  setFavorite: vi.fn(),
   delete: vi.fn(),
   chooseImage: vi.fn(),
   loadImage: vi.fn(),
@@ -39,6 +40,7 @@ vi.mock("./lib/database/clothingRepository", () => ({
     get: mocks.get,
     list: mocks.list,
     update: mocks.update,
+    setFavorite: mocks.setFavorite,
     delete: mocks.delete,
   },
 }));
@@ -84,6 +86,7 @@ const sampleItem: ClothingItem = {
   occasions: ["casual"],
   styleTags: ["classic"],
   ownership: "owned",
+  favorite: false,
   imagePath: "images/original/item.jpg",
   displayImagePath: "images/display/item.jpg",
   createdAt: "2026-01-01T00:00:00Z",
@@ -108,6 +111,9 @@ beforeEach(() => {
   mocks.get.mockResolvedValue(sampleItem);
   mocks.create.mockResolvedValue(sampleItem);
   mocks.update.mockResolvedValue(sampleItem);
+  mocks.setFavorite.mockImplementation((_id: string, favorite: boolean) =>
+    Promise.resolve({ ...sampleItem, favorite }),
+  );
   mocks.delete.mockResolvedValue(true);
   mocks.chooseImage.mockResolvedValue({
     reference: "images/original/new.jpg",
@@ -151,6 +157,28 @@ async function openBackup(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("App", () => {
+  it("toggles a closet item's favorite heart without opening the item", async () => {
+    mocks.list.mockResolvedValue([sampleItem]);
+    const user = userEvent.setup();
+    render(<App />);
+
+    const favoriteButton = await screen.findByRole("button", {
+      name: "Add Blue jeans to favorites",
+    });
+    expect(favoriteButton).toHaveAttribute("aria-pressed", "false");
+    await user.click(favoriteButton);
+
+    expect(mocks.setFavorite).toHaveBeenCalledWith("item-1", true);
+    expect(
+      await screen.findByRole("button", {
+        name: "Remove Blue jeans from favorites",
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.queryByRole("heading", { name: "Blue jeans" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("navigates between the primary sections", async () => {
     const user = userEvent.setup();
     render(<App />);

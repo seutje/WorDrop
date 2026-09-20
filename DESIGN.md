@@ -473,6 +473,8 @@ type ClothingItem = {
 
   ownership: "owned" | "wishlist";
 
+  favorite: boolean;
+
   imagePath: string;
 
   notes?: string;
@@ -703,6 +705,7 @@ Each card should show:
 - name
 - category or subtype
 - wishlist indicator when relevant
+- a heart control for toggling the item's favorite status
 
 The interface should support:
 

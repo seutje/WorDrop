@@ -21,6 +21,7 @@ function changesFor(item: ClothingItem): ClothingItemChanges {
     occasions: item.occasions,
     styleTags: item.styleTags,
     ownership: item.ownership,
+    favorite: item.favorite,
     imagePath: item.imagePath,
     displayImagePath: item.displayImagePath,
     cropZoom: item.cropZoom,

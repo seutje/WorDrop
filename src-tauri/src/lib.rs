@@ -121,6 +121,19 @@ fn list_clothing_items(database: State<'_, Database>) -> Result<Vec<ClothingItem
 }
 
 #[tauri::command]
+fn set_clothing_item_favorite(
+    database: State<'_, Database>,
+    id: String,
+    favorite: bool,
+) -> Result<ClothingItem, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    database::set_favorite(&connection, &id, favorite)
+}
+
+#[tauri::command]
 fn update_clothing_item(
     app_data: State<'_, AppDataDirectory>,
     database: State<'_, Database>,
@@ -274,6 +287,7 @@ pub fn run() {
             create_clothing_item,
             get_clothing_item,
             list_clothing_items,
+            set_clothing_item_favorite,
             update_clothing_item,
             delete_clothing_item,
             import_clothing_image,
