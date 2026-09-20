@@ -211,6 +211,68 @@ h1 {
   background: #faf9f7;
   box-shadow: 0 24px 70px rgb(0 0 0 / 24%);
 }
+.update-backdrop {
+  z-index: 20;
+}
+.update-dialog {
+  width: min(560px, 100%);
+  padding: 30px;
+  border-radius: 18px;
+  background: #faf9f7;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 24%);
+}
+.update-dialog h2 {
+  margin: 0 0 12px;
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: 500;
+}
+.update-dialog > p:not(.eyebrow, .error-message) {
+  margin: 0;
+  color: #62645f;
+  line-height: 1.55;
+}
+.update-notes {
+  max-height: 180px;
+  margin-top: 20px;
+  padding: 15px 17px;
+  overflow: auto;
+  color: #4e514c;
+  background: #f0eee9;
+  border-radius: 10px;
+}
+.update-notes p {
+  margin: 7px 0 0;
+  white-space: pre-wrap;
+}
+.update-progress {
+  display: grid;
+  gap: 9px;
+  margin-top: 22px;
+}
+.update-progress-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  color: #465049;
+  font-size: 13px;
+  font-weight: 650;
+}
+.update-progress progress {
+  width: 100%;
+  height: 10px;
+  accent-color: #54705b;
+}
+.update-progress small {
+  color: #74766f;
+}
+.update-error {
+  margin-top: 18px;
+}
+.update-actions {
+  justify-content: flex-end;
+  margin-top: 26px;
+}
 .item-form-dialog {
   width: min(960px, 100%);
   max-height: calc(100vh - 44px);

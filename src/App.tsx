@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { AppShell, type AppSection } from "./components/AppShell";
+import { UpdatePrompt } from "./components/UpdatePrompt";
 import { ClosetPage } from "./pages/ClosetPage";
 import { OutfitsPage } from "./pages/OutfitsPage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -53,21 +54,24 @@ function App() {
   }
 
   return (
-    <AppShell activeSection={activeSection} onNavigate={navigate}>
-      {activeSection === "closet" ? (
-        <ClosetPage onStartOutfit={startOutfit} onOpenOutfit={openOutfit} />
-      ) : activeSection === "outfits" ? (
-        <OutfitsPage
-          key={outfitRequestKey}
-          initialItemIds={outfitItemIds}
-          initialOutfitId={outfitId}
-          onDirtyChange={handleDirtyChange}
-          allowMultipleBottoms={settings.allowMultipleBottoms}
-        />
-      ) : (
-        <SettingsPage settings={settings} onSettingsChange={setSettings} />
-      )}
-    </AppShell>
+    <>
+      <AppShell activeSection={activeSection} onNavigate={navigate}>
+        {activeSection === "closet" ? (
+          <ClosetPage onStartOutfit={startOutfit} onOpenOutfit={openOutfit} />
+        ) : activeSection === "outfits" ? (
+          <OutfitsPage
+            key={outfitRequestKey}
+            initialItemIds={outfitItemIds}
+            initialOutfitId={outfitId}
+            onDirtyChange={handleDirtyChange}
+            allowMultipleBottoms={settings.allowMultipleBottoms}
+          />
+        ) : (
+          <SettingsPage settings={settings} onSettingsChange={setSettings} />
+        )}
+      </AppShell>
+      <UpdatePrompt />
+    </>
   );
 }
 

@@ -1191,6 +1191,26 @@ When all MVP acceptance criteria are satisfied, tag the first stable release.
 
 These items are intentionally not part of the initial critical path.
 
+## Automatic Updates
+
+- [x] check GitHub Releases once at application startup
+- [x] keep offline and failed update checks silent
+- [x] show an optional update prompt with release notes
+- [x] show download progress after user acceptance
+- [x] verify and install updates with Tauri's updater
+- [x] generate signed updater artifacts and `latest.json` in the release workflow
+- [x] document updater key storage and release verification
+
+Implementation note: the official Tauri 2 updater reads the static
+`latest.json` attached to the newest public GitHub Release. The React startup
+prompt offers `Download and install` or `Not now`; postponing is not persisted,
+so the next app start checks again. Network/check failures do not surface an
+error or delay the core offline workflow. Accepted Windows updates use passive
+NSIS installation; Tauri verifies the artifact signature and exits WorDrop
+before starting the installer. The updater signing key is separate from Windows
+publisher signing. Existing versions without this feature require one final
+manual installation of the first updater-enabled release.
+
 ## Convenience Features
 
 - [ ] favorites

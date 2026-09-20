@@ -1391,6 +1391,15 @@ Desired release experience:
 5. end user downloads installer;
 6. end user installs and launches the application.
 
+After the first updater-enabled version is installed, WorDrop checks the latest
+GitHub Release once on every application start. A failed check is silent so an
+offline user can continue immediately. When a newer semantic version is
+available, the application shows its version and release notes and offers
+`Download and install` or `Not now`; updates are never mandatory. Accepting the
+update downloads a Tauri-signed NSIS artifact, verifies it, closes WorDrop, and
+starts the installer. Choosing `Not now` dismisses only the current prompt, so
+the application checks again on its next start.
+
 No Windows code-signing work is required.
 
 Implementation choice: pushing a semantic tag such as `v0.1.0` starts the
@@ -1398,10 +1407,13 @@ Windows-only release workflow. A preflight script requires the tag and the
 versions in `package.json`, `src-tauri/Cargo.toml`, and
 `src-tauri/tauri.conf.json` to agree. The workflow runs frontend and Rust tests,
 builds the configured NSIS target, creates a public GitHub Release, uploads a
-clearly named setup executable, and retains the same installer as a workflow
-artifact. The Tauri release action is pinned to an explicit published version;
-no signing secrets or certificates are used. The full process and clean-machine
-test checklist are documented in the repository README.
+clearly named setup executable plus Tauri updater metadata and its cryptographic
+signature, and retains the installer as a workflow artifact. The Tauri release
+action is pinned to an explicit published version. Its private updater key is
+held in GitHub Actions secrets and its public key is embedded in the app. This
+updater signature verifies artifact integrity and is distinct from Windows
+publisher/code signing, which remains out of scope. The full process and
+clean-machine test checklist are documented in the repository README.
 
 ---
 
@@ -1583,6 +1595,7 @@ Current major decisions:
 - no cloud backend
 - GitHub Releases for distribution
 - Windows installer executable
+- optional startup updates through signed GitHub Release artifacts
 - Windows code signing out of scope
 - user testing at the end of each implementation phase
 

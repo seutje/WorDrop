@@ -26,6 +26,7 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -33,5 +34,16 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/seutje/WorDrop/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVFMEZFRUQyQ0M1RDZBMjgKUldRb2FsM00wdTRQWHRTaUN5WXFlK0xtR0lpMkxOR3oxK2ZTUW5HNTFvekpkNmhtVEhTa1VGNWcK",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

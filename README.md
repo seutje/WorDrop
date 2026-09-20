@@ -81,11 +81,35 @@ git push origin v0.1.0
 The tag must match the configured version exactly, including the leading `v`.
 The workflow builds on `windows-latest`, creates a public GitHub Release, and
 attaches a file named like `WorDrop_0.1.0_x64-setup.exe`. This is the file end
-users should download. The same installer is retained as a workflow artifact.
+users should download. The release also contains Tauri's signed updater
+artifact and `latest.json`; the same installer is retained as a workflow
+artifact.
 
 Windows may show an “unknown publisher” or SmartScreen warning because code
-signing is intentionally out of scope. No signing secrets or certificates are
-required by the release workflow.
+signing is intentionally out of scope. Tauri updater signing is separate from
+Windows publisher signing: it verifies that automatic updates came from this
+project, but it does not remove the Windows warning.
+
+### Updater signing setup
+
+The public updater key is committed in `src-tauri/tauri.conf.json`. The matching
+private key was generated locally at
+`%USERPROFILE%\.tauri\wordrop-updater.key`; keep a secure backup outside the
+repository. Losing it prevents installed copies from accepting future updates.
+
+Add the complete contents of that private-key file as the GitHub Actions
+repository secret `TAURI_SIGNING_PRIVATE_KEY`. The generated key has no
+password, so `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` may be absent or empty. Never
+commit the private key.
+
+Each published release must contain `latest.json`, the NSIS installer, and its
+`.sig` signature. Test automatic updating with two real versions: install the
+older version, publish the newer version, launch the older app, accept the
+prompt, and confirm the new version launches while wardrobe data remains.
+
+The first version containing updater support is a bootstrap release. Copies of
+older WorDrop versions must install that release manually once; subsequent
+versions can update from inside the app.
 
 After publishing, test the installer on a clean or reasonably clean Windows
 machine: install, launch, add an item with an image, restart to verify

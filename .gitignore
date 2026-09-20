@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+*.key
+*.key.pub
 *.tsbuildinfo
 
 # Editor directories and files
