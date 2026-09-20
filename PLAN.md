@@ -1237,21 +1237,71 @@ favorites-first order. Newest is the secondary order except when it is the
 primary order, where item name is used to break ties.
 
 ## Automated website parsing
-- [ ] aritzia.com
-- [ ] athleta.gapcanada.ca
-- [ ] abercrombie.com
-- [ ] quince.com
-- [ ] gapcanada.ca
-- [ ] ae.com
-- [ ] simons.ca
-- [ ] dynamiteclothing.com
-- [ ] rw-co.com
-- [ ] oldnavy.gapcanada.ca
-- [ ] hm.com
-- [ ] zara.com
-- [ ] callitspring.com
-- [ ] halara.com
-- [ ] talbots.com
+
+- [x] generic Get from URL photo picker in Add/Edit
+- [x] preserve form/photo state when returning or cancelling
+- [x] extract structured product, social preview, and ordinary/lazy/responsive images
+- [x] rank and deduplicate candidates, with optional hidden-image reveal
+- [x] validate/download the selected original into managed storage and reuse crop/zoom
+- [x] cover extraction, invalid URLs/images, form preservation, failures, and late-download cleanup
+
+Implementation note: the optional importer normally fetches and parses public
+pages in Rust. Verification responses can open a restricted, temporary WebView2
+window that returns image markup to the same picker. Preview downloads are bounded and
+held in memory; only the chosen original is saved locally. Existing item fields
+are never filled or overwritten by page metadata. Blocked/dynamic pages retain
+the manual photo fallback. `DESIGN.md` documents the flow, dependencies, limits,
+and the deliberate expansion beyond the original no-scraping MVP scope.
+
+Validation: generic extraction and previews succeeded against a live Quince
+product page (19 candidates, first three previews decoded). This is a smoke test,
+not a claim of complete Quince support. Retailer-specific extraction and metadata
+remain unchecked below. Automated interaction tests cover the picker; visual
+browser inspection was unavailable in this development session.
+
+Follow-up fixes: the URL picker now uses correctly scoped header/form spacing,
+and responsive image parsing preserves commas inside Cloudinary URLs. Separate
+page/image request headers avoid Gap returning unsupported AVIF image contents.
+The reported Gap Canada URL returned 14 candidates and its first three previews
+decoded successfully. Aritzia's direct request requires website verification;
+the browser fallback handles that workflow rather than treating it as a normal
+download failure. Retailer-specific name/metadata work remains deferred below.
+
+Native verification of the supplied Aritzia link succeeded through WebView2:
+38 candidates returned, the first preview decoded, and the selected original was
+imported, reloaded, and cleaned up in an isolated temporary folder. The reusable
+`website_import_smoke` Cargo example exercises this flow without accessing a
+wardrobe database. Its Windows common-controls manifest is supplied by `build.rs`.
+The same native end-to-end test also passed for the supplied Gap Canada link:
+14 candidates, a decoded preview, and successful original import/reload/cleanup.
+Validation passed: 74 frontend tests, 19 native tests, lint, type checks, production
+frontend build, and formatting checks for the changed source files.
+
+- [x] aritzia.com
+- [x] athleta.gapcanada.ca
+- [x] abercrombie.com
+- [x] quince.com
+- [x] gapcanada.ca
+- [x] ae.com
+- [x] simons.ca
+- [x] dynamiteclothing.com
+- [x] rw-co.com
+- [x] oldnavy.gapcanada.ca
+- [x] hm.com
+- [x] zara.com
+- [x] callitspring.com
+- [x] halara.com
+- [x] talbots.com
+
+Zara follow-up: recognize Akamai verification markup served with HTTP 200 and no
+image candidates, then reuse the existing restricted website window. The supplied
+Belgian product URL (clear-volume-top-p05584457, v1=577927041) passed the native
+end-to-end smoke test: 9 candidates, a decoded preview, and successful original
+import/reload/cleanup. Regression tests distinguish verification markup from
+ordinary empty pages and descriptive text. All 20 native tests pass; the optional
+network test remains excluded from the normal offline suite. The owner also
+confirmed image imports from every other retailer listed above. These checkboxes
+record working image imports, not retailer-specific name or metadata extraction.
 
 ## Wardrobe Insights
 

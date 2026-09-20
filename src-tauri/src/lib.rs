@@ -3,6 +3,8 @@ mod database;
 mod image_store;
 mod outfits;
 mod settings;
+mod website_browser;
+mod website_import;
 
 use database::{ClothingItem, ClothingItemInput};
 use outfits::{Outfit, OutfitInput};
@@ -12,6 +14,42 @@ use tauri::{Manager, State};
 
 struct Database(Mutex<Connection>);
 struct AppDataDirectory(PathBuf);
+
+#[tauri::command]
+async fn find_website_images(
+    app: tauri::AppHandle,
+    url: String,
+) -> Result<website_import::WebsiteImages, String> {
+    let cancelled = website_browser::begin(&app)?;
+    let result = website_import::find(&url).await;
+    if cancelled.load(std::sync::atomic::Ordering::SeqCst) {
+        return Err("Website import cancelled.".into());
+    }
+    match result {
+        Err(error) if website_import::needs_browser(&error) => {
+            website_browser::find(app, &url, cancelled).await
+        }
+        result => result,
+    }
+}
+
+#[tauri::command]
+fn cancel_website_image_browser(app: tauri::AppHandle) {
+    website_browser::cancel(&app);
+}
+
+#[tauri::command]
+async fn preview_website_image(url: String) -> Result<String, String> {
+    website_import::preview(&url).await
+}
+
+#[tauri::command]
+async fn import_website_image(
+    app_data: State<'_, AppDataDirectory>,
+    url: String,
+) -> Result<image_store::ManagedImage, String> {
+    website_import::import(&url, app_data.0.clone()).await
+}
 
 #[tauri::command]
 fn export_backup(
@@ -292,6 +330,7 @@ pub fn run() {
                 database::open_database(&database_path).map_err(std::io::Error::other)?;
             app.manage(Database(Mutex::new(connection)));
             app.manage(AppDataDirectory(app.path().app_data_dir()?));
+            app.manage(website_browser::BrowserImportState::default());
             Ok(())
         })
         .plugin(tauri_plugin_dialog::init())
@@ -304,6 +343,10 @@ pub fn run() {
             update_clothing_item,
             delete_clothing_item,
             import_clothing_image,
+            find_website_images,
+            cancel_website_image_browser,
+            preview_website_image,
+            import_website_image,
             load_clothing_image,
             save_display_image,
             discard_clothing_image,

@@ -220,13 +220,17 @@ The application is not intended to become a store.
 No initial requirement exists for:
 
 - affiliate links
-- retailer integrations
+- retailer-specific integrations
 - automatic price tracking
 - checkout
 - stock monitoring
-- product scraping
+- automatic catalog crawling or product monitoring
 
 Wishlist support is local wardrobe planning, not shopping infrastructure.
+
+An optional, user-triggered image import from a product URL is now in scope.
+It downloads photos for the user's local wardrobe; it does not crawl stores,
+track prices, require an account, or introduce a cloud service.
 
 ### 6.3 No mandatory cloud
 
@@ -700,6 +704,62 @@ Minimum required fields:
 
 Colors are strongly recommended but should not block item creation unless later testing shows this improves the experience.
 
+### 12.2.1 Optional photo import from a website
+
+Add/Edit offers **Get from URL** alongside **Choose photo**. It opens another
+step inside the same dialog, preserving all form values, the current photo,
+and its crop. The user pastes a public HTTP(S) product link and selects
+**Find images** (or presses Enter).
+
+The picker shows a grid of photo previews, ordered by structured product data,
+social preview metadata, then ordinary page images. It resolves relative URLs,
+recognizes common lazy-loading attributes, selects the largest declared
+responsive image, and removes duplicate URLs. Small images and likely logos,
+swatches, and icons are initially hidden but remain available through
+**Show more images**. Results are revealed in batches to keep browsing responsive.
+
+Selecting a photo downloads and validates the original before replacing the
+current photo. The dialog returns to the existing crop/zoom editor with framing
+reset to fit the whole image. Nothing is saved as a wardrobe item until the user
+submits the normal form. Back/Escape and cancellation return without losing form
+values or the current photo. Failed downloads leave the picker open for another
+selection; errors, empty results, and loading states explain the next action,
+including using **Choose photo** instead.
+
+This optional step requires internet access. Imported photos are copied into
+managed local storage, and all subsequent wardrobe use works offline. Previews
+are held in memory, not saved to the wardrobe. Replaced or cancelled pending
+imports use the existing managed-image cleanup. Results arriving after leaving
+the picker are ignored; a selected photo that finishes importing late is removed.
+An already-running request may finish within its timeout, but no more previews
+are scheduled after leaving the picker.
+
+The importer extracts images only. Product names in structured data may label
+previews but do not fill the form. Retailer-specific metadata and login flows
+remain deferred.
+
+When a page returns a browser-verification response (HTTP 403 or 429, or a
+recognized verification interstitial with HTTP 200 and no image candidates), the app
+opens a separate, temporary website window using its existing WebView2 runtime.
+The user can complete the site's check there; image markup returns automatically
+to the picker and the website window closes. Closing that window, leaving the
+picker, or reaching the two-minute timeout cancels the fallback without changing
+the item. Cancellation also prevents a delayed page response from opening a new
+window after the user has left. The site receives no wardrobe/native permissions;
+its window uses an incognito session, restricts top-level navigation to the
+requested host, and denies additional windows. Only bounded image markup is read,
+not form values, cookies, account information, or arbitrary page text.
+
+The importer remains best effort: some sites may continue to reject embedded
+browsers or require manual photo import. A website verification is never solved
+or bypassed automatically by WorDrop.
+
+Zara's Akamai verification page returns HTTP 200. The native importer recognizes
+its interstitial iframe or verification refresh markup and opens the same
+website-window fallback. Ordinary empty pages and descriptive text mentioning
+verification do not trigger it. Product images still use the existing validated
+download, managed-storage, and crop flow.
+
 ### 12.3 Browse wardrobe
 
 User sees a photo grid.
@@ -1102,6 +1162,36 @@ zoom, fit, and reset controls. Saving regenerates the display image and stores
 normalized framing metadata. Closet cards, details, recommendations, and outfit
 views use only the display image, with an original-image fallback for legacy
 records until they are edited.
+
+Website imports use a dedicated `website_import` native module and a typed
+frontend bridge, separate from the form and existing managed-image storage.
+`reqwest` (also used by the updater) performs asynchronous HTTP requests;
+`scraper` parses HTML without executing scripts; `image` decodes JPEG/PNG/WebP
+and creates in-memory previews up to 360 x 450; `tokio` provides DNS lookup and
+timeouts. Normal requests do not need a browser, cloud parsing service, or
+hand-written HTML parser. The verification fallback reuses Tauri's installed
+WebView2 runtime. No database migration is needed: selected downloads
+use the same managed original reference and framing fields as local photos.
+
+Requests accept public HTTP(S) URLs on standard ports only, without embedded
+credentials, browser cookies, or an automatic referrer. Native requests use the
+computer's configured proxy when present. Target addresses are checked for each
+request and redirect and pinned for direct connections; local/private network
+targets are rejected. Native requests have a 30-second total deadline and at most five redirects.
+HTML is limited to 5 MB, image downloads to 25 MB, and candidates to 100 per page.
+The picker requests at most three previews concurrently and initially reveals
+12 photos. Image decoding has dimension/allocation limits and rejects corrupt
+or unsupported content before writing an original. Signed/CDN query parameters
+are preserved; only the exact normalized URL is deduplicated. Network activity
+occurs only when the user opens this workflow and requests images.
+
+Page requests use desktop-compatible HTML headers. Image requests identify
+WorDrop and advertise only supported formats; this avoids Gap's CDN returning
+AVIF for a `.png` URL based on a Chrome user agent. URL query parameters remain
+unchanged. Responsive-image parsing preserves internal commas in URLs, including
+Aritzia's Cloudinary transformation paths. The URL picker has its own heading
+and form spacing, avoiding the item editor's negative heading margins and nested
+form padding; long URLs shrink within the field and controls wrap when necessary.
 
 Requirements:
 

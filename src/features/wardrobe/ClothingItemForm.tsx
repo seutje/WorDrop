@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { clothingRepository } from "../../lib/database/clothingRepository";
 import {
   chooseAndImportImage,
@@ -9,6 +9,7 @@ import {
 } from "../../lib/images/managedImages";
 import { renderDisplayImage } from "../../lib/images/imageFraming";
 import { ImageCropEditor } from "./ImageCropEditor";
+import { WebsiteImagePicker } from "./WebsiteImagePicker";
 import {
   clothingCategories,
   clothingColors,
@@ -109,6 +110,24 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
   });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [websitePickerOpen, setWebsitePickerOpen] = useState(false);
+  const urlButton = useRef<HTMLButtonElement>(null);
+
+  function returnToItem() {
+    setWebsitePickerOpen(false);
+    requestAnimationFrame(() => urlButton.current?.focus());
+  }
+
+  function acceptWebsiteImage(imported: ManagedImage) {
+    const previousPending = pendingImageReference;
+    setImage(imported);
+    setFraming({ zoom: 1, x: 0, y: 0 });
+    setPendingImageReference(imported.reference);
+    setError(null);
+    returnToItem();
+    if (previousPending)
+      void discardManagedImage(previousPending).catch(() => undefined);
+  }
 
   useEffect(() => {
     if (!item) return;
@@ -237,212 +256,234 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
         aria-modal="true"
         aria-labelledby="item-form-title"
         onKeyDown={(event) => {
-          if (event.key === "Escape" && !busy) void cancel();
+          if (event.key === "Escape" && !busy && !websitePickerOpen)
+            void cancel();
         }}
       >
-        <form onSubmit={submit}>
-          <div className="dialog-heading sticky-heading">
-            <div>
-              <p className="eyebrow">
-                {item ? "Edit wardrobe" : "New wardrobe item"}
-              </p>
-              <h2 id="item-form-title">{item ? "Edit item" : "Add item"}</h2>
-            </div>
-            <button
-              className="icon-button"
-              type="button"
-              aria-label="Close"
-              onClick={cancel}
-            >
-              ×
-            </button>
-          </div>
-          <div className="item-form-layout">
-            <div className="form-photo-column">
-              {image ? (
-                <ImageCropEditor
-                  source={image.dataUrl}
-                  framing={framing}
-                  onChange={setFraming}
-                />
-              ) : (
-                <div className="image-preview form-image-preview" data-empty>
-                  <div>
-                    <span aria-hidden="true">◇</span>
-                    <p>JPEG, PNG, or WebP</p>
-                  </div>
-                </div>
-              )}
+        {websitePickerOpen ? (
+          <WebsiteImagePicker
+            onBack={returnToItem}
+            onSelected={acceptWebsiteImage}
+          />
+        ) : (
+          <form onSubmit={submit}>
+            <div className="dialog-heading sticky-heading">
+              <div>
+                <p className="eyebrow">
+                  {item ? "Edit wardrobe" : "New wardrobe item"}
+                </p>
+                <h2 id="item-form-title">{item ? "Edit item" : "Add item"}</h2>
+              </div>
               <button
-                className="secondary-button full-button"
+                className="icon-button"
                 type="button"
-                disabled={busy}
-                onClick={chooseImage}
-              >
-                {image ? "Replace photo" : "Choose photo"}
-              </button>
-              <p className="field-help">
-                The app keeps a private copy and never changes your original.
-              </p>
-            </div>
-            <div className="form-fields">
-              <label className="form-field form-field-wide">
-                <span>
-                  Name <b aria-hidden="true">*</b>
-                </span>
-                <input
-                  autoFocus
-                  required
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder="Black oversized T-shirt"
-                />
-              </label>
-              <label className="form-field">
-                <span>
-                  Category <b aria-hidden="true">*</b>
-                </span>
-                <select
-                  value={category}
-                  onChange={(event) =>
-                    setCategory(event.target.value as ClothingCategory)
-                  }
-                >
-                  {clothingCategories.map((value) => (
-                    <option key={value} value={value}>
-                      {titleCase(value)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="form-field">
-                <span>Subtype</span>
-                <input
-                  value={subtype}
-                  onChange={(event) => setSubtype(event.target.value)}
-                  placeholder="T-shirt"
-                />
-              </label>
-              <label className="form-field">
-                <span>Size</span>
-                <input
-                  value={size}
-                  onChange={(event) => setSize(event.target.value)}
-                  placeholder="XS, M, XXXL, 38, 10..."
-                />
-              </label>
-              <label className="form-field">
-                <span>Material</span>
-                <input
-                  value={material}
-                  onChange={(event) => setMaterial(event.target.value)}
-                  placeholder="Cotton"
-                />
-              </label>
-              <label className="form-field">
-                <span>Pattern</span>
-                <input
-                  value={pattern}
-                  onChange={(event) => setPattern(event.target.value)}
-                  placeholder="Solid"
-                />
-              </label>
-              <ToggleGroup
-                label="Colors"
-                options={clothingColors}
-                selected={colors}
-                onChange={setColors}
-              />
-              <ToggleGroup
-                label="Seasons"
-                options={seasons}
-                selected={selectedSeasons}
-                onChange={setSelectedSeasons}
-              />
-              <ToggleGroup
-                label="Occasions"
-                options={occasions}
-                selected={selectedOccasions}
-                onChange={setSelectedOccasions}
-              />
-              <label className="form-field form-field-wide">
-                <span>Style tags</span>
-                <input
-                  value={styleTags}
-                  onChange={(event) => setStyleTags(event.target.value)}
-                  placeholder="Minimalist, casual, classic"
-                />
-                <small>Separate tags with commas.</small>
-              </label>
-              <fieldset className="form-field form-field-wide ownership-field">
-                <legend>
-                  Wardrobe status <b aria-hidden="true">*</b>
-                </legend>
-                <div className="segmented-control">
-                  <label data-selected={ownership === "owned"}>
-                    <input
-                      type="radio"
-                      name="ownership"
-                      checked={ownership === "owned"}
-                      onChange={() => setOwnership("owned")}
-                    />
-                    Owned
-                  </label>
-                  <label data-selected={ownership === "wishlist"}>
-                    <input
-                      type="radio"
-                      name="ownership"
-                      checked={ownership === "wishlist"}
-                      onChange={() => setOwnership("wishlist")}
-                    />
-                    Wishlist
-                  </label>
-                </div>
-              </fieldset>
-              <label className="form-field form-field-wide">
-                <span>Notes</span>
-                <textarea
-                  rows={3}
-                  value={notes}
-                  onChange={(event) => setNotes(event.target.value)}
-                  placeholder="Fit, care, or styling notes…"
-                />
-              </label>
-            </div>
-          </div>
-          {error && (
-            <p className="error-message form-error" role="alert">
-              {error}
-            </p>
-          )}
-          <div className="dialog-actions form-actions">
-            <div>
-              {item && (
-                <button
-                  className="danger-button"
-                  type="button"
-                  disabled={busy}
-                  onClick={deleteItem}
-                >
-                  Delete item
-                </button>
-              )}
-            </div>
-            <div className="action-group">
-              <button
-                className="secondary-button"
-                type="button"
+                aria-label="Close"
                 disabled={busy}
                 onClick={cancel}
               >
-                Cancel
-              </button>
-              <button className="primary-button" type="submit" disabled={busy}>
-                {busy ? "Saving…" : item ? "Save changes" : "Add item"}
+                ×
               </button>
             </div>
-          </div>
-        </form>
+            <div className="item-form-layout">
+              <div className="form-photo-column">
+                {image ? (
+                  <ImageCropEditor
+                    source={image.dataUrl}
+                    framing={framing}
+                    onChange={setFraming}
+                  />
+                ) : (
+                  <div className="image-preview form-image-preview" data-empty>
+                    <div>
+                      <span aria-hidden="true">◇</span>
+                      <p>JPEG, PNG, or WebP</p>
+                    </div>
+                  </div>
+                )}
+                <button
+                  className="secondary-button full-button"
+                  type="button"
+                  disabled={busy}
+                  onClick={chooseImage}
+                >
+                  {image ? "Replace photo" : "Choose photo"}
+                </button>
+                <button
+                  ref={urlButton}
+                  className="secondary-button full-button website-import-button"
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setWebsitePickerOpen(true)}
+                >
+                  Get from URL
+                </button>
+                <p className="field-help">
+                  The app keeps a private copy and never changes your original.
+                </p>
+              </div>
+              <div className="form-fields">
+                <label className="form-field form-field-wide">
+                  <span>
+                    Name <b aria-hidden="true">*</b>
+                  </span>
+                  <input
+                    autoFocus
+                    required
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    placeholder="Black oversized T-shirt"
+                  />
+                </label>
+                <label className="form-field">
+                  <span>
+                    Category <b aria-hidden="true">*</b>
+                  </span>
+                  <select
+                    value={category}
+                    onChange={(event) =>
+                      setCategory(event.target.value as ClothingCategory)
+                    }
+                  >
+                    {clothingCategories.map((value) => (
+                      <option key={value} value={value}>
+                        {titleCase(value)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="form-field">
+                  <span>Subtype</span>
+                  <input
+                    value={subtype}
+                    onChange={(event) => setSubtype(event.target.value)}
+                    placeholder="T-shirt"
+                  />
+                </label>
+                <label className="form-field">
+                  <span>Size</span>
+                  <input
+                    value={size}
+                    onChange={(event) => setSize(event.target.value)}
+                    placeholder="XS, M, XXXL, 38, 10..."
+                  />
+                </label>
+                <label className="form-field">
+                  <span>Material</span>
+                  <input
+                    value={material}
+                    onChange={(event) => setMaterial(event.target.value)}
+                    placeholder="Cotton"
+                  />
+                </label>
+                <label className="form-field">
+                  <span>Pattern</span>
+                  <input
+                    value={pattern}
+                    onChange={(event) => setPattern(event.target.value)}
+                    placeholder="Solid"
+                  />
+                </label>
+                <ToggleGroup
+                  label="Colors"
+                  options={clothingColors}
+                  selected={colors}
+                  onChange={setColors}
+                />
+                <ToggleGroup
+                  label="Seasons"
+                  options={seasons}
+                  selected={selectedSeasons}
+                  onChange={setSelectedSeasons}
+                />
+                <ToggleGroup
+                  label="Occasions"
+                  options={occasions}
+                  selected={selectedOccasions}
+                  onChange={setSelectedOccasions}
+                />
+                <label className="form-field form-field-wide">
+                  <span>Style tags</span>
+                  <input
+                    value={styleTags}
+                    onChange={(event) => setStyleTags(event.target.value)}
+                    placeholder="Minimalist, casual, classic"
+                  />
+                  <small>Separate tags with commas.</small>
+                </label>
+                <fieldset className="form-field form-field-wide ownership-field">
+                  <legend>
+                    Wardrobe status <b aria-hidden="true">*</b>
+                  </legend>
+                  <div className="segmented-control">
+                    <label data-selected={ownership === "owned"}>
+                      <input
+                        type="radio"
+                        name="ownership"
+                        checked={ownership === "owned"}
+                        onChange={() => setOwnership("owned")}
+                      />
+                      Owned
+                    </label>
+                    <label data-selected={ownership === "wishlist"}>
+                      <input
+                        type="radio"
+                        name="ownership"
+                        checked={ownership === "wishlist"}
+                        onChange={() => setOwnership("wishlist")}
+                      />
+                      Wishlist
+                    </label>
+                  </div>
+                </fieldset>
+                <label className="form-field form-field-wide">
+                  <span>Notes</span>
+                  <textarea
+                    rows={3}
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    placeholder="Fit, care, or styling notes…"
+                  />
+                </label>
+              </div>
+            </div>
+            {error && (
+              <p className="error-message form-error" role="alert">
+                {error}
+              </p>
+            )}
+            <div className="dialog-actions form-actions">
+              <div>
+                {item && (
+                  <button
+                    className="danger-button"
+                    type="button"
+                    disabled={busy}
+                    onClick={deleteItem}
+                  >
+                    Delete item
+                  </button>
+                )}
+              </div>
+              <div className="action-group">
+                <button
+                  className="secondary-button"
+                  type="button"
+                  disabled={busy}
+                  onClick={cancel}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="primary-button"
+                  type="submit"
+                  disabled={busy}
+                >
+                  {busy ? "Saving…" : item ? "Save changes" : "Add item"}
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
       </section>
     </div>
   );

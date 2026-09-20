@@ -67,6 +67,27 @@ pub fn load(root: &Path, reference: &str) -> Result<ManagedImage, String> {
     })
 }
 
+pub fn import_bytes(root: &Path, bytes: &[u8]) -> Result<ManagedImage, String> {
+    if bytes.len() as u64 > MAX_IMAGE_BYTES {
+        return Err("Choose an image smaller than 25 MB.".into());
+    }
+    let (extension, mime) =
+        detect_image(bytes).ok_or_else(|| "Choose a JPEG, PNG, or WebP photo.".to_string())?;
+    let directory = root.join("images").join("original");
+    fs::create_dir_all(&directory)
+        .map_err(|_| "The managed image folder could not be created.".to_string())?;
+    let filename = unique_filename(extension);
+    let destination = directory.join(&filename);
+    if fs::write(&destination, bytes).is_err() {
+        let _ = fs::remove_file(&destination);
+        return Err("The photo could not be saved. Your current photo has not changed.".into());
+    }
+    Ok(ManagedImage {
+        reference: format!("images/original/{filename}"),
+        data_url: data_url(mime, bytes),
+    })
+}
+
 pub fn save_display(root: &Path, data_url_value: &str) -> Result<ManagedImage, String> {
     let encoded = data_url_value
         .strip_prefix("data:image/jpeg;base64,")
