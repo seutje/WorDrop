@@ -12,13 +12,11 @@ import { ImageCropEditor } from "./ImageCropEditor";
 import {
   clothingCategories,
   clothingColors,
-  clothingSizes,
   occasions,
   seasons,
   type ClothingCategory,
   type ClothingColor,
   type ClothingItem,
-  type ClothingSize,
   type Occasion,
   type Ownership,
   type Season,
@@ -85,7 +83,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
     item?.category ?? "top",
   );
   const [subtype, setSubtype] = useState(item?.subtype ?? "");
-  const [size, setSize] = useState<ClothingSize | "">(item?.size ?? "");
+  const [size, setSize] = useState(item?.size ?? "");
   const [colors, setColors] = useState<ClothingColor[]>(item?.colors ?? []);
   const [material, setMaterial] = useState(item?.material ?? "");
   const [pattern, setPattern] = useState(item?.pattern ?? "");
@@ -327,19 +325,11 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
               </label>
               <label className="form-field">
                 <span>Size</span>
-                <select
+                <input
                   value={size}
-                  onChange={(event) =>
-                    setSize(event.target.value as ClothingSize | "")
-                  }
-                >
-                  <option value="">Not specified</option>
-                  {clothingSizes.map((value) => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(event) => setSize(event.target.value)}
+                  placeholder="XS, M, XXXL, 38, 10..."
+                />
               </label>
               <label className="form-field">
                 <span>Material</span>

@@ -2,7 +2,7 @@ use rusqlite::{params, Connection, OptionalExtension, Transaction};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
 
-pub const CURRENT_SCHEMA_VERSION: i64 = 7;
+pub const CURRENT_SCHEMA_VERSION: i64 = 8;
 
 const INITIAL_MIGRATION: &str = include_str!("../migrations/0001_clothing_items.sql");
 const OUTFITS_MIGRATION: &str = include_str!("../migrations/0002_outfits.sql");
@@ -11,6 +11,8 @@ const IMAGE_FRAMING_MIGRATION: &str = include_str!("../migrations/0004_image_fra
 const CLOTHING_SIZE_MIGRATION: &str = include_str!("../migrations/0005_clothing_size.sql");
 const CLOTHING_FAVORITE_MIGRATION: &str = include_str!("../migrations/0006_clothing_favorite.sql");
 const OUTFIT_FAVORITE_MIGRATION: &str = include_str!("../migrations/0007_outfit_favorite.sql");
+const FREEFORM_CLOTHING_SIZE_MIGRATION: &str =
+    include_str!("../migrations/0008_freeform_clothing_size.sql");
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -156,6 +158,35 @@ pub(crate) fn migrate(connection: &mut Connection) -> Result<(), String> {
             .pragma_update(None, "user_version", 7)
             .map_err(db_error)?;
         transaction.commit().map_err(db_error)?;
+    }
+    if version < 8 {
+        // Rebuilding a referenced table requires foreign-key enforcement to be
+        // disabled outside the migration transaction. The integrity check below
+        // verifies that all relationships survived the rebuild.
+        connection
+            .pragma_update(None, "foreign_keys", false)
+            .map_err(db_error)?;
+        let migration_result = (|| -> Result<(), String> {
+            let transaction = connection.transaction().map_err(db_error)?;
+            transaction
+                .execute_batch(FREEFORM_CLOTHING_SIZE_MIGRATION)
+                .map_err(db_error)?;
+            transaction
+                .pragma_update(None, "user_version", 8)
+                .map_err(db_error)?;
+            transaction.commit().map_err(db_error)
+        })();
+        connection
+            .pragma_update(None, "foreign_keys", true)
+            .map_err(db_error)?;
+        migration_result?;
+        let invalid_reference = connection
+            .query_row("PRAGMA foreign_key_check", [], |_| Ok(()))
+            .optional()
+            .map_err(db_error)?;
+        if invalid_reference.is_some() {
+            return Err("The database upgrade found an invalid clothing reference.".into());
+        }
     }
     Ok(())
 }
@@ -358,11 +389,6 @@ fn validate(input: &ClothingItemInput) -> Result<(), String> {
     if !["owned", "wishlist"].contains(&input.ownership.as_str()) {
         return Err("Choose owned or wishlist.".into());
     }
-    if let Some(size) = clean(&input.size) {
-        if !["XS", "S", "M", "L", "XL", "XXL", "XXXL"].contains(&size) {
-            return Err("Choose a valid clothing size.".into());
-        }
-    }
     if input.image_path.trim().is_empty() {
         return Err("Choose an image for the clothing item.".into());
     }
@@ -461,15 +487,16 @@ mod tests {
                 }
             )
             .is_err());
-            assert!(create(
+            let numeric_size = create(
                 &mut db,
                 ClothingItemInput {
-                    id: "bad-size".into(),
-                    size: Some("Medium".into()),
+                    id: "numeric-size".into(),
+                    size: Some(" 38 ".into()),
                     ..sample()
-                }
+                },
             )
-            .is_err());
+            .unwrap();
+            assert_eq!(numeric_size.size.as_deref(), Some("38"));
         }
         {
             let db = open_database(&path).unwrap();
@@ -496,7 +523,7 @@ mod tests {
                 |row| row.get(0),
             )
             .unwrap();
-        assert_eq!(version, 7);
+        assert_eq!(version, CURRENT_SCHEMA_VERSION);
         assert_eq!(outfit_table, "outfits");
         let settings_table: String = db
             .query_row(

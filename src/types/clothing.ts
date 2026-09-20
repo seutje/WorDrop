@@ -47,29 +47,18 @@ export const occasions = [
   "outdoor",
 ] as const;
 export const ownershipStates = ["owned", "wishlist"] as const;
-export const clothingSizes = [
-  "XS",
-  "S",
-  "M",
-  "L",
-  "XL",
-  "XXL",
-  "XXXL",
-] as const;
-
 export type ClothingCategory = (typeof clothingCategories)[number];
 export type ClothingColor = (typeof clothingColors)[number];
 export type Season = (typeof seasons)[number];
 export type Occasion = (typeof occasions)[number];
 export type Ownership = (typeof ownershipStates)[number];
-export type ClothingSize = (typeof clothingSizes)[number];
 
 export type ClothingItem = {
   id: string;
   name: string;
   category: ClothingCategory;
   subtype?: string;
-  size?: ClothingSize;
+  size?: string;
   colors: ClothingColor[];
   material?: string;
   pattern?: string;

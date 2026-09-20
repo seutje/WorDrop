@@ -1293,8 +1293,9 @@ These must remain optional.
 
 # Development Health Checklist
 
-Implemented follow-up: wardrobe items now support an optional, validated size
-from XS through XXXL in creation, editing, persistence, and item details.
+Implemented follow-up: wardrobe items now support an optional free-form size
+(including XS through XXXL and numeric sizes) in creation, editing, persistence,
+and item details.
 
 Run periodically:
 
