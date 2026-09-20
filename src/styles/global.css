@@ -467,8 +467,11 @@ h1 {
   margin-top: 20px;
 }
 .form-actions {
+  position: relative;
+  z-index: 1;
   margin-top: 24px;
   padding-top: 20px;
+  background: #faf9f7;
   border-top: 1px solid #e2dfd9;
 }
 .action-group {
@@ -1701,6 +1704,12 @@ h1 {
   }
   .outfit-fields {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 800px) {
+  .form-photo-column {
+    position: static;
   }
 }
 
