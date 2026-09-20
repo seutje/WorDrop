@@ -74,13 +74,13 @@ npm run test:native
 Commit the version change, then create and push the matching tag:
 
 ```powershell
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
 The tag must match the configured version exactly, including the leading `v`.
 The workflow builds on `windows-latest`, creates a public GitHub Release, and
-attaches a file named like `WorDrop_0.1.0_x64-setup.exe`. This is the file end
+attaches a file named like `WorDrop_0.2.0_x64-setup.exe`. This is the file end
 users should download. The release also contains Tauri's signed updater
 artifact and `latest.json`; the same installer is retained as a workflow
 artifact.

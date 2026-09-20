@@ -1402,7 +1402,7 @@ the application checks again on its next start.
 
 No Windows code-signing work is required.
 
-Implementation choice: pushing a semantic tag such as `v0.1.0` starts the
+Implementation choice: pushing a semantic tag such as `v0.2.0` starts the
 Windows-only release workflow. A preflight script requires the tag and the
 versions in `package.json`, `src-tauri/Cargo.toml`, and
 `src-tauri/tauri.conf.json` to agree. The workflow runs frontend and Rust tests,

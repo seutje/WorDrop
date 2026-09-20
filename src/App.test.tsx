@@ -155,7 +155,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
     expect(screen.getByRole("heading", { name: "Closet" })).toBeInTheDocument();
-    expect(screen.getByText("Version 0.1.0")).toBeInTheDocument();
+    expect(screen.getByText("Version 0.2.0")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Outfits" }));
     expect(
       screen.getByRole("heading", { name: "Saved Outfits" }),
