@@ -376,6 +376,10 @@ Functions:
 - rename outfit
 - duplicate outfit
 - delete outfit
+- search by outfit, notes, or contained clothing name
+- filter by contained clothing metadata
+- sort by newest, oldest, or name
+- mark favorite outfits and sort favorites first
 
 ### Suggestions
 
@@ -634,6 +638,7 @@ type Outfit = {
   name: string;
   itemIds: string[];
   notes?: string;
+  favorite: boolean;
   createdAt: string;
   updatedAt: string;
 };

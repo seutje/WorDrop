@@ -2,7 +2,7 @@ use rusqlite::{params, Connection, OptionalExtension, Transaction};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
 
-pub const CURRENT_SCHEMA_VERSION: i64 = 6;
+pub const CURRENT_SCHEMA_VERSION: i64 = 7;
 
 const INITIAL_MIGRATION: &str = include_str!("../migrations/0001_clothing_items.sql");
 const OUTFITS_MIGRATION: &str = include_str!("../migrations/0002_outfits.sql");
@@ -10,6 +10,7 @@ const SETTINGS_MIGRATION: &str = include_str!("../migrations/0003_settings.sql")
 const IMAGE_FRAMING_MIGRATION: &str = include_str!("../migrations/0004_image_framing.sql");
 const CLOTHING_SIZE_MIGRATION: &str = include_str!("../migrations/0005_clothing_size.sql");
 const CLOTHING_FAVORITE_MIGRATION: &str = include_str!("../migrations/0006_clothing_favorite.sql");
+const OUTFIT_FAVORITE_MIGRATION: &str = include_str!("../migrations/0007_outfit_favorite.sql");
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -143,6 +144,16 @@ pub(crate) fn migrate(connection: &mut Connection) -> Result<(), String> {
             .map_err(db_error)?;
         transaction
             .pragma_update(None, "user_version", 6)
+            .map_err(db_error)?;
+        transaction.commit().map_err(db_error)?;
+    }
+    if version < 7 {
+        let transaction = connection.transaction().map_err(db_error)?;
+        transaction
+            .execute_batch(OUTFIT_FAVORITE_MIGRATION)
+            .map_err(db_error)?;
+        transaction
+            .pragma_update(None, "user_version", 7)
             .map_err(db_error)?;
         transaction.commit().map_err(db_error)?;
     }
@@ -485,7 +496,7 @@ mod tests {
                 |row| row.get(0),
             )
             .unwrap();
-        assert_eq!(version, 6);
+        assert_eq!(version, 7);
         assert_eq!(outfit_table, "outfits");
         let settings_table: String = db
             .query_row(

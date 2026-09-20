@@ -740,6 +740,13 @@ confirmed delete actions. Deleting an outfit only removes the outfit record.
 Clothing details query outfit relationships and can open a related outfit
 directly. The library includes loading, error, and first-outfit empty states.
 
+Follow-up implementation note: the saved-outfit library now mirrors the closet
+overview with immediate search, clothing metadata filters, result counts, clear
+controls, and newest, oldest, or alphabetical sorting. Search includes outfit
+names, notes, and the names of clothing contained in an outfit.
+Outfits can also be favorited directly from their cards and sorted with
+favorites first; the favorite state is stored locally and included in backups.
+
 ## User Test Gate
 
 Intended user verifies:

@@ -1,4 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  defaultOutfitSort,
+  emptyOutfitFilters,
+  filterOutfits,
+  hasActiveOutfitFilters,
+  sortOutfits,
+  type OutfitFilters,
+  type OutfitSort,
+} from "../features/outfits/outfitFilters";
 import { clothingRepository } from "../lib/database/clothingRepository";
 import { outfitRepository } from "../lib/database/outfitRepository";
 import { loadManagedImage } from "../lib/images/managedImages";
@@ -6,6 +15,10 @@ import { scoreOutfit } from "../lib/matching";
 import { shouldExcludeBottoms } from "../lib/outfitRules";
 import {
   clothingCategories,
+  clothingColors,
+  occasions,
+  ownershipStates,
+  seasons,
   type ClothingCategory,
   type ClothingItem,
 } from "../types/clothing";
@@ -268,6 +281,10 @@ export function OutfitsPage({
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [favoriteBusyIds, setFavoriteBusyIds] = useState<string[]>([]);
+  const [libraryFilters, setLibraryFilters] =
+    useState<OutfitFilters>(emptyOutfitFilters);
+  const [librarySort, setLibrarySort] = useState<OutfitSort>(defaultOutfitSort);
   const snapshot = JSON.stringify({ name, notes, selectedIds });
   const dirty = snapshot !== savedSnapshot;
   const selectedItems = selectedIds.flatMap((id) => {
@@ -275,6 +292,15 @@ export function OutfitsPage({
     return item ? [item] : [];
   });
   const compatibility = scoreOutfit(selectedItems);
+  const visibleOutfits = useMemo(
+    () =>
+      sortOutfits(
+        filterOutfits(outfits, wardrobe, libraryFilters),
+        librarySort,
+      ),
+    [libraryFilters, librarySort, outfits, wardrobe],
+  );
+  const libraryFiltersActive = hasActiveOutfitFilters(libraryFilters);
 
   useEffect(() => {
     let active = true;
@@ -377,6 +403,9 @@ export function OutfitsPage({
         name: name.trim(),
         notes: notes.trim() || undefined,
         itemIds: selectedIds,
+        favorite:
+          outfits.find((outfit) => outfit.id === activeOutfitId)?.favorite ??
+          false,
       };
       const saved = activeOutfitId
         ? await outfitRepository.update(activeOutfitId, {
@@ -469,6 +498,36 @@ export function OutfitsPage({
     }
   }
 
+  async function toggleFavorite(outfit: Outfit) {
+    const favorite = !outfit.favorite;
+    setError(null);
+    setFavoriteBusyIds((current) => [...current, outfit.id]);
+    setOutfits((current) =>
+      current.map((entry) =>
+        entry.id === outfit.id ? { ...entry, favorite } : entry,
+      ),
+    );
+    try {
+      const updated = await outfitRepository.setFavorite(outfit.id, favorite);
+      setOutfits((current) =>
+        current.map((entry) => (entry.id === outfit.id ? updated : entry)),
+      );
+    } catch {
+      setOutfits((current) =>
+        current.map((entry) =>
+          entry.id === outfit.id
+            ? { ...entry, favorite: outfit.favorite }
+            : entry,
+        ),
+      );
+      setError(
+        "The outfit favorite could not be updated. Nothing else was changed.",
+      );
+    } finally {
+      setFavoriteBusyIds((current) => current.filter((id) => id !== outfit.id));
+    }
+  }
+
   if (view === "library")
     return (
       <section
@@ -518,42 +577,222 @@ export function OutfitsPage({
           </div>
         )}
         {!loading && outfits.length > 0 && (
-          <div className="outfit-library-grid" aria-label="Saved outfits">
-            {outfits.map((outfit) => (
-              <article className="outfit-library-card" key={outfit.id}>
+          <>
+            <div className="closet-controls">
+              <label className="search-control">
+                <span className="sr-only">Search saved outfits</span>
+                <span aria-hidden="true">⌕</span>
+                <input
+                  type="search"
+                  placeholder="Search your outfits…"
+                  value={libraryFilters.search}
+                  onChange={(event) =>
+                    setLibraryFilters((current) => ({
+                      ...current,
+                      search: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+              <div className="filter-row" aria-label="Outfit filters">
+                <label>
+                  <span className="sr-only">Category</span>
+                  <select
+                    value={libraryFilters.category}
+                    onChange={(event) =>
+                      setLibraryFilters((current) => ({
+                        ...current,
+                        category: event.target
+                          .value as OutfitFilters["category"],
+                      }))
+                    }
+                  >
+                    <option value="">All categories</option>
+                    {clothingCategories.map((value) => (
+                      <option value={value} key={value}>
+                        {titleCase(value)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span className="sr-only">Ownership</span>
+                  <select
+                    value={libraryFilters.ownership}
+                    onChange={(event) =>
+                      setLibraryFilters((current) => ({
+                        ...current,
+                        ownership: event.target
+                          .value as OutfitFilters["ownership"],
+                      }))
+                    }
+                  >
+                    <option value="">Owned & wishlist</option>
+                    {ownershipStates.map((value) => (
+                      <option value={value} key={value}>
+                        {titleCase(value)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span className="sr-only">Color</span>
+                  <select
+                    value={libraryFilters.color}
+                    onChange={(event) =>
+                      setLibraryFilters((current) => ({
+                        ...current,
+                        color: event.target.value as OutfitFilters["color"],
+                      }))
+                    }
+                  >
+                    <option value="">All colors</option>
+                    {clothingColors.map((value) => (
+                      <option value={value} key={value}>
+                        {titleCase(value)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span className="sr-only">Season</span>
+                  <select
+                    value={libraryFilters.season}
+                    onChange={(event) =>
+                      setLibraryFilters((current) => ({
+                        ...current,
+                        season: event.target.value as OutfitFilters["season"],
+                      }))
+                    }
+                  >
+                    <option value="">All seasons</option>
+                    {seasons.map((value) => (
+                      <option value={value} key={value}>
+                        {titleCase(value)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span className="sr-only">Occasion</span>
+                  <select
+                    value={libraryFilters.occasion}
+                    onChange={(event) =>
+                      setLibraryFilters((current) => ({
+                        ...current,
+                        occasion: event.target
+                          .value as OutfitFilters["occasion"],
+                      }))
+                    }
+                  >
+                    <option value="">All occasions</option>
+                    {occasions.map((value) => (
+                      <option value={value} key={value}>
+                        {titleCase(value)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span className="sr-only">Sort outfits</span>
+                  <select
+                    aria-label="Sort outfits"
+                    value={librarySort}
+                    onChange={(event) =>
+                      setLibrarySort(event.target.value as OutfitSort)
+                    }
+                  >
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="alphabetical">Alphabetical</option>
+                    <option value="favorite">Favorite</option>
+                  </select>
+                </label>
+                {libraryFiltersActive && (
+                  <button
+                    className="clear-filters"
+                    type="button"
+                    onClick={() => setLibraryFilters(emptyOutfitFilters)}
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="closet-results-heading">
+              <p>
+                {visibleOutfits.length}{" "}
+                {visibleOutfits.length === 1 ? "outfit" : "outfits"}
+              </p>
+            </div>
+            {visibleOutfits.length > 0 ? (
+              <div className="outfit-library-grid" aria-label="Saved outfits">
+                {visibleOutfits.map((outfit) => (
+                  <article className="outfit-library-card" key={outfit.id}>
+                    <button
+                      className="outfit-card-open"
+                      type="button"
+                      aria-label={`Open ${outfit.name}`}
+                      onClick={() => openOutfit(outfit)}
+                    >
+                      <OutfitPreview outfit={outfit} wardrobe={wardrobe} />
+                      <span className="outfit-card-copy">
+                        <strong>{outfit.name}</strong>
+                        <small>
+                          {outfit.itemIds.length}{" "}
+                          {outfit.itemIds.length === 1 ? "item" : "items"}
+                        </small>
+                        {outfit.notes && <span>{outfit.notes}</span>}
+                      </span>
+                    </button>
+                    <button
+                      className="favorite-button"
+                      data-favorite={outfit.favorite}
+                      type="button"
+                      disabled={favoriteBusyIds.includes(outfit.id)}
+                      aria-label={
+                        outfit.favorite
+                          ? `Remove ${outfit.name} from favorites`
+                          : `Add ${outfit.name} to favorites`
+                      }
+                      aria-pressed={outfit.favorite}
+                      onClick={() => void toggleFavorite(outfit)}
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 21s-7.5-4.7-9.6-9C.6 8.2 2.6 4 6.8 4c2.2 0 4 1.3 5.2 3 1.2-1.7 3-3 5.2-3 4.2 0 6.2 4.2 4.4 8-2.1 4.3-9.6 9-9.6 9Z" />
+                      </svg>
+                    </button>
+                    <div className="outfit-card-actions">
+                      <button
+                        type="button"
+                        onClick={() => void renameOutfit(outfit)}
+                      >
+                        Rename
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void deleteOutfit(outfit)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="no-results">
+                <h2>No matching outfits</h2>
+                <p>Try a different search or clear your filters.</p>
                 <button
-                  className="outfit-card-open"
+                  className="secondary-button"
                   type="button"
-                  aria-label={`Open ${outfit.name}`}
-                  onClick={() => openOutfit(outfit)}
+                  onClick={() => setLibraryFilters(emptyOutfitFilters)}
                 >
-                  <OutfitPreview outfit={outfit} wardrobe={wardrobe} />
-                  <span className="outfit-card-copy">
-                    <strong>{outfit.name}</strong>
-                    <small>
-                      {outfit.itemIds.length}{" "}
-                      {outfit.itemIds.length === 1 ? "item" : "items"}
-                    </small>
-                    {outfit.notes && <span>{outfit.notes}</span>}
-                  </span>
+                  Clear filters
                 </button>
-                <div className="outfit-card-actions">
-                  <button
-                    type="button"
-                    onClick={() => void renameOutfit(outfit)}
-                  >
-                    Rename
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void deleteOutfit(outfit)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
+              </div>
+            )}
+          </>
         )}
       </section>
     );

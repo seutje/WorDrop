@@ -431,6 +431,7 @@ mod tests {
                 name: "Weekend".into(),
                 item_ids: vec!["item-1".into()],
                 notes: Some("Relaxed".into()),
+                favorite: false,
             },
         )
         .unwrap();

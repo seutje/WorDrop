@@ -8,6 +8,7 @@ pub struct Outfit {
     pub name: String,
     pub item_ids: Vec<String>,
     pub notes: Option<String>,
+    pub favorite: bool,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -20,14 +21,16 @@ pub struct OutfitInput {
     #[serde(default)]
     pub item_ids: Vec<String>,
     pub notes: Option<String>,
+    #[serde(default)]
+    pub favorite: bool,
 }
 
 pub fn create(connection: &mut Connection, input: OutfitInput) -> Result<Outfit, String> {
     validate(&input)?;
     let transaction = connection.transaction().map_err(db_error)?;
     transaction.execute(
-        "INSERT INTO outfits (id, name, notes, created_at, updated_at) VALUES (?1, ?2, ?3, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))",
-        params![input.id, input.name.trim(), clean(&input.notes)],
+        "INSERT INTO outfits (id, name, notes, favorite, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))",
+        params![input.id, input.name.trim(), clean(&input.notes), input.favorite],
     ).map_err(db_error)?;
     replace_items(&transaction, &input.id, &input.item_ids)?;
     transaction.commit().map_err(db_error)?;
@@ -37,7 +40,7 @@ pub fn create(connection: &mut Connection, input: OutfitInput) -> Result<Outfit,
 pub fn get(connection: &Connection, id: &str) -> Result<Option<Outfit>, String> {
     let base: Option<Outfit> = connection
         .query_row(
-            "SELECT id, name, notes, created_at, updated_at FROM outfits WHERE id = ?1",
+            "SELECT id, name, notes, favorite, created_at, updated_at FROM outfits WHERE id = ?1",
             [id],
             |row| {
                 Ok(Outfit {
@@ -45,8 +48,9 @@ pub fn get(connection: &Connection, id: &str) -> Result<Option<Outfit>, String> 
                     name: row.get(1)?,
                     item_ids: Vec::new(),
                     notes: row.get(2)?,
-                    created_at: row.get(3)?,
-                    updated_at: row.get(4)?,
+                    favorite: row.get(3)?,
+                    created_at: row.get(4)?,
+                    updated_at: row.get(5)?,
                 })
             },
         )
@@ -80,8 +84,8 @@ pub fn update(connection: &mut Connection, id: &str, input: OutfitInput) -> Resu
     }
     let transaction = connection.transaction().map_err(db_error)?;
     let changed = transaction.execute(
-        "UPDATE outfits SET name = ?2, notes = ?3, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?1",
-        params![id, input.name.trim(), clean(&input.notes)],
+        "UPDATE outfits SET name = ?2, notes = ?3, favorite = ?4, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?1",
+        params![id, input.name.trim(), clean(&input.notes), input.favorite],
     ).map_err(db_error)?;
     if changed == 0 {
         return Err("Outfit not found.".into());
@@ -96,6 +100,19 @@ pub fn delete(connection: &Connection, id: &str) -> Result<bool, String> {
         .execute("DELETE FROM outfits WHERE id = ?1", [id])
         .map_err(db_error)?
         > 0)
+}
+
+pub fn set_favorite(connection: &Connection, id: &str, favorite: bool) -> Result<Outfit, String> {
+    let changed = connection
+        .execute(
+            "UPDATE outfits SET favorite = ?2, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?1",
+            params![id, favorite],
+        )
+        .map_err(db_error)?;
+    if changed == 0 {
+        return Err("Outfit not found.".into());
+    }
+    get(connection, id)?.ok_or_else(|| "The outfit could not be read after updating.".into())
 }
 
 pub fn containing_item(
@@ -202,6 +219,7 @@ mod tests {
             name: "Weekend look".into(),
             item_ids: vec!["item-1".into(), "item-2".into()],
             notes: Some("Comfortable".into()),
+            favorite: false,
         }
     }
     fn database() -> Connection {
@@ -217,6 +235,12 @@ mod tests {
         database::create(&mut connection, clothing("item-2")).unwrap();
         let created = create(&mut connection, outfit()).unwrap();
         assert_eq!(created.item_ids, vec!["item-1", "item-2"]);
+        assert!(!created.favorite);
+        assert!(
+            set_favorite(&connection, "outfit-1", true)
+                .unwrap()
+                .favorite
+        );
         assert_eq!(list(&connection).unwrap().len(), 1);
         assert_eq!(
             containing_item(&connection, "item-2").unwrap()[0].id,

@@ -21,6 +21,7 @@ const outfitMocks = vi.hoisted(() => ({
   get: vi.fn(),
   list: vi.fn(),
   update: vi.fn(),
+  setFavorite: vi.fn(),
   delete: vi.fn(),
   containingItem: vi.fn(),
 }));
@@ -97,6 +98,7 @@ const savedOutfit: Outfit = {
   name: "Weekend look",
   itemIds: ["item-1"],
   notes: "Relaxed",
+  favorite: false,
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
 };
@@ -131,6 +133,9 @@ beforeEach(() => {
   outfitMocks.list.mockResolvedValue([]);
   outfitMocks.create.mockResolvedValue(savedOutfit);
   outfitMocks.update.mockResolvedValue(savedOutfit);
+  outfitMocks.setFavorite.mockImplementation((_id: string, favorite: boolean) =>
+    Promise.resolve({ ...savedOutfit, favorite }),
+  );
   outfitMocks.delete.mockResolvedValue(true);
   outfitMocks.get.mockResolvedValue(savedOutfit);
   outfitMocks.containingItem.mockResolvedValue([]);
@@ -619,7 +624,30 @@ describe("App", () => {
       name: "Weekend look",
       notes: "Relaxed",
       itemIds: ["item-1"],
+      favorite: false,
     });
+  });
+
+  it("toggles a saved outfit favorite without opening it", async () => {
+    outfitMocks.list.mockResolvedValue([savedOutfit]);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Outfits" }));
+
+    const favoriteButton = await screen.findByRole("button", {
+      name: "Add Weekend look to favorites",
+    });
+    await user.click(favoriteButton);
+
+    expect(outfitMocks.setFavorite).toHaveBeenCalledWith("outfit-1", true);
+    expect(
+      await screen.findByRole("button", {
+        name: "Remove Weekend look from favorites",
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.queryByRole("heading", { name: "Outfit Builder" }),
+    ).not.toBeInTheDocument();
   });
 
   it("updates advisory compatibility as outfit pieces change", async () => {

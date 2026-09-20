@@ -216,6 +216,19 @@ fn list_outfits(database: State<'_, Database>) -> Result<Vec<Outfit>, String> {
 }
 
 #[tauri::command]
+fn set_outfit_favorite(
+    database: State<'_, Database>,
+    id: String,
+    favorite: bool,
+) -> Result<Outfit, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    outfits::set_favorite(&connection, &id, favorite)
+}
+
+#[tauri::command]
 fn update_outfit(
     database: State<'_, Database>,
     id: String,
@@ -297,6 +310,7 @@ pub fn run() {
             create_outfit,
             get_outfit,
             list_outfits,
+            set_outfit_favorite,
             update_outfit,
             delete_outfit,
             list_outfits_containing_item,

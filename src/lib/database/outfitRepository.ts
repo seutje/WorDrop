@@ -5,6 +5,7 @@ export type OutfitRepository = {
   create(outfit: NewOutfit): Promise<Outfit>;
   get(id: string): Promise<Outfit | null>;
   list(): Promise<Outfit[]>;
+  setFavorite(id: string, favorite: boolean): Promise<Outfit>;
   update(id: string, outfit: OutfitChanges): Promise<Outfit>;
   delete(id: string): Promise<boolean>;
   containingItem(clothingItemId: string): Promise<Outfit[]>;
@@ -21,6 +22,9 @@ export const outfitRepository: OutfitRepository = {
   },
   list() {
     return invoke("list_outfits");
+  },
+  setFavorite(id, favorite) {
+    return invoke("set_outfit_favorite", { id, favorite });
   },
   update(id, outfit) {
     return invoke("update_outfit", { id, outfit });
