@@ -371,15 +371,19 @@ fn zip_error(error: impl std::fmt::Display) -> String {
 mod tests {
     use super::*;
     use crate::{database::ClothingItemInput, outfits::OutfitInput};
+    use std::sync::atomic::{AtomicU64, Ordering};
+
+    static TEST_ROOT_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
     fn test_root() -> PathBuf {
         let unique = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_nanos();
+        let sequence = TEST_ROOT_SEQUENCE.fetch_add(1, Ordering::Relaxed);
         let root = std::env::temp_dir().join(format!(
-            "wordrop-backup-test-{}-{unique}",
-            std::process::id()
+            "wordrop-backup-test-{}-{unique}-{sequence}",
+            std::process::id(),
         ));
         fs::create_dir_all(&root).unwrap();
         root
