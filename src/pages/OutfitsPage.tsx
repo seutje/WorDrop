@@ -3,6 +3,7 @@ import { clothingRepository } from "../lib/database/clothingRepository";
 import { outfitRepository } from "../lib/database/outfitRepository";
 import { loadManagedImage } from "../lib/images/managedImages";
 import { scoreOutfit } from "../lib/matching";
+import { shouldExcludeBottoms } from "../lib/outfitRules";
 import {
   clothingCategories,
   type ClothingCategory,
@@ -138,11 +139,13 @@ function OutfitItemTile({
 function ItemPicker({
   items,
   excludedIds,
+  excludeBottoms,
   onChoose,
   onClose,
 }: {
   items: ClothingItem[];
   excludedIds: string[];
+  excludeBottoms: boolean;
   onChoose: (item: ClothingItem) => void;
   onClose: () => void;
 }) {
@@ -153,13 +156,14 @@ function ItemPicker({
       items.filter(
         (item) =>
           !excludedIds.includes(item.id) &&
+          (!excludeBottoms || item.category !== "bottom") &&
           (!category || item.category === category) &&
           (!search.trim() ||
             item.name
               .toLocaleLowerCase()
               .includes(search.trim().toLocaleLowerCase())),
       ),
-    [category, excludedIds, items, search],
+    [category, excludeBottoms, excludedIds, items, search],
   );
   return (
     <div className="dialog-backdrop" role="presentation">
@@ -236,12 +240,14 @@ type Props = {
   initialItemIds?: string[];
   initialOutfitId?: string;
   onDirtyChange: (dirty: boolean) => void;
+  allowMultipleBottoms: boolean;
 };
 
 export function OutfitsPage({
   initialItemIds = [],
   initialOutfitId,
   onDirtyChange,
+  allowMultipleBottoms,
 }: Props) {
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
@@ -713,6 +719,11 @@ export function OutfitsPage({
         <ItemPicker
           items={wardrobe}
           excludedIds={selectedIds.filter((_, index) => index !== pickerIndex)}
+          excludeBottoms={shouldExcludeBottoms(
+            selectedItems,
+            pickerIndex,
+            allowMultipleBottoms,
+          )}
           onChoose={chooseItem}
           onClose={() => setPickerIndex(undefined)}
         />

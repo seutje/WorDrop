@@ -2,10 +2,11 @@ use rusqlite::{params, Connection, OptionalExtension, Transaction};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
 
-pub const CURRENT_SCHEMA_VERSION: i64 = 2;
+pub const CURRENT_SCHEMA_VERSION: i64 = 3;
 
 const INITIAL_MIGRATION: &str = include_str!("../migrations/0001_clothing_items.sql");
 const OUTFITS_MIGRATION: &str = include_str!("../migrations/0002_outfits.sql");
+const SETTINGS_MIGRATION: &str = include_str!("../migrations/0003_settings.sql");
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -83,6 +84,16 @@ pub(crate) fn migrate(connection: &mut Connection) -> Result<(), String> {
             .map_err(db_error)?;
         transaction
             .pragma_update(None, "user_version", 2)
+            .map_err(db_error)?;
+        transaction.commit().map_err(db_error)?;
+    }
+    if version < 3 {
+        let transaction = connection.transaction().map_err(db_error)?;
+        transaction
+            .execute_batch(SETTINGS_MIGRATION)
+            .map_err(db_error)?;
+        transaction
+            .pragma_update(None, "user_version", 3)
             .map_err(db_error)?;
         transaction.commit().map_err(db_error)?;
     }
@@ -369,7 +380,15 @@ mod tests {
                 |row| row.get(0),
             )
             .unwrap();
-        assert_eq!(version, 2);
+        assert_eq!(version, 3);
         assert_eq!(outfit_table, "outfits");
+        let settings_table: String = db
+            .query_row(
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'app_settings'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(settings_table, "app_settings");
     }
 }

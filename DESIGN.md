@@ -138,7 +138,7 @@ An outfit may contain any useful combination of:
 - shoes
 - accessories
 
-The application should not enforce overly rigid composition rules. A user may intentionally create incomplete or unusual outfits.
+The application should not enforce overly rigid composition rules. A user may intentionally create incomplete or unusual outfits. By default, the builder allows one Bottom per outfit while still allowing multiple Tops and other categories. This rule can be disabled under Settings > Preferences. Existing saved outfits are never rewritten when the preference changes.
 
 ### 5.4 Useful outfit suggestions
 

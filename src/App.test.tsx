@@ -27,6 +27,10 @@ const backupMocks = vi.hoisted(() => ({
   chooseRestore: vi.fn(),
   restore: vi.fn(),
 }));
+const settingsMocks = vi.hoisted(() => ({
+  get: vi.fn(),
+  setAllowMultipleBottoms: vi.fn(),
+}));
 
 vi.mock("./lib/database/clothingRepository", () => ({
   clothingRepository: {
@@ -49,6 +53,10 @@ vi.mock("./lib/backup", () => ({
   chooseAndExportBackup: backupMocks.chooseAndExport,
   chooseBackupToRestore: backupMocks.chooseRestore,
   restoreBackup: backupMocks.restore,
+}));
+vi.mock("./lib/settings", () => ({
+  getAppSettings: settingsMocks.get,
+  setAllowMultipleBottoms: settingsMocks.setAllowMultipleBottoms,
 }));
 
 import App from "./App";
@@ -114,7 +122,16 @@ beforeEach(() => {
     "C:/Backups/wordrop-backup.wordrop",
   );
   backupMocks.restore.mockResolvedValue(backupSummary);
+  settingsMocks.get.mockResolvedValue({ allowMultipleBottoms: false });
+  settingsMocks.setAllowMultipleBottoms.mockResolvedValue({
+    allowMultipleBottoms: true,
+  });
 });
+
+async function openBackup(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Settings" }));
+  await user.click(screen.getByRole("tab", { name: "Backup & Restore" }));
+}
 
 describe("App", () => {
   it("navigates between the primary sections", async () => {
@@ -126,7 +143,12 @@ describe("App", () => {
     expect(
       screen.getByRole("heading", { name: "Saved Outfits" }),
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Backup" }));
+    await user.click(screen.getByRole("button", { name: "Settings" }));
+    expect(screen.getByRole("tab", { name: "Preferences" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await user.click(screen.getByRole("tab", { name: "Backup & Restore" }));
     expect(
       screen.getByRole("heading", { name: "Backup & Restore" }),
     ).toBeInTheDocument();
@@ -135,7 +157,7 @@ describe("App", () => {
   it("exports a complete local backup", async () => {
     const user = userEvent.setup();
     render(<App />);
-    await user.click(screen.getByRole("button", { name: "Backup" }));
+    await openBackup(user);
     await user.click(
       screen.getByRole("button", { name: "Choose backup location" }),
     );
@@ -152,7 +174,7 @@ describe("App", () => {
     );
     const user = userEvent.setup();
     render(<App />);
-    await user.click(screen.getByRole("button", { name: "Backup" }));
+    await openBackup(user);
     await user.click(
       screen.getByRole("button", { name: "Choose backup location" }),
     );
@@ -167,7 +189,7 @@ describe("App", () => {
       .mockReturnValue(true);
     const user = userEvent.setup();
     render(<App />);
-    await user.click(screen.getByRole("button", { name: "Backup" }));
+    await openBackup(user);
     const restoreButton = screen.getByRole("button", {
       name: "Choose backup to restore",
     });

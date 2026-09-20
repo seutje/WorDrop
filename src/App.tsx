@@ -1,8 +1,9 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AppShell, type AppSection } from "./components/AppShell";
-import { BackupPage } from "./pages/BackupPage";
 import { ClosetPage } from "./pages/ClosetPage";
 import { OutfitsPage } from "./pages/OutfitsPage";
+import { SettingsPage } from "./pages/SettingsPage";
+import { getAppSettings, type AppSettings } from "./lib/settings";
 import "./styles/global.css";
 
 function App() {
@@ -11,6 +12,14 @@ function App() {
   const [outfitId, setOutfitId] = useState<string>();
   const [outfitRequestKey, setOutfitRequestKey] = useState(0);
   const [outfitDirty, setOutfitDirty] = useState(false);
+  const [settings, setSettings] = useState<AppSettings>({
+    allowMultipleBottoms: false,
+  });
+  useEffect(() => {
+    void getAppSettings()
+      .then(setSettings)
+      .catch(() => undefined);
+  }, []);
   const handleDirtyChange = useCallback(
     (dirty: boolean) => setOutfitDirty(dirty),
     [],
@@ -53,9 +62,10 @@ function App() {
           initialItemIds={outfitItemIds}
           initialOutfitId={outfitId}
           onDirtyChange={handleDirtyChange}
+          allowMultipleBottoms={settings.allowMultipleBottoms}
         />
       ) : (
-        <BackupPage />
+        <SettingsPage settings={settings} onSettingsChange={setSettings} />
       )}
     </AppShell>
   );

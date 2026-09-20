@@ -29,7 +29,7 @@ function Summary({
   );
 }
 
-export function BackupPage() {
+export function BackupPage({ embedded = false }: { embedded?: boolean }) {
   const [working, setWorking] = useState<"export" | "restore">();
   const [result, setResult] = useState<{
     action: string;
@@ -78,8 +78,11 @@ export function BackupPage() {
   }
 
   return (
-    <section className="page backup-page" aria-labelledby="backup-heading">
-      <header className="page-header">
+    <section
+      className={embedded ? "backup-page embedded-backup" : "page backup-page"}
+      aria-labelledby="backup-heading"
+    >
+      <header className={embedded ? "embedded-page-header" : "page-header"}>
         <div>
           <p className="eyebrow">Local data safety</p>
           <h1 id="backup-heading">Backup & Restore</h1>

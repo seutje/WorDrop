@@ -2,6 +2,7 @@ mod backup;
 mod database;
 mod image_store;
 mod outfits;
+mod settings;
 
 use database::{ClothingItem, ClothingItemInput};
 use outfits::{Outfit, OutfitInput};
@@ -213,6 +214,27 @@ fn list_outfits_containing_item(
     outfits::containing_item(&connection, &clothing_item_id)
 }
 
+#[tauri::command]
+fn get_app_settings(database: State<'_, Database>) -> Result<settings::AppSettings, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    settings::get(&connection)
+}
+
+#[tauri::command]
+fn set_allow_multiple_bottoms(
+    database: State<'_, Database>,
+    allow: bool,
+) -> Result<settings::AppSettings, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local database is unavailable.".to_string())?;
+    settings::set_allow_multiple_bottoms(&connection, allow)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -240,6 +262,8 @@ pub fn run() {
             update_outfit,
             delete_outfit,
             list_outfits_containing_item,
+            get_app_settings,
+            set_allow_multiple_bottoms,
             export_backup,
             restore_backup
         ])

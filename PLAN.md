@@ -910,6 +910,12 @@ integrity and schema compatibility, managed image references, and image file
 signatures. Round-trip tests verify clothing metadata, images, and outfits;
 corrupt and incomplete archives are rejected without changing current data.
 
+Follow-up implementation note: the former Backup navigation destination is now
+Settings, with Preferences selected by default and Backup & Restore available
+as a second tab. A backed-up local preference limits new outfit selections to
+one Bottom by default while allowing multiple Tops. Users may disable the rule,
+and existing saved outfits are preserved unchanged.
+
 ## User Test Gate
 
 Project owner completes a backup and restore without using developer tools.

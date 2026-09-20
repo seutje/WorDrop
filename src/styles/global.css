@@ -857,6 +857,79 @@ h1 {
 .backup-page {
   max-width: 980px;
 }
+.settings-page {
+  max-width: 980px;
+}
+.settings-tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 26px;
+  border-bottom: 1px solid #d9d6cf;
+}
+.settings-tabs button {
+  padding: 11px 16px;
+  color: #666762;
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font: inherit;
+}
+.settings-tabs button[aria-selected="true"] {
+  color: #304b37;
+  border-bottom-color: #5f8068;
+  font-weight: 700;
+}
+.settings-tabs button:focus-visible,
+.preference-row:has(input:focus-visible) {
+  outline: 3px solid rgb(74 109 82 / 25%);
+  outline-offset: 2px;
+}
+.settings-panel {
+  display: grid;
+  gap: 24px;
+  margin-top: 28px;
+}
+.settings-panel h2,
+.embedded-page-header h1 {
+  margin: 3px 0 8px;
+  font-family: Georgia, serif;
+  font-weight: 500;
+}
+.settings-panel p {
+  margin: 0;
+  color: #666762;
+}
+.preference-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 20px 22px;
+  background: #f3f1ed;
+  border: 1px solid #e0ddd6;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.preference-row span {
+  display: grid;
+  gap: 5px;
+}
+.preference-row small {
+  color: #666762;
+  line-height: 1.45;
+}
+.preference-row input {
+  width: 22px;
+  height: 22px;
+  accent-color: #54705b;
+}
+.embedded-backup {
+  margin-top: 28px;
+}
+.embedded-page-header {
+  margin-bottom: 0;
+}
 .backup-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

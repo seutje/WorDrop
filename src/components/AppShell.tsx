@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type AppSection = "closet" | "outfits" | "backup";
+export type AppSection = "closet" | "outfits" | "settings";
 
 type AppShellProps = {
   activeSection: AppSection;
@@ -10,9 +10,9 @@ type AppShellProps = {
 
 const sections: ReadonlyArray<{ id: AppSection; label: string; icon: string }> =
   [
-    { id: "closet", label: "Closet", icon: "▦" },
+    { id: "closet", label: "Closet", icon: "◦" },
     { id: "outfits", label: "Outfits", icon: "♧" },
-    { id: "backup", label: "Backup", icon: "⇩" },
+    { id: "settings", label: "Settings", icon: "⚙" },
   ];
 
 export function AppShell({
