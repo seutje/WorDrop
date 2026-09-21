@@ -10,6 +10,7 @@ import {
 import { renderDisplayImage } from "../../lib/images/imageFraming";
 import {
   canApplyCategorySuggestion,
+  canApplySubtypeSuggestion,
   classifyManagedImage,
   type ImageClassificationResult,
 } from "../../lib/images/imageClassification";
@@ -120,6 +121,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
   const urlButton = useRef<HTMLButtonElement>(null);
   const classificationRequest = useRef(0);
   const categoryWasEdited = useRef(Boolean(item));
+  const subtypeWasEdited = useRef(Boolean(item));
   const [classification, setClassification] =
     useState<ImageClassificationResult | null>(null);
   const [classifying, setClassifying] = useState(false);
@@ -148,6 +150,16 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
           )
         )
           setCategory(result.suggestedCategory);
+        if (
+          canApplySubtypeSuggestion(
+            request,
+            classificationRequest.current,
+            categoryWasEdited.current,
+            subtypeWasEdited.current,
+            result.suggestedSubtype,
+          )
+        )
+          setSubtype(result.suggestedSubtype);
       })
       .catch(() => {
         // Classification is optional; manual item creation must remain available.
@@ -427,7 +439,10 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                   <span>Subtype</span>
                   <input
                     value={subtype}
-                    onChange={(event) => setSubtype(event.target.value)}
+                    onChange={(event) => {
+                      subtypeWasEdited.current = true;
+                      setSubtype(event.target.value);
+                    }}
                     placeholder="T-shirt"
                   />
                 </label>

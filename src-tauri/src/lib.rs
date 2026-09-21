@@ -1,6 +1,7 @@
 mod backup;
 mod database;
 pub mod image_classification;
+pub mod image_classification_vocabulary;
 mod image_store;
 mod outfits;
 mod settings;

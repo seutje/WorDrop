@@ -1677,22 +1677,28 @@ website image import. This subsystem is metadata assistance only and has no
 dependency on, or effect on, outfit and wishlist compatibility scoring.
 
 The output space reuses the canonical six clothing categories exactly. The
-existing subtype remains unrestricted free-form text and is not inferred in
-version 1. Prompts and confidence gates live centrally in the native
-`image_classification` module. Each category vector is produced by normalizing
-its prompt vectors, averaging them, and normalizing again. A suggestion is
-shown only when both the top score and top-two margin pass the centralized
-gates. Scores are described as relative confidence, not calibrated probability.
+existing subtype remains unrestricted free-form text. A built-in vocabulary of
+visually distinguishable garment types is used only to suggest text; it does not
+constrain, normalize, validate, or migrate user data. Prompts, parent-category
+mappings, generic-fallback metadata, and confidence gates live centrally in the
+native image-classification vocabulary. Each label vector is produced by
+normalizing its prompt vectors, averaging them, and normalizing again. A subtype
+suggestion is shown only when both the parent category and subtype pass their
+centralized score and top-two-margin gates. Scores are relative confidence, not
+calibrated probability.
 
-Quantized FashionCLIP ONNX resources and the tokenizer are bundled in the
-installer. On first use, the native layer creates category vectors with the text
-encoder, discards that session, and retains one vision session for the process.
+The installer bundles a quantized FashionCLIP vision encoder and precomputed
+normalized category/subtype vectors. Text encoding is a development-only
+regeneration step; the text model and tokenizer are not shipped. One normalized
+image embedding feeds both category ranking and category-filtered subtype
+ranking, so the photo is decoded once and the vision encoder runs once.
 Inference runs on a blocking worker so the React form remains responsive. The
-native result reports initialization, decode/preprocessing, inference, scoring,
-and total duration. The form identifies every request; results from replaced
-images are ignored, and a user category edit is never overwritten. Failure is
-non-blocking and manual creation remains fully available. No photo, embedding,
-or classification result leaves the computer.
+native result reports initialization, decode/preprocessing, vision inference,
+category scoring, subtype scoring, and total duration. The form identifies every
+request; results from replaced images are ignored, and user category/subtype
+edits (including clearing) are never overwritten. Malformed subtype vectors
+degrade to category-only output. Failure remains non-blocking and manual creation
+remains fully available. No photo, embedding, or result leaves the computer.
 
 The model download script pins and verifies model SHA-256 values. Attribution
 is recorded in `THIRD_PARTY_NOTICES.md`. The local `evaluation` directory and

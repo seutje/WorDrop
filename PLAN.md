@@ -1362,12 +1362,24 @@ claiming a real-world accuracy figure or tuning the initial gates.
 
 Release-mode smoke measurement on the development Windows machine (using the
 existing design image to exercise the full pipeline, not to measure accuracy):
-614.0 ms first-use model/category initialization; warm decode/preprocessing
-27.7 ms, inference 57.1 ms, scoring 0.004 ms, and total 84.8 ms. The three model
-resources occupy 147,483,399 bytes. The generated 0.4.0 NSIS installer is
-121,665,684 bytes, an increase of 118,592,980 bytes over the prior local 0.1.0
-installer. NSIS generation succeeded locally; updater signing then correctly
-required the release-only private key configured in GitHub Actions.
+301.5 ms first-use session/resource initialization; warm decode/preprocessing
+21.44 ms, vision inference 57.81 ms, category scoring 0.004 ms, subtype ranking
+0.0105 ms, and category-plus-subtype total 79.27 ms. Subtype ranking adds about
+0.01 ms and the vision encoder runs once. Production classifier resources occupy
+81,578,279 bytes. The generated 0.4.0 NSIS installer is 82,347,876 bytes, an
+increase of 79,275,172 bytes over the prior local 0.1.0 installer and 39,317,808
+bytes smaller than the earlier runtime-text-encoder build. NSIS generation
+succeeded locally; updater signing then correctly required the release-only
+private key configured in GitHub Actions.
+
+Subtype follow-up: the same normalized image vector now ranks only the built-in
+subtypes belonging to the predicted category. Conservative subtype score and
+margin gates suppress ambiguous results and are additionally gated by parent
+category confidence. The existing free-form field accepts every prior/custom
+value unchanged, and its manual-edit flag shares the category request-version
+guard. Category and subtype prompt vectors are precomputed by a development
+utility; production no longer ships the text encoder or tokenizer. No subtype
+accuracy figure is claimed because no labeled representative dataset exists.
 
 ## Explicitly Deferred
 

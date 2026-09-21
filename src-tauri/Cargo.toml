@@ -32,6 +32,8 @@ image = { version = "0.25", default-features = false, features = ["jpeg", "png",
 tauri-plugin-opener = "2"
 ort = { version = "=2.0.0-rc.10", default-features = false, features = ["std", "ndarray", "download-binaries", "copy-dylibs"] }
 ndarray = "0.16"
+
+[dev-dependencies]
 tokenizers = { version = "0.21", default-features = false, features = ["onig"] }
 
 

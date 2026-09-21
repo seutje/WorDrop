@@ -35,6 +35,7 @@ const settingsMocks = vi.hoisted(() => ({
   setAllowMultipleBottoms: vi.fn(),
 }));
 const openerMocks = vi.hoisted(() => ({ openUrl: vi.fn() }));
+const classificationMocks = vi.hoisted(() => ({ classify: vi.fn() }));
 
 vi.mock("./lib/database/clothingRepository", () => ({
   clothingRepository: {
@@ -61,6 +62,11 @@ vi.mock("./lib/images/imageFraming", async (importOriginal) => {
       .fn()
       .mockResolvedValue("data:image/jpeg;base64,/9j/"),
   };
+});
+vi.mock("./lib/images/imageClassification", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("./lib/images/imageClassification")>();
+  return { ...original, classifyManagedImage: classificationMocks.classify };
 });
 vi.mock("./lib/database/outfitRepository", () => ({
   outfitRepository: outfitMocks,
@@ -132,6 +138,7 @@ beforeEach(() => {
     reference: "images/display/framed.jpg",
     dataUrl: "data:image/jpeg;base64,/9j/",
   });
+  classificationMocks.classify.mockRejectedValue("Classifier unavailable");
   outfitMocks.list.mockResolvedValue([]);
   outfitMocks.create.mockResolvedValue(savedOutfit);
   outfitMocks.update.mockResolvedValue(savedOutfit);
@@ -291,6 +298,65 @@ describe("App", () => {
       ownership: "wishlist",
       imagePath: "images/original/new.jpg",
     });
+  });
+
+  it("prefills a confident subtype but preserves free-form manual input", async () => {
+    classificationMocks.classify.mockResolvedValue({
+      predictions: [{ category: "top", score: 0.8 }],
+      suggestedCategory: "top",
+      confidenceScore: 0.8,
+      topTwoMargin: 0.5,
+      subtypePredictions: [{ subtype: "T-shirt", category: "top", score: 0.7 }],
+      suggestedSubtype: "T-shirt",
+      subtypeConfidenceScore: 0.7,
+      subtypeTopTwoMargin: 0.4,
+      timing: {
+        sessionInitializationMs: 0,
+        imageDecodePreprocessingMs: 1,
+        modelInferenceMs: 2,
+        categoryScoringMs: 0.01,
+        subtypeScoringMs: 0.01,
+        scoringMs: 0.02,
+        totalMs: 3,
+      },
+    });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /\+ add item/i }));
+    await user.click(screen.getByRole("button", { name: "Choose photo" }));
+    const subtype = screen.getByRole("textbox", { name: /subtype/i });
+    await waitFor(() => expect(subtype).toHaveValue("T-shirt"));
+    await user.clear(subtype);
+    await user.type(subtype, "Vintage oversized band tee");
+    expect(subtype).toHaveValue("Vintage oversized band tee");
+  });
+
+  it("does not overwrite subtype text entered while classification is pending", async () => {
+    let finish!: (value: unknown) => void;
+    classificationMocks.classify.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /\+ add item/i }));
+    await user.click(screen.getByRole("button", { name: "Choose photo" }));
+    const subtype = screen.getByRole("textbox", { name: /subtype/i });
+    await user.type(subtype, "Graphic tee");
+    finish({
+      predictions: [{ category: "top", score: 0.8 }],
+      suggestedCategory: "top",
+      confidenceScore: 0.8,
+      topTwoMargin: 0.5,
+      subtypePredictions: [],
+      suggestedSubtype: "T-shirt",
+      subtypeConfidenceScore: 0.7,
+      subtypeTopTwoMargin: 0.4,
+      timing: {},
+    });
+    await screen.findByText(/Suggested from photo/);
+    expect(subtype).toHaveValue("Graphic tee");
   });
 
   it("opens a saved item for editing", async () => {
