@@ -1670,6 +1670,35 @@ Only after core product quality is strong:
 
 AI should remain optional.
 
+### Local photo category suggestion
+
+Adding a new item may run a local FashionCLIP classifier after either file or
+website image import. This subsystem is metadata assistance only and has no
+dependency on, or effect on, outfit and wishlist compatibility scoring.
+
+The output space reuses the canonical six clothing categories exactly. The
+existing subtype remains unrestricted free-form text and is not inferred in
+version 1. Prompts and confidence gates live centrally in the native
+`image_classification` module. Each category vector is produced by normalizing
+its prompt vectors, averaging them, and normalizing again. A suggestion is
+shown only when both the top score and top-two margin pass the centralized
+gates. Scores are described as relative confidence, not calibrated probability.
+
+Quantized FashionCLIP ONNX resources and the tokenizer are bundled in the
+installer. On first use, the native layer creates category vectors with the text
+encoder, discards that session, and retains one vision session for the process.
+Inference runs on a blocking worker so the React form remains responsive. The
+native result reports initialization, decode/preprocessing, inference, scoring,
+and total duration. The form identifies every request; results from replaced
+images are ignored, and a user category edit is never overwritten. Failure is
+non-blocking and manual creation remains fully available. No photo, embedding,
+or classification result leaves the computer.
+
+The model download script pins and verifies model SHA-256 values. Attribution
+is recorded in `THIRD_PARTY_NOTICES.md`. The local `evaluation` directory and
+native evaluation example report top-1/per-category accuracy, confusion counts,
+and warm average/median/p95 timing without checking test photos into source.
+
 ---
 
 ## 34. Success Criteria

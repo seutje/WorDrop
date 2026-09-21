@@ -1344,11 +1344,30 @@ record working image imports, not retailer-specific name or metadata extraction.
 
 These must remain optional.
 
-- [ ] suggest category from photo
+- [x] suggest category from photo locally with six-way FashionCLIP inference
 - [ ] suggest colors from photo
 - [ ] suggest material/style tags
 - [ ] natural-language explanation improvements
 - [ ] local or opt-in cloud vision experiments
+
+Implementation note: category suggestion is isolated from deterministic outfit
+matching. A reusable native ONNX session classifies newly imported images on a
+worker, returns all six ranked candidates and timing components, and applies a
+suggestion only above centralized score and margin thresholds. Late requests,
+manual edits, and failures are safe. Quantized model resources are pinned,
+checksummed, bundled for offline use, and attributed. The subtype field remains
+free-form and manual. `evaluation/` plus the release-mode native evaluator is
+ready for a representative private image set; results must be recorded before
+claiming a real-world accuracy figure or tuning the initial gates.
+
+Release-mode smoke measurement on the development Windows machine (using the
+existing design image to exercise the full pipeline, not to measure accuracy):
+614.0 ms first-use model/category initialization; warm decode/preprocessing
+27.7 ms, inference 57.1 ms, scoring 0.004 ms, and total 84.8 ms. The three model
+resources occupy 147,483,399 bytes. The generated 0.4.0 NSIS installer is
+121,665,684 bytes, an increase of 118,592,980 bytes over the prior local 0.1.0
+installer. NSIS generation succeeded locally; updater signing then correctly
+required the release-only private key configured in GitHub Actions.
 
 ## Explicitly Deferred
 

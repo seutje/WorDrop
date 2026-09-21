@@ -1,5 +1,6 @@
 mod backup;
 mod database;
+pub mod image_classification;
 mod image_store;
 mod outfits;
 mod settings;
@@ -49,6 +50,28 @@ async fn import_website_image(
     url: String,
 ) -> Result<image_store::ManagedImage, String> {
     website_import::import(&url, app_data.0.clone()).await
+}
+
+#[tauri::command]
+async fn classify_clothing_image(
+    app_data: State<'_, AppDataDirectory>,
+    classifier: State<'_, image_classification::State>,
+    reference: String,
+) -> Result<image_classification::ClassificationResult, String> {
+    let relative = std::path::Path::new(&reference);
+    if relative.is_absolute()
+        || !relative
+            .components()
+            .all(|part| matches!(part, std::path::Component::Normal(_)))
+        || !reference.replace('\\', "/").starts_with("images/")
+    {
+        return Err("The clothing image reference is invalid.".into());
+    }
+    let path = app_data.0.join(relative);
+    let classifier = classifier.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || classifier.classify(&path))
+        .await
+        .map_err(|_| "The local image classifier stopped unexpectedly.".to_string())?
 }
 
 #[tauri::command]
@@ -331,6 +354,9 @@ pub fn run() {
             app.manage(Database(Mutex::new(connection)));
             app.manage(AppDataDirectory(app.path().app_data_dir()?));
             app.manage(website_browser::BrowserImportState::default());
+            app.manage(image_classification::State::new(
+                app.path().resource_dir()?.join("image-classification"),
+            ));
             Ok(())
         })
         .plugin(tauri_plugin_dialog::init())
@@ -344,6 +370,7 @@ pub fn run() {
             update_clothing_item,
             delete_clothing_item,
             import_clothing_image,
+            classify_clothing_image,
             find_website_images,
             cancel_website_image_browser,
             preview_website_image,

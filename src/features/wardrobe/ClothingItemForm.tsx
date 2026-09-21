@@ -8,6 +8,11 @@ import {
   type ManagedImage,
 } from "../../lib/images/managedImages";
 import { renderDisplayImage } from "../../lib/images/imageFraming";
+import {
+  canApplyCategorySuggestion,
+  classifyManagedImage,
+  type ImageClassificationResult,
+} from "../../lib/images/imageClassification";
 import { ImageCropEditor } from "./ImageCropEditor";
 import { WebsiteImagePicker } from "./WebsiteImagePicker";
 import {
@@ -113,6 +118,44 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
   const [busy, setBusy] = useState(false);
   const [websitePickerOpen, setWebsitePickerOpen] = useState(false);
   const urlButton = useRef<HTMLButtonElement>(null);
+  const classificationRequest = useRef(0);
+  const categoryWasEdited = useRef(Boolean(item));
+  const [classification, setClassification] =
+    useState<ImageClassificationResult | null>(null);
+  const [classifying, setClassifying] = useState(false);
+
+  useEffect(
+    () => () => {
+      classificationRequest.current += 1;
+    },
+    [],
+  );
+
+  function analyzeImage(reference: string) {
+    const request = ++classificationRequest.current;
+    setClassification(null);
+    setClassifying(true);
+    void classifyManagedImage(reference)
+      .then((result) => {
+        if (request !== classificationRequest.current) return;
+        setClassification(result);
+        if (
+          canApplyCategorySuggestion(
+            request,
+            classificationRequest.current,
+            categoryWasEdited.current,
+            result.suggestedCategory,
+          )
+        )
+          setCategory(result.suggestedCategory);
+      })
+      .catch(() => {
+        // Classification is optional; manual item creation must remain available.
+      })
+      .finally(() => {
+        if (request === classificationRequest.current) setClassifying(false);
+      });
+  }
 
   function returnToItem() {
     setWebsitePickerOpen(false);
@@ -127,6 +170,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
     setSourceUrl(importedFrom);
     setError(null);
     returnToItem();
+    if (!item) analyzeImage(imported.reference);
     if (previousPending)
       void discardManagedImage(previousPending).catch(() => undefined);
   }
@@ -156,6 +200,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
       setImage(imported);
       setFraming({ zoom: 1, x: 0, y: 0 });
       setPendingImageReference(imported.reference);
+      if (!item) analyzeImage(imported.reference);
       if (previousPending) await discardManagedImage(previousPending);
     } catch (cause) {
       setError(errorMessage(cause));
@@ -359,9 +404,10 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                   </span>
                   <select
                     value={category}
-                    onChange={(event) =>
-                      setCategory(event.target.value as ClothingCategory)
-                    }
+                    onChange={(event) => {
+                      categoryWasEdited.current = true;
+                      setCategory(event.target.value as ClothingCategory);
+                    }}
                   >
                     {clothingCategories.map((value) => (
                       <option key={value} value={value}>
@@ -369,6 +415,13 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                       </option>
                     ))}
                   </select>
+                  {classifying && <small>Checking the photo locally…</small>}
+                  {!classifying && classification?.suggestedCategory && (
+                    <small>
+                      Suggested from photo · relative confidence{" "}
+                      {Math.round(classification.confidenceScore * 100)}%
+                    </small>
+                  )}
                 </label>
                 <label className="form-field">
                   <span>Subtype</span>
