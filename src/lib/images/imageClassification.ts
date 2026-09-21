@@ -18,7 +18,7 @@ export type ClassificationTiming = {
 
 export type ImageClassificationResult = {
   predictions: CategoryPrediction[];
-  suggestedCategory?: ClothingCategory;
+  suggestedCategory?: ClothingCategory | null;
   confidenceScore: number;
   topTwoMargin: number;
   subtypePredictions: Array<{
@@ -26,7 +26,7 @@ export type ImageClassificationResult = {
     category: ClothingCategory;
     score: number;
   }>;
-  suggestedSubtype?: string;
+  suggestedSubtype?: string | null;
   subtypeConfidenceScore?: number;
   subtypeTopTwoMargin?: number;
   timing: ClassificationTiming;
@@ -43,13 +43,13 @@ export function canApplySubtypeSuggestion(
   currentRequest: number,
   categoryWasEdited: boolean,
   subtypeWasEdited: boolean,
-  suggestedSubtype?: string,
+  suggestedSubtype?: string | null,
 ): suggestedSubtype is string {
   return (
     completedRequest === currentRequest &&
     !categoryWasEdited &&
     !subtypeWasEdited &&
-    suggestedSubtype !== undefined
+    suggestedSubtype != null
   );
 }
 
@@ -57,11 +57,11 @@ export function canApplyCategorySuggestion(
   completedRequest: number,
   currentRequest: number,
   categoryWasEdited: boolean,
-  suggestedCategory?: ClothingCategory,
+  suggestedCategory?: ClothingCategory | null,
 ): suggestedCategory is ClothingCategory {
   return (
     completedRequest === currentRequest &&
     !categoryWasEdited &&
-    suggestedCategory !== undefined
+    suggestedCategory != null
   );
 }

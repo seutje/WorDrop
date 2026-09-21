@@ -300,6 +300,31 @@ describe("App", () => {
     });
   });
 
+  it("keeps the selected category when classification has no suggestion", async () => {
+    classificationMocks.classify.mockResolvedValue({
+      suggestedCategory: null,
+      suggestedSubtype: null,
+    });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /\+ add item/i }));
+    await user.type(
+      screen.getByRole("textbox", { name: /name/i }),
+      "Blue shirt",
+    );
+    await user.click(screen.getByRole("button", { name: "Choose photo" }));
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: /category/i }),
+      "top",
+    );
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await waitFor(() => expect(mocks.create).toHaveBeenCalledOnce());
+    expect(mocks.create.mock.calls[0][0]).toMatchObject({
+      category: "top",
+      subtype: undefined,
+    });
+  });
+
   it("prefills a confident subtype but preserves free-form manual input", async () => {
     classificationMocks.classify.mockResolvedValue({
       predictions: [{ category: "top", score: 0.8 }],

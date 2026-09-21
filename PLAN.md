@@ -286,6 +286,10 @@ Implementation note: the Closet page renders a lightweight visual card grid so
 saved records can be reopened for editing. Search, filtering, sorting, and
 large-wardrobe optimization remain Phase 4 work.
 
+Follow-up fix: absent local classifier suggestions arrive as JSON `null`.
+The add-item form now keeps the selected category and subtype when no suggestion
+is available, so the save command receives a valid category.
+
 ## User Test Gate
 
 This is the first important real-user test.

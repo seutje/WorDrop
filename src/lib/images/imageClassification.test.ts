@@ -10,6 +10,7 @@ describe("category suggestion lifecycle", () => {
     expect(canApplyCategorySuggestion(1, 2, false, "shoes")).toBe(false);
     expect(canApplyCategorySuggestion(2, 2, true, "shoes")).toBe(false);
     expect(canApplyCategorySuggestion(2, 2, false, undefined)).toBe(false);
+    expect(canApplyCategorySuggestion(2, 2, false, null)).toBe(false);
   });
 
   it("protects subtype edits, clearing, and newer image requests", () => {
@@ -22,5 +23,6 @@ describe("category suggestion lifecycle", () => {
     expect(canApplySubtypeSuggestion(3, 3, false, false, undefined)).toBe(
       false,
     );
+    expect(canApplySubtypeSuggestion(3, 3, false, false, null)).toBe(false);
   });
 });
