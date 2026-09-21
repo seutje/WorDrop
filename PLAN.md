@@ -998,6 +998,11 @@ Generated 1,000-item tests cover closet rendering, search, and filtering. The
 Windows bundle now uses a custom WorDrop monogram/hanger icon. The existing
 1180x760 default and 720x560 minimum window sizes were retained after review.
 
+Click-target follow-up: constrain and clip the hidden native checkbox/radio
+inputs inside their labels so color, season, and occasion chips cannot intercept
+clicks on other fields, including Owned/Wishlist. Labels remain clickable and
+native keyboard controls retain the existing visible focus treatment.
+
 ## User Test Gate
 
 Give intended user a release-like build and ask them to use it normally.
