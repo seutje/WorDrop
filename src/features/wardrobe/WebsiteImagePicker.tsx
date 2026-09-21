@@ -11,7 +11,10 @@ import {
   type WebsiteImages,
 } from "../../lib/images/websiteImages";
 
-type Props = { onBack: () => void; onSelected: (image: ManagedImage) => void };
+type Props = {
+  onBack: () => void;
+  onSelected: (image: ManagedImage, sourceUrl: string) => void;
+};
 type Preview = { dataUrl?: string; failed?: boolean };
 
 export function WebsiteImagePicker({ onBack, onSelected }: Props) {
@@ -140,7 +143,7 @@ export function WebsiteImagePicker({ onBack, onSelected }: Props) {
         await discardManagedImage(image.reference).catch(() => undefined);
         return;
       }
-      onSelected(image);
+      onSelected(image, result?.pageUrl ?? url.trim());
     } catch (cause) {
       if (generation.current === current)
         setError(

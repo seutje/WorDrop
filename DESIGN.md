@@ -483,6 +483,8 @@ type ClothingItem = {
 
   favorite: boolean;
 
+  sourceUrl?: string;
+
   imagePath: string;
 
   notes?: string;
@@ -725,6 +727,11 @@ submits the normal form. Back/Escape and cancellation return without losing form
 values or the current photo. Failed downloads leave the picker open for another
 selection; errors, empty results, and loading states explain the next action,
 including using **Choose photo** instead.
+
+When the user selects a website photo, the normalized product-page URL is also
+copied into the item's optional URL field. The field remains editable. Clothing
+details show its domain as a compact link and open the full saved URL in the
+system's default browser.
 
 This optional step requires internet access. Imported photos are copied into
 managed local storage, and all subsequent wardrobe use works offline. Previews

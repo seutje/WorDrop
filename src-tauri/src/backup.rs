@@ -404,6 +404,7 @@ mod tests {
             style_tags: vec!["classic".into()],
             ownership: "owned".into(),
             favorite: false,
+            source_url: Some("https://shop.example/item".into()),
             image_path: "images/original/item.png".into(),
             display_image_path: Some("images/display/item.jpg".into()),
             crop_zoom: 1.5,
@@ -458,6 +459,10 @@ mod tests {
         let restored_item = database::get(&connection, "item-1").unwrap().unwrap();
         assert_eq!(restored_item.colors, vec!["blue"]);
         assert_eq!(restored_item.notes.as_deref(), Some("Favorite"));
+        assert_eq!(
+            restored_item.source_url.as_deref(),
+            Some("https://shop.example/item")
+        );
         assert_eq!(restored_item.crop_zoom, 1.5);
         assert_eq!(
             restored_item.display_image_path.as_deref(),

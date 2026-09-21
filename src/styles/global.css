@@ -657,6 +657,22 @@ h1 {
   white-space: pre-wrap;
   line-height: 1.55;
 }
+.detail-source-link {
+  max-width: 100%;
+  padding: 0;
+  overflow: hidden;
+  color: #3f6650;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-decoration: underline;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.detail-source-link:hover {
+  color: #294735;
+}
 .detail-actions {
   display: flex;
   flex-wrap: wrap;

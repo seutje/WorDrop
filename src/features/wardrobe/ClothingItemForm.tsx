@@ -98,6 +98,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
   const [ownership, setOwnership] = useState<Ownership>(
     item?.ownership ?? "owned",
   );
+  const [sourceUrl, setSourceUrl] = useState(item?.sourceUrl ?? "");
   const [notes, setNotes] = useState(item?.notes ?? "");
   const [image, setImage] = useState<ManagedImage | null>(null);
   const [pendingImageReference, setPendingImageReference] = useState<
@@ -118,11 +119,12 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
     requestAnimationFrame(() => urlButton.current?.focus());
   }
 
-  function acceptWebsiteImage(imported: ManagedImage) {
+  function acceptWebsiteImage(imported: ManagedImage, importedFrom: string) {
     const previousPending = pendingImageReference;
     setImage(imported);
     setFraming({ zoom: 1, x: 0, y: 0 });
     setPendingImageReference(imported.reference);
+    setSourceUrl(importedFrom);
     setError(null);
     returnToItem();
     if (previousPending)
@@ -179,6 +181,22 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
       setError("Choose a photo for the clothing item.");
       return;
     }
+    let normalizedSourceUrl: string | undefined;
+    if (sourceUrl.trim()) {
+      try {
+        const parsed = new URL(sourceUrl.trim());
+        if (
+          !["http:", "https:"].includes(parsed.protocol) ||
+          parsed.username ||
+          parsed.password
+        )
+          throw new Error();
+        normalizedSourceUrl = parsed.href;
+      } catch {
+        setError("Enter a complete item URL beginning with https://.");
+        return;
+      }
+    }
     setBusy(true);
     let createdDisplayReference: string | null = null;
     const values = {
@@ -201,6 +219,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
       ],
       ownership,
       favorite: item?.favorite ?? false,
+      sourceUrl: normalizedSourceUrl,
       imagePath: image.reference,
       displayImagePath: item?.displayImagePath,
       cropZoom: framing.zoom,
@@ -366,6 +385,19 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                     onChange={(event) => setSize(event.target.value)}
                     placeholder="XS, M, XXXL, 38, 10..."
                   />
+                </label>
+                <label className="form-field form-field-wide">
+                  <span>Item URL</span>
+                  <input
+                    type="url"
+                    value={sourceUrl}
+                    onChange={(event) => setSourceUrl(event.target.value)}
+                    placeholder="https://www.shop.com/product"
+                  />
+                  <small>
+                    Filled automatically when you choose a photo with Get from
+                    URL.
+                  </small>
                 </label>
                 <label className="form-field">
                   <span>Material</span>

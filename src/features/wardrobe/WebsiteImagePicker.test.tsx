@@ -86,6 +86,7 @@ describe("website image import", () => {
     await waitFor(() => expect(choice).toBeEnabled());
     await user.click(choice);
     expect(await screen.findByLabelText(/Name/)).toHaveValue("My blue dress");
+    expect(screen.getByLabelText(/^Item URL/)).toHaveValue(results.pageUrl);
     expect(screen.getByLabelText("Notes")).toHaveValue("Keep these notes");
     expect(screen.getByAltText("Clothing crop preview")).toHaveAttribute(
       "src",

@@ -34,6 +34,7 @@ const settingsMocks = vi.hoisted(() => ({
   get: vi.fn(),
   setAllowMultipleBottoms: vi.fn(),
 }));
+const openerMocks = vi.hoisted(() => ({ openUrl: vi.fn() }));
 
 vi.mock("./lib/database/clothingRepository", () => ({
   clothingRepository: {
@@ -73,6 +74,7 @@ vi.mock("./lib/settings", () => ({
   getAppSettings: settingsMocks.get,
   setAllowMultipleBottoms: settingsMocks.setAllowMultipleBottoms,
 }));
+vi.mock("@tauri-apps/plugin-opener", () => ({ openUrl: openerMocks.openUrl }));
 
 import App from "./App";
 
@@ -154,6 +156,7 @@ beforeEach(() => {
   settingsMocks.setAllowMultipleBottoms.mockResolvedValue({
     allowMultipleBottoms: true,
   });
+  openerMocks.openUrl.mockResolvedValue(undefined);
 });
 
 async function openBackup(user: ReturnType<typeof userEvent.setup>) {
@@ -433,6 +436,7 @@ describe("App", () => {
       occasions: ["casual", "travel"],
       styleTags: ["classic", "minimalist"],
       notes: "A dependable everyday pair.",
+      sourceUrl: "https://www.shop.example/products/blue-jeans?color=navy",
     };
     mocks.list.mockResolvedValue([fullItem]);
     mocks.get.mockResolvedValue(fullItem);
@@ -447,6 +451,10 @@ describe("App", () => {
     expect(screen.getByText("Denim")).toBeInTheDocument();
     expect(screen.getByText("Solid")).toBeInTheDocument();
     expect(screen.getByText("A dependable everyday pair.")).toBeInTheDocument();
+    const sourceLink = screen.getByRole("button", { name: /shop\.example/ });
+    expect(sourceLink).toHaveAttribute("title", fullItem.sourceUrl);
+    await user.click(sourceLink);
+    expect(openerMocks.openUrl).toHaveBeenCalledWith(fullItem.sourceUrl);
     expect(
       screen.getByRole("heading", { name: "Looks good with" }),
     ).toBeInTheDocument();

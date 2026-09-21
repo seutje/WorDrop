@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { clothingRepository } from "../../lib/database/clothingRepository";
 import { outfitRepository } from "../../lib/database/outfitRepository";
 import { loadManagedImage } from "../../lib/images/managedImages";
@@ -263,6 +264,25 @@ export function ClothingDetail({
             {item.styleTags.length > 0 && (
               <MetadataRow label="Style">
                 <TagList values={item.styleTags} />
+              </MetadataRow>
+            )}
+            {item.sourceUrl && (
+              <MetadataRow label="Link">
+                <button
+                  className="detail-source-link"
+                  type="button"
+                  title={item.sourceUrl}
+                  onClick={() => {
+                    void openUrl(item.sourceUrl!).catch(() =>
+                      setError(
+                        "The item link could not be opened. Your saved data was not changed.",
+                      ),
+                    );
+                  }}
+                >
+                  {new URL(item.sourceUrl).hostname.replace(/^www\./, "")}
+                  <span aria-hidden="true"> ↗</span>
+                </button>
               </MetadataRow>
             )}
             {item.notes && (

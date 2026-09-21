@@ -1224,6 +1224,7 @@ manual installation of the first updater-enabled release.
 ## Convenience Features
 
 - [x] favorites
+- [x] optional item URL with automatic website-import capture and detail link
 - [ ] recent outfits
 - [ ] outfit duplication improvements
 - [x] sorting options

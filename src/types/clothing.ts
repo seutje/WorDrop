@@ -67,6 +67,7 @@ export type ClothingItem = {
   styleTags: string[];
   ownership: Ownership;
   favorite: boolean;
+  sourceUrl?: string;
   imagePath: string;
   displayImagePath?: string;
   cropZoom?: number;
