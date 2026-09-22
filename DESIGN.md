@@ -683,6 +683,11 @@ No onboarding account flow should exist.
 
 ### 12.2 Add clothing item
 
+On the Add Item screen, dropping one JPEG, PNG, or WebP file anywhere in the
+application window imports it through the same managed-image flow as Choose
+photo. The photo is previewed and the local category/subtype classifier runs
+automatically. An invalid or multiple-file drop leaves the current photo intact.
+
 1. User clicks Add Item.
 2. User selects an image.
 3. Preview appears.

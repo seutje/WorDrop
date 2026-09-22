@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   setFavorite: vi.fn(),
   delete: vi.fn(),
   chooseImage: vi.fn(),
+  importImageFromPath: vi.fn(),
   loadImage: vi.fn(),
   discardImage: vi.fn(),
   saveDisplayImage: vi.fn(),
@@ -36,6 +37,11 @@ const settingsMocks = vi.hoisted(() => ({
 }));
 const openerMocks = vi.hoisted(() => ({ openUrl: vi.fn() }));
 const classificationMocks = vi.hoisted(() => ({ classify: vi.fn() }));
+const dragDropMocks = vi.hoisted(() => ({ onDragDropEvent: vi.fn() }));
+
+vi.mock("@tauri-apps/api/webview", () => ({
+  getCurrentWebview: () => ({ onDragDropEvent: dragDropMocks.onDragDropEvent }),
+}));
 
 vi.mock("./lib/database/clothingRepository", () => ({
   clothingRepository: {
@@ -49,6 +55,7 @@ vi.mock("./lib/database/clothingRepository", () => ({
 }));
 vi.mock("./lib/images/managedImages", () => ({
   chooseAndImportImage: mocks.chooseImage,
+  importImageFromPath: mocks.importImageFromPath,
   loadManagedImage: mocks.loadImage,
   discardManagedImage: mocks.discardImage,
   saveDisplayImage: mocks.saveDisplayImage,
@@ -129,6 +136,11 @@ beforeEach(() => {
     reference: "images/original/new.jpg",
     dataUrl: "data:image/jpeg;base64,/9j/",
   });
+  mocks.importImageFromPath.mockResolvedValue({
+    reference: "images/original/dropped.jpg",
+    dataUrl: "data:image/jpeg;base64,/9j/",
+  });
+  dragDropMocks.onDragDropEvent.mockResolvedValue(() => undefined);
   mocks.loadImage.mockResolvedValue({
     reference: sampleItem.imagePath,
     dataUrl: "data:image/jpeg;base64,/9j/",
@@ -298,6 +310,29 @@ describe("App", () => {
       ownership: "wishlist",
       imagePath: "images/original/new.jpg",
     });
+  });
+
+  it("imports and classifies an image dropped anywhere in the add item window", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /\+ add item/i }));
+    await waitFor(() =>
+      expect(dragDropMocks.onDragDropEvent).toHaveBeenCalled(),
+    );
+    const calls = dragDropMocks.onDragDropEvent.mock.calls;
+    const onDrop = calls[calls.length - 1]?.[0];
+    onDrop({ payload: { type: "drop", paths: ["C:/Photos/shirt.jpg"] } });
+    await waitFor(() =>
+      expect(classificationMocks.classify).toHaveBeenCalledWith(
+        "images/original/dropped.jpg",
+      ),
+    );
+    expect(mocks.importImageFromPath).toHaveBeenCalledWith(
+      "C:/Photos/shirt.jpg",
+    );
+    expect(
+      screen.getByRole("button", { name: "Replace photo" }),
+    ).toBeInTheDocument();
   });
 
   it("keeps the selected category when classification has no suggestion", async () => {

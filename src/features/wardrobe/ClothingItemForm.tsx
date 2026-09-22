@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { clothingRepository } from "../../lib/database/clothingRepository";
 import {
   chooseAndImportImage,
   discardManagedImage,
+  importImageFromPath,
   loadManagedImage,
   saveDisplayImage,
   type ManagedImage,
@@ -120,6 +122,8 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
   const [websitePickerOpen, setWebsitePickerOpen] = useState(false);
   const urlButton = useRef<HTMLButtonElement>(null);
   const classificationRequest = useRef(0);
+  const dropImportInProgress = useRef(false);
+  const pendingImageReferenceRef = useRef<string | null>(null);
   const categoryWasEdited = useRef(Boolean(item));
   const subtypeWasEdited = useRef(Boolean(item));
   const [classification, setClassification] =
@@ -183,6 +187,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
     setImage(imported);
     setFraming({ zoom: 1, x: 0, y: 0 });
     setPendingImageReference(imported.reference);
+    pendingImageReferenceRef.current = imported.reference;
     setSourceUrl(importedFrom);
     if (pageTitle?.trim())
       setName((current) => (current.trim() ? current : pageTitle.trim()));
@@ -218,6 +223,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
       setImage(imported);
       setFraming({ zoom: 1, x: 0, y: 0 });
       setPendingImageReference(imported.reference);
+      pendingImageReferenceRef.current = imported.reference;
       if (!item) analyzeImage(imported.reference);
       if (previousPending) await discardManagedImage(previousPending);
     } catch (cause) {
@@ -226,6 +232,58 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
       setBusy(false);
     }
   }
+
+  useEffect(() => {
+    if (item || websitePickerOpen) return;
+    let active = true;
+    let unlisten: (() => void) | undefined;
+    void getCurrentWebview()
+      .onDragDropEvent((event) => {
+        if (event.payload.type !== "drop" || dropImportInProgress.current)
+          return;
+        const paths = event.payload.paths;
+        if (paths.length !== 1) {
+          setError("Drop one JPEG, PNG, or WebP image at a time.");
+          return;
+        }
+        dropImportInProgress.current = true;
+        setBusy(true);
+        setError(null);
+        void importImageFromPath(paths[0])
+          .then(async (imported) => {
+            if (!active) {
+              await discardManagedImage(imported.reference).catch(
+                () => undefined,
+              );
+              return;
+            }
+            const previousPending = pendingImageReferenceRef.current;
+            setImage(imported);
+            setFraming({ zoom: 1, x: 0, y: 0 });
+            setPendingImageReference(imported.reference);
+            pendingImageReferenceRef.current = imported.reference;
+            analyzeImage(imported.reference);
+            if (previousPending)
+              await discardManagedImage(previousPending).catch(() => undefined);
+          })
+          .catch((cause) => {
+            if (active) setError(errorMessage(cause));
+          })
+          .finally(() => {
+            dropImportInProgress.current = false;
+            if (active) setBusy(false);
+          });
+      })
+      .then((stop) => {
+        if (active) unlisten = stop;
+        else stop();
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+      unlisten?.();
+    };
+  }, [item, websitePickerOpen]);
 
   async function cancel() {
     if (pendingImageReference)
@@ -400,7 +458,8 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                   Get from URL
                 </button>
                 <p className="field-help">
-                  The app keeps a private copy and never changes your original.
+                  Drop a photo anywhere in the app, or choose one. The app keeps
+                  a private copy and never changes your original.
                 </p>
               </div>
               <div className="form-fields">

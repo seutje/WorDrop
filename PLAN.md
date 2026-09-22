@@ -1336,6 +1336,10 @@ record working image imports, not retailer-specific name or metadata extraction.
 
 ## Image Improvements
 
+Completed follow-up: Add Item accepts a single image dropped anywhere in the
+application window, imports it into managed storage, and runs the existing
+local classifier. Invalid drops preserve the current photo.
+
 - [ ] crop
 - [ ] rotate
 - [ ] better thumbnail pipeline

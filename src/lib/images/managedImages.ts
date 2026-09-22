@@ -12,7 +12,11 @@ export async function chooseAndImportImage(): Promise<ManagedImage | null> {
     ],
   });
   if (!sourcePath) return null;
-  return invoke<ManagedImage>("import_clothing_image", { sourcePath });
+  return importImageFromPath(sourcePath);
+}
+
+export function importImageFromPath(sourcePath: string): Promise<ManagedImage> {
+  return invoke("import_clothing_image", { sourcePath });
 }
 
 export function loadManagedImage(reference: string): Promise<ManagedImage> {
