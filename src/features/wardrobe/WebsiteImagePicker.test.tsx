@@ -16,6 +16,12 @@ import {
   type ManagedImage,
 } from "../../lib/images/managedImages";
 
+vi.mock("@tauri-apps/api/webview", () => ({
+  getCurrentWebview: () => ({
+    onDragDropEvent: vi.fn().mockResolvedValue(() => undefined),
+  }),
+}));
+
 vi.mock("../../lib/images/websiteImages", () => ({
   cancelWebsiteImageBrowser: vi.fn().mockResolvedValue(undefined),
   findWebsiteImages: vi.fn(),

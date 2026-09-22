@@ -1,6 +1,6 @@
 [package]
 name = "wordrop"
-version = "0.5.2"
+version = "0.6.0"
 description = "A local-first desktop wardrobe manager"
 edition = "2021"
 
