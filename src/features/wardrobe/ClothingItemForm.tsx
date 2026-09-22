@@ -174,12 +174,18 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
     requestAnimationFrame(() => urlButton.current?.focus());
   }
 
-  function acceptWebsiteImage(imported: ManagedImage, importedFrom: string) {
+  function acceptWebsiteImage(
+    imported: ManagedImage,
+    importedFrom: string,
+    pageTitle: string | null,
+  ) {
     const previousPending = pendingImageReference;
     setImage(imported);
     setFraming({ zoom: 1, x: 0, y: 0 });
     setPendingImageReference(imported.reference);
     setSourceUrl(importedFrom);
+    if (pageTitle?.trim())
+      setName((current) => (current.trim() ? current : pageTitle.trim()));
     setError(null);
     returnToItem();
     if (!item) analyzeImage(imported.reference);

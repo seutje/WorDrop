@@ -28,6 +28,7 @@ pub struct ImageCandidate {
 #[serde(rename_all = "camelCase")]
 pub struct WebsiteImages {
     pub page_url: String,
+    pub title: Option<String>,
     pub images: Vec<ImageCandidate>,
 }
 
@@ -307,6 +308,29 @@ fn largest_source(value: &str) -> Option<&str> {
 
 pub fn extract(html: &str, page_url: Url) -> WebsiteImages {
     let document = Html::parse_document(html);
+    let title = document
+        .select(&selector("meta[property], meta[name]"))
+        .find(|meta| {
+            meta.value()
+                .attr("property")
+                .or_else(|| meta.value().attr("name"))
+                .is_some_and(|name| name.eq_ignore_ascii_case("og:title"))
+                && meta
+                    .value()
+                    .attr("content")
+                    .is_some_and(|value| !value.trim().is_empty())
+        })
+        .and_then(|meta| meta.value().attr("content"))
+        .map(str::trim)
+        .map(str::to_owned)
+        .or_else(|| {
+            document
+                .select(&selector("title"))
+                .next()
+                .map(|element| element.text().collect::<String>())
+                .map(|value| value.trim().to_owned())
+                .filter(|value| !value.is_empty())
+        });
     let base = document
         .select(&selector("base[href]"))
         .next()
@@ -382,6 +406,7 @@ pub fn extract(html: &str, page_url: Url) -> WebsiteImages {
     candidates.images.sort_by_key(|image| !image.suggested);
     WebsiteImages {
         page_url: page_url.to_string(),
+        title,
         images: candidates.images,
     }
 }
@@ -411,6 +436,7 @@ pub async fn find(value: &str) -> Result<WebsiteImages, String> {
     if crate::image_store::detect_image(&bytes).is_some() {
         return Ok(WebsiteImages {
             page_url: url.to_string(),
+            title: None,
             images: vec![ImageCandidate {
                 url: url.to_string(),
                 label: "Linked photo".into(),
@@ -517,6 +543,19 @@ mod tests {
             ]
         );
         assert_eq!(result.images[0].label, "Blue dress");
+    }
+
+    #[test]
+    fn prefers_og_title_then_page_title() {
+        assert_eq!(
+            page(r#"<title>Fallback &amp; name</title><meta property="og:title" content="  Preferred &amp; name  ">"#).title.as_deref(),
+            Some("Preferred & name")
+        );
+        assert_eq!(
+            page("<title>Fallback &amp; name</title>").title.as_deref(),
+            Some("Fallback & name")
+        );
+        assert_eq!(page("<title>  </title>").title, None);
     }
 
     #[test]

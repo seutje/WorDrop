@@ -1258,12 +1258,13 @@ name is used to break ties.
 - [x] rank and deduplicate candidates, with optional hidden-image reveal
 - [x] validate/download the selected original into managed storage and reuse crop/zoom
 - [x] cover extraction, invalid URLs/images, form preservation, failures, and late-download cleanup
+- [x] fill a blank item name from website `og:title`, falling back to HTML `<title>`, while preserving an existing name
 
 Implementation note: the optional importer normally fetches and parses public
 pages in Rust. Verification responses can open a restricted, temporary WebView2
 window that returns image markup to the same picker. Preview downloads are bounded and
 held in memory; only the chosen original is saved locally. Existing item fields
-are never filled or overwritten by page metadata. Blocked/dynamic pages retain
+other than the item name are never filled or overwritten by page metadata. Blocked/dynamic pages retain
 the manual photo fallback. `DESIGN.md` documents the flow, dependencies, limits,
 and the deliberate expansion beyond the original no-scraping MVP scope.
 

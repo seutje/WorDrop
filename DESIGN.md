@@ -741,9 +741,11 @@ the picker are ignored; a selected photo that finishes importing late is removed
 An already-running request may finish within its timeout, but no more previews
 are scheduled after leaving the picker.
 
-The importer extracts images only. Product names in structured data may label
-previews but do not fill the form. Retailer-specific metadata and login flows
-remain deferred.
+When a website photo is selected, its page's `og:title` fills the item name
+only if the name field is blank; the HTML `<title>` is used when `og:title` is
+absent or empty. An existing name is preserved. The name remains editable.
+Product names in structured data may label previews but do not fill the form.
+Retailer-specific metadata and login flows remain deferred.
 
 When a page returns a browser-verification response (HTTP 403 or 429, or a
 recognized verification interstitial with HTTP 200 and no image candidates), the app

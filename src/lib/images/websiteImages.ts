@@ -2,7 +2,11 @@ import { invoke } from "@tauri-apps/api/core";
 import type { ManagedImage } from "./managedImages";
 
 export type WebsiteImage = { url: string; label: string; suggested: boolean };
-export type WebsiteImages = { pageUrl: string; images: WebsiteImage[] };
+export type WebsiteImages = {
+  pageUrl: string;
+  title: string | null;
+  images: WebsiteImage[];
+};
 
 export function findWebsiteImages(url: string): Promise<WebsiteImages> {
   return invoke("find_website_images", { url });

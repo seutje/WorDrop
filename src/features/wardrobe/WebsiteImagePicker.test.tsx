@@ -35,6 +35,7 @@ const photo = {
 };
 const results: WebsiteImages = {
   pageUrl: "https://shop.example/dress",
+  title: "Blue dress from shop",
   images: [
     { url: "https://cdn.example/dress.png", label: "Dress", suggested: true },
     { url: "https://cdn.example/logo.png", label: "Logo", suggested: false },
@@ -98,6 +99,21 @@ describe("website image import", () => {
     expect(saved).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(discardManagedImage).toHaveBeenCalledWith(photo.reference);
+  });
+
+  it("fills a blank name from the page title", async () => {
+    const user = userEvent.setup();
+    render(<ClothingItemForm onCancel={vi.fn()} onSaved={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: "Get from URL" }));
+    await search(user);
+    const choice = await screen.findByRole("button", {
+      name: "Use image 1: Dress",
+    });
+    await waitFor(() => expect(choice).toBeEnabled());
+    await user.click(choice);
+    expect(await screen.findByLabelText(/Name/)).toHaveValue(
+      "Blue dress from shop",
+    );
   });
 
   it("reveals filtered images and keeps the picker available after a failed download", async () => {
