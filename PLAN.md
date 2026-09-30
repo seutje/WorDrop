@@ -643,7 +643,7 @@ Let the user manually assemble outfits visually.
 - [x] start empty outfit
 - [x] start from selected clothing item
 - [x] add clothing items
-- [x] remove clothing items
+- [x] remove clothing items with confirmation
 - [x] replace clothing items
 - [x] show item images prominently
 - [x] name outfit
@@ -960,7 +960,7 @@ Turn the functional application into something pleasant for daily use.
 - [x] loading states
 - [x] error states
 - [x] empty states
-- [x] confirmation dialogs
+- [x] confirmation dialogs, including in-app item and outfit delete confirmation
 - [x] keyboard/focus improvements
 - [x] image loading optimization
 - [x] large-wardrobe performance check

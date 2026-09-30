@@ -1,4 +1,10 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClothingItem } from "./types/clothing";
@@ -468,7 +474,6 @@ describe("App", () => {
 
   it("deletes an item after confirmation", async () => {
     mocks.list.mockResolvedValue([sampleItem]);
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     const user = userEvent.setup();
     render(<App />);
     await user.click(
@@ -476,6 +481,20 @@ describe("App", () => {
     );
     await user.click(await screen.findByRole("button", { name: "Edit" }));
     await user.click(screen.getByRole("button", { name: "Delete item" }));
+    const confirmation = screen.getByRole("alertdialog", {
+      name: "Delete “Blue jeans”?",
+    });
+    expect(mocks.delete).not.toHaveBeenCalled();
+    await user.click(
+      within(confirmation).getByRole("button", { name: "Cancel" }),
+    );
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Delete item" }));
+    await user.click(
+      within(screen.getByRole("alertdialog")).getByRole("button", {
+        name: "Delete item",
+      }),
+    );
     await waitFor(() => expect(mocks.delete).toHaveBeenCalledWith("item-1"));
   });
 
@@ -606,13 +625,17 @@ describe("App", () => {
 
   it("deletes directly from item details and returns to the closet", async () => {
     mocks.list.mockResolvedValue([sampleItem]);
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     const user = userEvent.setup();
     render(<App />);
     await user.click(
       await screen.findByRole("button", { name: "Open Blue jeans" }),
     );
     await user.click(await screen.findByRole("button", { name: "Delete" }));
+    await user.click(
+      within(screen.getByRole("alertdialog")).getByRole("button", {
+        name: "Delete item",
+      }),
+    );
     await waitFor(() => expect(mocks.delete).toHaveBeenCalledWith("item-1"));
     expect(screen.getByRole("heading", { name: "Closet" })).toBeInTheDocument();
   });
@@ -825,6 +848,11 @@ describe("App", () => {
       ),
     ).toBeInTheDocument();
     await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(
+      within(screen.getByRole("alertdialog")).getByRole("button", {
+        name: "Remove item",
+      }),
+    );
     expect(
       screen.getByText("Add another item to see outfit compatibility."),
     ).toBeInTheDocument();
@@ -877,6 +905,13 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: /White tee/ }));
     expect(screen.getByText("White tee")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Remove" }));
+    const confirmation = screen.getByRole("alertdialog", {
+      name: "Remove “White tee”?",
+    });
+    expect(screen.getByText("White tee")).toBeInTheDocument();
+    await user.click(
+      within(confirmation).getByRole("button", { name: "Remove item" }),
+    );
     expect(screen.queryByText("White tee")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /Add clothing/ }));
     await user.click(screen.getByRole("button", { name: /White tee/ }));
@@ -913,11 +948,15 @@ describe("App", () => {
   it("deletes an outfit without deleting clothing", async () => {
     mocks.list.mockResolvedValue([sampleItem]);
     outfitMocks.list.mockResolvedValue([savedOutfit]);
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole("button", { name: "Outfits" }));
     await user.click(await screen.findByRole("button", { name: "Delete" }));
+    await user.click(
+      within(screen.getByRole("alertdialog")).getByRole("button", {
+        name: "Delete outfit",
+      }),
+    );
     await waitFor(() =>
       expect(outfitMocks.delete).toHaveBeenCalledWith("outfit-1"),
     );

@@ -204,6 +204,36 @@ h1 {
   padding: 28px;
   background: rgb(24 25 24 / 42%);
 }
+.confirmation-backdrop {
+  z-index: 30;
+}
+.confirmation-dialog {
+  width: min(460px, 100%);
+  padding: 28px;
+  border-radius: 18px;
+  background: #faf9f7;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 24%);
+}
+.confirmation-dialog h2 {
+  margin: 4px 0 14px;
+  font-family: Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+}
+.confirmation-copy {
+  color: #62645f;
+  line-height: 1.55;
+}
+.confirmation-copy p {
+  margin: 0;
+}
+.confirmation-copy p + p {
+  margin-top: 8px;
+}
+.confirmation-actions {
+  justify-content: flex-end;
+  margin-top: 26px;
+}
 .image-dialog {
   width: min(560px, 100%);
   padding: 28px;

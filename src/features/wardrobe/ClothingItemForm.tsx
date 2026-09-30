@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { clothingRepository } from "../../lib/database/clothingRepository";
 import {
   chooseAndImportImage,
@@ -119,6 +120,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
   });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [websitePickerOpen, setWebsitePickerOpen] = useState(false);
   const urlButton = useRef<HTMLButtonElement>(null);
   const classificationRequest = useRef(0);
@@ -370,11 +372,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
   }
 
   async function deleteItem() {
-    if (
-      !item ||
-      !window.confirm(`Delete “${item.name}”? This cannot be undone.`)
-    )
-      return;
+    if (!item) return;
     setBusy(true);
     setError(null);
     try {
@@ -623,7 +621,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                     className="danger-button"
                     type="button"
                     disabled={busy}
-                    onClick={deleteItem}
+                    onClick={() => setConfirmingDelete(true)}
                   >
                     Delete item
                   </button>
@@ -650,6 +648,18 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
           </form>
         )}
       </section>
+      {confirmingDelete && item && (
+        <ConfirmDialog
+          title={`Delete “${item.name}”?`}
+          confirmLabel="Delete item"
+          busy={busy}
+          onCancel={() => setConfirmingDelete(false)}
+          onConfirm={() => void deleteItem()}
+        >
+          <p>This item and its managed photo will be removed permanently.</p>
+          <p>Saved outfits will be kept, with this item removed from them.</p>
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

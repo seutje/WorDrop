@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import {
   defaultOutfitSort,
   emptyOutfitFilters,
@@ -335,6 +336,12 @@ export function OutfitsPage({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [favoriteBusyIds, setFavoriteBusyIds] = useState<string[]>([]);
+  const [outfitToDelete, setOutfitToDelete] = useState<Outfit | null>(null);
+  const [deletingOutfit, setDeletingOutfit] = useState(false);
+  const [itemToRemove, setItemToRemove] = useState<{
+    item: ClothingItem;
+    index: number;
+  } | null>(null);
   const [libraryFilters, setLibraryFilters] =
     useState<OutfitFilters>(emptyOutfitFilters);
   const [librarySort, setLibrarySort] = useState<OutfitSort>(defaultOutfitSort);
@@ -535,19 +542,19 @@ export function OutfitsPage({
   }
 
   async function deleteOutfit(outfit: Outfit) {
-    if (
-      !window.confirm(`Delete “${outfit.name}”? Clothing items will be kept.`)
-    )
-      return;
     setError(null);
+    setDeletingOutfit(true);
     try {
       await outfitRepository.delete(outfit.id);
       setOutfits((current) =>
         current.filter((entry) => entry.id !== outfit.id),
       );
       setNotice("Outfit deleted. Your clothing items were kept.");
+      setOutfitToDelete(null);
     } catch {
       setError("The outfit could not be deleted. Nothing was changed.");
+    } finally {
+      setDeletingOutfit(false);
     }
   }
 
@@ -824,7 +831,7 @@ export function OutfitsPage({
                       </button>
                       <button
                         type="button"
-                        onClick={() => void deleteOutfit(outfit)}
+                        onClick={() => setOutfitToDelete(outfit)}
                       >
                         Delete
                       </button>
@@ -846,6 +853,18 @@ export function OutfitsPage({
               </div>
             )}
           </>
+        )}
+        {outfitToDelete && (
+          <ConfirmDialog
+            title={`Delete “${outfitToDelete.name}”?`}
+            confirmLabel="Delete outfit"
+            busy={deletingOutfit}
+            onCancel={() => setOutfitToDelete(null)}
+            onConfirm={() => void deleteOutfit(outfitToDelete)}
+          >
+            <p>The saved outfit will be removed permanently.</p>
+            <p>Your clothing items will stay in your closet.</p>
+          </ConfirmDialog>
         )}
       </section>
     );
@@ -984,11 +1003,7 @@ export function OutfitsPage({
               <OutfitItemTile
                 item={item}
                 key={`${item.id}-${index}`}
-                onRemove={() =>
-                  setSelectedIds((current) =>
-                    current.filter((_, itemIndex) => itemIndex !== index),
-                  )
-                }
+                onRemove={() => setItemToRemove({ item, index })}
                 onReplace={() => setPickerIndex(index)}
               />
             ))}
@@ -1019,6 +1034,24 @@ export function OutfitsPage({
           onChoose={chooseItem}
           onClose={() => setPickerIndex(undefined)}
         />
+      )}
+      {itemToRemove && (
+        <ConfirmDialog
+          title={`Remove “${itemToRemove.item.name}”?`}
+          confirmLabel="Remove item"
+          onCancel={() => setItemToRemove(null)}
+          onConfirm={() => {
+            setSelectedIds((current) =>
+              current.filter(
+                (_, itemIndex) => itemIndex !== itemToRemove.index,
+              ),
+            );
+            setItemToRemove(null);
+          }}
+        >
+          <p>This item will be removed from the outfit.</p>
+          <p>It will stay safely in your closet.</p>
+        </ConfirmDialog>
       )}
     </section>
   );

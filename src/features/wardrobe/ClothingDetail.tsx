@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { clothingRepository } from "../../lib/database/clothingRepository";
 import { outfitRepository } from "../../lib/database/outfitRepository";
 import { loadManagedImage } from "../../lib/images/managedImages";
@@ -58,6 +59,7 @@ export function ClothingDetail({
   const [item, setItem] = useState<ClothingItem | null>();
   const [candidates, setCandidates] = useState<ClothingItem[]>([]);
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [recommendationsError, setRecommendationsError] = useState(false);
   const [includeWishlist, setIncludeWishlist] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>();
@@ -158,11 +160,7 @@ export function ClothingDetail({
   }, [item]);
 
   async function deleteItem() {
-    if (
-      !item ||
-      !window.confirm(`Delete “${item.name}”? This cannot be undone.`)
-    )
-      return;
+    if (!item) return;
     setDeleting(true);
     setError(null);
     try {
@@ -303,7 +301,7 @@ export function ClothingDetail({
               className="danger-button"
               type="button"
               disabled={deleting}
-              onClick={deleteItem}
+              onClick={() => setConfirmingDelete(true)}
             >
               {deleting ? "Deleting…" : "Delete"}
             </button>
@@ -317,6 +315,18 @@ export function ClothingDetail({
           </div>
         </div>
       </div>
+      {confirmingDelete && (
+        <ConfirmDialog
+          title={`Delete “${item.name}”?`}
+          confirmLabel="Delete item"
+          busy={deleting}
+          onCancel={() => setConfirmingDelete(false)}
+          onConfirm={() => void deleteItem()}
+        >
+          <p>This item and its managed photo will be removed permanently.</p>
+          <p>Saved outfits will be kept, with this item removed from them.</p>
+        </ConfirmDialog>
+      )}
       <div className="detail-sections">
         {wishlistIntegration && (
           <section className="detail-panel wishlist-integration-panel">
