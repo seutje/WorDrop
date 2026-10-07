@@ -5,6 +5,7 @@ pub mod image_classification_vocabulary;
 mod image_store;
 mod outfits;
 mod settings;
+mod wear;
 mod website_browser;
 mod website_import;
 
@@ -17,6 +18,36 @@ use tauri::{Manager, State};
 struct Database(Mutex<Connection>);
 struct AppDataDirectory(PathBuf);
 
+#[tauri::command]
+fn list_wear_events(database: State<'_, Database>) -> Result<Vec<wear::WearEvent>, String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "Your wardrobe is busy. Try again.".to_string())?;
+    wear::list(&connection)
+}
+#[tauri::command]
+fn record_wear(
+    database: State<'_, Database>,
+    id: String,
+    target_id: String,
+    is_outfit: bool,
+    worn_on: String,
+) -> Result<(), String> {
+    let mut connection = database
+        .0
+        .lock()
+        .map_err(|_| "Your wardrobe is busy. Try again.".to_string())?;
+    wear::record(&mut connection, &id, &target_id, is_outfit, &worn_on)
+}
+#[tauri::command]
+fn delete_wear_event(database: State<'_, Database>, id: String) -> Result<(), String> {
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "Your wardrobe is busy. Try again.".to_string())?;
+    wear::delete(&connection, &id)
+}
 #[tauri::command]
 async fn find_website_images(
     app: tauri::AppHandle,
@@ -379,6 +410,9 @@ pub fn run() {
             load_clothing_image,
             save_display_image,
             discard_clothing_image,
+            list_wear_events,
+            record_wear,
+            delete_wear_event,
             create_outfit,
             get_outfit,
             list_outfits,

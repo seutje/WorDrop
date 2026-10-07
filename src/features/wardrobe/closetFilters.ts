@@ -7,6 +7,7 @@ import type {
   Season,
 } from "../../types/clothing";
 import { clothingCategories } from "../../types/clothing";
+import { monthCutoff } from "../../lib/wearHistory";
 
 export type ClosetFilters = {
   search: string;
@@ -15,6 +16,7 @@ export type ClosetFilters = {
   color: ClothingColor | "";
   season: Season | "";
   occasion: Occasion | "";
+  notWornMonths: "" | "1" | "3" | "6" | "12";
 };
 
 export type ClosetSort =
@@ -29,13 +31,19 @@ export const emptyClosetFilters: ClosetFilters = {
   color: "",
   season: "",
   occasion: "",
+  notWornMonths: "",
 };
 
 export function filterClothingItems(
   items: readonly ClothingItem[],
   filters: ClosetFilters,
+  lastWorn: Readonly<Record<string, string>> = {},
+  today = new Date(),
 ): ClothingItem[] {
   const search = filters.search.trim().toLocaleLowerCase();
+  const cutoff = filters.notWornMonths
+    ? monthCutoff(Number(filters.notWornMonths), today)
+    : "";
   return items.filter(
     (item) =>
       (!search || item.name.toLocaleLowerCase().includes(search)) &&
@@ -43,7 +51,10 @@ export function filterClothingItems(
       (!filters.ownership || item.ownership === filters.ownership) &&
       (!filters.color || item.colors.includes(filters.color)) &&
       (!filters.season || item.seasons.includes(filters.season)) &&
-      (!filters.occasion || item.occasions.includes(filters.occasion)),
+      (!filters.occasion || item.occasions.includes(filters.occasion)) &&
+      (!cutoff ||
+        (item.ownership === "owned" &&
+          (!lastWorn[item.id] || lastWorn[item.id] < cutoff))),
   );
 }
 

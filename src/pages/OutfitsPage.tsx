@@ -1,3 +1,4 @@
+import { WearHistory } from "../components/WearHistory";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import {
@@ -944,6 +945,14 @@ export function OutfitsPage({
           )}
         </aside>
         <div className="outfit-workspace">
+          {activeOutfitId && (
+            <WearHistory
+              key={activeOutfitId}
+              targetId={activeOutfitId}
+              isOutfit
+              disabled={dirty || saving}
+            />
+          )}
           <div className="outfit-fields">
             <label>
               <span>Outfit name</span>

@@ -12,6 +12,8 @@ import {
   type ClosetSort,
 } from "../features/wardrobe/closetFilters";
 import { clothingRepository } from "../lib/database/clothingRepository";
+import { wearRepository } from "../lib/database/wearRepository";
+import { lastWornByItem } from "../lib/wearHistory";
 import { ensureDisplayImages } from "../lib/images/ensureDisplayImages";
 import {
   clothingCategories,
@@ -44,9 +46,13 @@ export function ClosetPage({
   const [notice, setNotice] = useState<string | null>(null);
   const [filters, setFilters] = useState<ClosetFilters>(emptyClosetFilters);
   const [sort, setSort] = useState<ClosetSort>(defaultClosetSort);
+  const [lastWorn, setLastWorn] = useState<Record<string, string>>({});
+  const [wearLoaded, setWearLoaded] = useState(false);
+  const [wearError, setWearError] = useState(false);
   const visibleItems = useMemo(
-    () => sortClothingItems(filterClothingItems(items, filters), sort),
-    [items, filters, sort],
+    () =>
+      sortClothingItems(filterClothingItems(items, filters, lastWorn), sort),
+    [items, filters, sort, lastWorn],
   );
   const filtersActive = hasActiveFilters(filters);
 
@@ -88,6 +94,28 @@ export function ClosetPage({
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    wearRepository
+      .list()
+      .then((events) => {
+        if (active) {
+          setLastWorn(lastWornByItem(events));
+          setWearLoaded(true);
+          setWearError(false);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setWearError(true);
+          setFilters((current) => ({ ...current, notWornMonths: "" }));
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [selectedItemId]);
 
   function openAdd() {
     setEditingItem(undefined);
@@ -213,6 +241,27 @@ export function ClosetPage({
             </label>
             <div className="filter-row" aria-label="Closet filters">
               <label>
+                <span className="sr-only">Wear frequency</span>
+                <select
+                  aria-label="Wear frequency"
+                  value={filters.notWornMonths}
+                  disabled={!wearLoaded || wearError}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      notWornMonths: event.target
+                        .value as ClosetFilters["notWornMonths"],
+                    }))
+                  }
+                >
+                  <option value="">Any wear history</option>
+                  <option value="1">Not worn in the past month</option>
+                  <option value="3">Not worn in the past 3 months</option>
+                  <option value="6">Not worn in the past 6 months</option>
+                  <option value="12">Not worn in the past year</option>
+                </select>
+              </label>
+              <label>
                 <span className="sr-only">Category</span>
                 <select
                   value={filters.category}
@@ -336,6 +385,15 @@ export function ClosetPage({
             </div>
           </div>
           <div className="closet-results-heading">
+            {wearError && (
+              <p role="alert">
+                Wear history could not be loaded. Reopen the closet to use wear
+                filters.
+              </p>
+            )}
+            {filters.notWornMonths && (
+              <p>Owned pieces only, including those with no recorded wears.</p>
+            )}
             <p>
               {visibleItems.length}{" "}
               {visibleItems.length === 1 ? "item" : "items"}

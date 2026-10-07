@@ -23,6 +23,11 @@ const mocks = vi.hoisted(() => ({
   discardImage: vi.fn(),
   saveDisplayImage: vi.fn(),
 }));
+const wearMocks = vi.hoisted(() => ({
+  list: vi.fn(),
+  record: vi.fn(),
+  delete: vi.fn(),
+}));
 const outfitMocks = vi.hoisted(() => ({
   create: vi.fn(),
   get: vi.fn(),
@@ -97,6 +102,10 @@ vi.mock("@tauri-apps/plugin-opener", () => ({ openUrl: openerMocks.openUrl }));
 
 import App from "./App";
 
+vi.mock("./lib/database/wearRepository", () => ({
+  wearRepository: wearMocks,
+}));
+
 const sampleItem: ClothingItem = {
   id: "item-1",
   name: "Blue jeans",
@@ -130,6 +139,7 @@ afterEach(() => {
 });
 beforeEach(() => {
   vi.clearAllMocks();
+  wearMocks.list.mockResolvedValue([]);
   mocks.list.mockResolvedValue([]);
   mocks.get.mockResolvedValue(sampleItem);
   mocks.create.mockResolvedValue(sampleItem);
@@ -190,6 +200,55 @@ async function openBackup(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("App", () => {
+  it("filters unused owned pieces using propagated outfit wears and clears the filter", async () => {
+    mocks.list.mockResolvedValue([
+      sampleItem,
+      { ...sampleItem, id: "never", name: "Unworn shirt" },
+      {
+        ...sampleItem,
+        id: "wish",
+        name: "Wishlist shirt",
+        ownership: "wishlist",
+      },
+    ]);
+    wearMocks.list.mockResolvedValue([
+      {
+        id: "wear",
+        wornOn: "9999-01-01",
+        outfitId: "outfit",
+        sourceName: "Weekend",
+        isOutfit: true,
+        itemIds: [sampleItem.id],
+        createdAt: "",
+      },
+    ]);
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("button", { name: "Open Blue jeans" });
+    await waitFor(() =>
+      expect(
+        screen.getByRole("combobox", { name: "Wear frequency" }),
+      ).toBeEnabled(),
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Wear frequency" }),
+      "1",
+    );
+    expect(
+      screen.queryByRole("button", { name: "Open Blue jeans" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open Unworn shirt" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open Wishlist shirt" }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(
+      screen.getByRole("button", { name: "Open Blue jeans" }),
+    ).toBeInTheDocument();
+  });
+
   it("toggles a closet item's favorite heart without opening the item", async () => {
     mocks.list.mockResolvedValue([sampleItem]);
     const user = userEvent.setup();

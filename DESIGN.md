@@ -1750,3 +1750,28 @@ Current major decisions:
 - user testing at the end of each implementation phase
 
 These decisions should remain stable unless real usage provides a reason to change them.
+
+## Wear tracking (promoted to current scope)
+
+Wear history is stored locally in migration 0010 as dated `wear_events` and
+`wear_event_items`, separate from clothing/outfit metadata. Each event has a stable
+ID, local calendar date (YYYY-MM-DD), creation timestamp, source kind/name, optional
+outfit reference, and a snapshot of the clothing IDs worn. Recording a saved outfit
+atomically records all its current pieces. Later outfit edits do not change history.
+Dates must be valid and no later than today. Duplicate outfit/date and individual
+piece/date entries are rejected. Distinct sources on the same date remain separate
+entries; displayed wear totals count distinct days rather than inflating statistics.
+
+Item details and saved outfit builders offer Mark as worn, a date picker defaulting
+to today, last-worn information, and full history. Unsaved outfit edits must be saved
+before recording. Confirmed removal of an outfit event removes its propagated wears,
+preserving unrelated entries. Deleting an outfit keeps its recorded piece history and
+source name; deleting clothing removes its links, preserving other pieces' history.
+Database snapshots in backups automatically include wear history.
+
+The closet offers Not worn in the past month, 3 months, 6 months, or year. Filters
+show owned pieces with no history or a last-worn date strictly before the inclusive
+cutoff. Calendar month subtraction clamps to the target month's last day. Wishlist
+pieces are excluded from these filters. Wear history load failures disable filters
+rather than incorrectly classifying pieces as never worn. Statistics and changes to
+suggestion ranking remain future work.

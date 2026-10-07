@@ -135,6 +135,7 @@ describe("filterClothingItems", () => {
 
   it("combines every active filter", () => {
     const filters: ClosetFilters = {
+      notWornMonths: "",
       search: "black",
       category: "dress",
       ownership: "wishlist",

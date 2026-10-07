@@ -239,27 +239,28 @@ fn validate_database(connection: &Connection, root: &Path) -> Result<(), String>
         return Err("The backup database is damaged.".into());
     }
     for item in database::list(connection)? {
-      for image_reference in [Some(item.image_path.clone()), item.display_image_path.clone()]
-          .into_iter()
-          .flatten()
-      {
-        let reference = Path::new(&image_reference);
-        if reference.is_absolute()
-            || !reference
-                .components()
-                .all(|part| matches!(part, std::path::Component::Normal(_)))
-            || !image_reference
-                .replace('\\', "/")
-                .starts_with("images/")
+        for image_reference in [
+            Some(item.image_path.clone()),
+            item.display_image_path.clone(),
+        ]
+        .into_iter()
+        .flatten()
         {
-            return Err("The backup contains an invalid managed image reference.".into());
+            let reference = Path::new(&image_reference);
+            if reference.is_absolute()
+                || !reference
+                    .components()
+                    .all(|part| matches!(part, std::path::Component::Normal(_)))
+                || !image_reference.replace('\\', "/").starts_with("images/")
+            {
+                return Err("The backup contains an invalid managed image reference.".into());
+            }
+            let bytes = fs::read(root.join(reference))
+                .map_err(|_| format!("The backup is missing the image for ‘{}’.", item.name))?;
+            if image_store::detect_image(&bytes).is_none() {
+                return Err(format!("The backup image for ‘{}’ is damaged.", item.name));
+            }
         }
-        let bytes = fs::read(root.join(reference))
-            .map_err(|_| format!("The backup is missing the image for ‘{}’.", item.name))?;
-        if image_store::detect_image(&bytes).is_none() {
-            return Err(format!("The backup image for ‘{}’ is damaged.", item.name));
-        }
-      }
     }
     Ok(())
 }
@@ -441,6 +442,7 @@ mod tests {
         )
         .unwrap();
 
+        crate::wear::record(&mut connection, "wear-1", "outfit-1", true, "2020-01-01").unwrap();
         let exported = export(&root, &connection, &archive_path).unwrap();
         assert_eq!(exported.clothing_items, 1);
         assert_eq!(exported.outfits, 1);
@@ -456,6 +458,10 @@ mod tests {
         assert_eq!(restored.clothing_items, 1);
         assert_eq!(restored.outfits, 1);
         assert_eq!(restored.images, 2);
+        let wear = crate::wear::list(&connection).unwrap();
+        assert_eq!(wear.len(), 1);
+        assert_eq!(wear[0].worn_on, "2020-01-01");
+        assert_eq!(wear[0].item_ids, vec!["item-1"]);
         let restored_item = database::get(&connection, "item-1").unwrap().unwrap();
         assert_eq!(restored_item.colors, vec!["blue"]);
         assert_eq!(restored_item.notes.as_deref(), Some("Favorite"));

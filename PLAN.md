@@ -1329,10 +1329,33 @@ record working image imports, not retailer-specific name or metadata extraction.
 
 ## Wear Tracking
 
-- [ ] mark outfit as worn
-- [ ] worn date history
+- [x] mark outfit as worn
+- [x] mark individual pieces as worn
+- [x] propagate outfit wears to a snapshot of its pieces
+- [x] worn date history with confirmed correction/removal
+- [x] not-worn overview filters for 1, 3, 6, and 12 calendar months
 - [ ] recently worn filter
 - [ ] avoid-repeat suggestions
+
+Implementation note: wear tracking was promoted into current scope by the owner.
+Migration 0010 adds local dated events and clothing snapshot links, persisted
+through backups. Item details and saved outfit builders show last-worn dates,
+distinct wear days, and full source-labeled histories. Recording requires a
+valid date today or earlier; duplicate source/date entries are rejected. Unsaved
+outfits must be saved first. Removing an outfit event is confirmed and removes
+its propagated wears while preserving unrelated history. Later outfit edits do
+not change recorded pieces, and deleting an outfit preserves its pieces? wear
+history. Closet filters include never-recorded owned clothing and exclude
+wishlist clothing. Calendar-month cutoffs clamp month ends. History load errors
+disable filters. Statistics and suggestion-ranking changes remain deferred.
+
+Validation: 93 frontend tests and 30 native tests passed (2 existing optional
+native tests remain ignored). Formatting for changed frontend files, Rust
+formatting, lint, type checks, and the production build passed. Native coverage
+includes propagation, snapshots, duplicates, deletion, invalid dates, migration
+idempotence, and backup/restore. UI coverage includes recording, unsaved-outfit
+guards, confirmed propagated removal, and closet filtering/clearing. Visual
+browser inspection remains unverified because no browser was available.
 
 ## Image Improvements
 

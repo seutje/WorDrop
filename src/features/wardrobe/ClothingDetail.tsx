@@ -1,3 +1,4 @@
+import { WearHistory } from "../../components/WearHistory";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
@@ -327,6 +328,7 @@ export function ClothingDetail({
           <p>Saved outfits will be kept, with this item removed from them.</p>
         </ConfirmDialog>
       )}
+      <WearHistory targetId={item.id} />
       <div className="detail-sections">
         {wishlistIntegration && (
           <section className="detail-panel wishlist-integration-panel">
