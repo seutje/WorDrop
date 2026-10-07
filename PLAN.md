@@ -1407,6 +1407,16 @@ local classifier. Invalid drops preserve the current photo.
 
 These must remain optional.
 
+Temporary evaluation export (2026-10-07): exported 20 eligible managed original
+images and saved category/subtype labels locally under `evaluation/`, using the
+owner-provided `wordrop-clothing-v1` taxonomy. All saved labels are treated as
+ground truth at the owner's request. Ten incompatible optional subtypes are
+blank in the export and recorded separately; no replacements were guessed.
+Excluded 30 multi-frame JPEG/MPO originals, 27 of which also exceed 20 million
+pixels. Exported copies passed full decoding, byte-hash verification, taxonomy
+checks, and visual eligibility review. Dataset files, helper tools, and images
+are git-ignored. No classifier baseline was run and no accuracy is claimed.
+
 - [x] suggest category from photo locally with six-way FashionCLIP inference
 - [ ] suggest colors from photo
 - [ ] suggest material/style tags

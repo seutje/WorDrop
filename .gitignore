@@ -25,3 +25,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Temporary private classifier evaluation data
+/evaluation/*
+!/evaluation/README.md
