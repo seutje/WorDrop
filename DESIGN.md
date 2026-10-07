@@ -385,6 +385,30 @@ Functions:
 - sort by newest, oldest, or name
 - mark favorite outfits and sort favorites first
 
+### Insights
+
+The left navigation includes an offline Insights destination, promoted from the
+post-MVP backlog at the owner's request. It derives summaries from the existing
+clothing, outfit, and wear repositories without additional persistence or dependencies.
+Owned is the default selection; Wishlist and All items are also available.
+
+Visual count/percentage bars cover categories, subtypes within each category,
+colors, occasions, seasons, materials, patterns, style tags, and sizes. Missing
+metadata is included as Not specified. Free-form values are trimmed and grouped
+without case sensitivity. Each distinct tag counts once per piece; multi-tag
+percentages may sum to more than 100%, with this explained on the page.
+
+Wear summaries cover owned pieces only and support all time or the past 1, 3, 6,
+and 12 calendar months. Cutoffs are inclusive and use the existing month-end
+clamping rule. Counts deduplicate individual and propagated outfit wears by
+piece/date. Most worn excludes zero counts; least worn includes them. Zero means
+no recorded wears in the selected range, not proof that an item has never been worn.
+The page shows wardrobe wear coverage, unrecorded pieces, distinct active days,
+and total piece wear days. Rankings link to clothing details and expand beyond
+the initial five entries. All-time saved outfit membership is shown separately,
+including pieces absent from saved outfits. Failed loads show a retry state
+instead of misleading zero totals. Opening Insights reloads the current data.
+
 ### Suggestions
 
 Suggestions are primarily contextual rather than a completely separate destination.
@@ -1645,7 +1669,7 @@ Potential future features, roughly ordered from low-risk to ambitious:
 - worn-history tracking
 - outfit notes
 - outfit duplicate
-- wardrobe statistics
+- additional wardrobe insights beyond the implemented breakdowns and wear summaries
 - better backup and restore
 - image crop/rotate
 - thumbnail optimization
@@ -1773,5 +1797,5 @@ The closet offers Not worn in the past month, 3 months, 6 months, or year. Filte
 show owned pieces with no history or a last-worn date strictly before the inclusive
 cutoff. Calendar month subtraction clamps to the target month's last day. Wishlist
 pieces are excluded from these filters. Wear history load failures disable filters
-rather than incorrectly classifying pieces as never worn. Statistics and changes to
-suggestion ranking remain future work.
+rather than incorrectly classifying pieces as never worn. The Insights destination
+now summarizes this history; changes to suggestion ranking remain future work.

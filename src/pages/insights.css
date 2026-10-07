@@ -1,0 +1,145 @@
+.insight-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 24px 0;
+}
+.insight-filters label {
+  display: grid;
+  gap: 8px;
+  color: #555653;
+  font-size: 14px;
+}
+.insight-filters select {
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1px solid #d8d5cf;
+  border-radius: 8px;
+  background: white;
+}
+.insight-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+.insight-summary > div {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 20px;
+  background: #efeee9;
+  border-radius: 12px;
+}
+.insight-summary strong {
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: 500;
+}
+.insight-summary span {
+  color: #555653;
+  font-size: 13px;
+}
+.insight-section-title {
+  margin: 36px 0 12px;
+  font-size: 22px;
+}
+.insight-note {
+  color: #656660;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.insight-panel {
+  padding: 24px;
+  border: 1px solid #dedbd5;
+  border-radius: 12px;
+  background: #fff;
+  min-width: 0;
+}
+.insight-panel h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+.insight-panel > p {
+  color: #656660;
+  line-height: 1.6;
+}
+.insight-bars {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  margin: 20px 0 0;
+  list-style: none;
+}
+.insight-bar-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 7px;
+  font-size: 13px;
+}
+.insight-bar-label > span:first-child {
+  overflow-wrap: anywhere;
+}
+.insight-bar-label > span:last-child {
+  flex-shrink: 0;
+  color: #656660;
+}
+.insight-track {
+  height: 8px;
+  background: #efeee9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.insight-track > div {
+  height: 100%;
+  background: #698570;
+  border-radius: inherit;
+}
+.insight-ranking {
+  padding: 0;
+  margin: 0 0 18px;
+  list-style: none;
+}
+.insight-ranking li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: space-between;
+  border-bottom: 1px solid #eeece7;
+  padding: 12px 0;
+}
+.insight-ranking button {
+  display: grid;
+  gap: 5px;
+  padding: 3px;
+  color: #242525;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.insight-ranking button:hover strong {
+  text-decoration: underline;
+}
+.insight-ranking small {
+  color: #656660;
+  line-height: 1.5;
+}
+.insight-ranking li > span {
+  font-size: 12px;
+  color: #555653;
+  flex-shrink: 0;
+}
+@media (max-width: 1100px) {
+  .insight-grid {
+    grid-template-columns: 1fr;
+  }
+}

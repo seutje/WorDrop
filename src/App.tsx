@@ -4,11 +4,13 @@ import { UpdatePrompt } from "./components/UpdatePrompt";
 import { ClosetPage } from "./pages/ClosetPage";
 import { OutfitsPage } from "./pages/OutfitsPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { InsightsPage } from "./pages/InsightsPage";
 import { getAppSettings, type AppSettings } from "./lib/settings";
 import "./styles/global.css";
 
 function App() {
   const [activeSection, setActiveSection] = useState<AppSection>("closet");
+  const [closetItemId, setClosetItemId] = useState<string>();
   const [outfitItemIds, setOutfitItemIds] = useState<string[]>([]);
   const [outfitId, setOutfitId] = useState<string>();
   const [outfitRequestKey, setOutfitRequestKey] = useState(0);
@@ -39,6 +41,7 @@ function App() {
       setOutfitRequestKey((key) => key + 1);
     }
     setActiveSection(section);
+    if (section === "closet") setClosetItemId(undefined);
   }
   function startOutfit(itemIds: string[]) {
     setOutfitItemIds(itemIds);
@@ -57,7 +60,11 @@ function App() {
     <>
       <AppShell activeSection={activeSection} onNavigate={navigate}>
         {activeSection === "closet" ? (
-          <ClosetPage onStartOutfit={startOutfit} onOpenOutfit={openOutfit} />
+          <ClosetPage
+            initialItemId={closetItemId}
+            onStartOutfit={startOutfit}
+            onOpenOutfit={openOutfit}
+          />
         ) : activeSection === "outfits" ? (
           <OutfitsPage
             key={outfitRequestKey}
@@ -65,6 +72,13 @@ function App() {
             initialOutfitId={outfitId}
             onDirtyChange={handleDirtyChange}
             allowMultipleBottoms={settings.allowMultipleBottoms}
+          />
+        ) : activeSection === "insights" ? (
+          <InsightsPage
+            onInspectItem={(id) => {
+              setClosetItemId(id);
+              setActiveSection("closet");
+            }}
           />
         ) : (
           <SettingsPage settings={settings} onSettingsChange={setSettings} />

@@ -1320,11 +1320,31 @@ record working image imports, not retailer-specific name or metadata extraction.
 
 ## Wardrobe Insights
 
-- [ ] items rarely used in outfits
+- [x] items rarely used in outfits (membership counts and pieces absent from saved outfits)
 - [ ] items with few compatible matches
 - [ ] most versatile items
-- [ ] wardrobe color distribution
-- [ ] category distribution
+- [x] wardrobe color distribution
+- [x] category distribution
+- [x] Insights destination in left navigation
+- [x] subtype breakdown within each category
+- [x] occasion, season, material, pattern, style-tag, and size distributions
+- [x] owned/wishlist/all selection with counts, percentages, and missing metadata
+- [x] most/least worn owned pieces with distinct-day totals and calendar-period filters
+- [x] wardrobe wear coverage and recorded activity totals
+- [x] ranking links to clothing details, expandable lists, and loading/empty/retry states
+
+Implementation note: Insights reads existing local repositories and does not change
+the schema or suggestion scoring. Tag counts deduplicate each piece's normalized
+values; multi-tag percentages use selected item count. Wear counts deduplicate
+individual and outfit entries per piece/date, exclude wishlist and deleted pieces,
+and include never-recorded pieces in least worn. Saved outfit membership remains
+separate from wear history. See DESIGN.md for scope and counting rules.
+
+Validation: all 103 frontend tests, lint, TypeScript checks, the production build,
+and changed-source formatting checks passed. Coverage includes tag normalization,
+ownership/subtype grouping, distinct-day wears, inclusive cutoffs, stable rankings,
+outfit usage, empty states, navigation to details, and load-failure retry. Visual
+browser verification remains unconfirmed because no browser was available.
 - [ ] wishlist value comparison
 
 ## Wear Tracking
@@ -1347,7 +1367,7 @@ its propagated wears while preserving unrelated history. Later outfit edits do
 not change recorded pieces, and deleting an outfit preserves its pieces? wear
 history. Closet filters include never-recorded owned clothing and exclude
 wishlist clothing. Calendar-month cutoffs clamp month ends. History load errors
-disable filters. Statistics and suggestion-ranking changes remain deferred.
+disable filters. Insights now summarizes this history; suggestion-ranking changes remain deferred.
 
 Validation: 93 frontend tests and 30 native tests passed (2 existing optional
 native tests remain ignored). Formatting for changed frontend files, Rust

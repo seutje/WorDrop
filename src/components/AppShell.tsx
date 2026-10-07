@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type AppSection = "closet" | "outfits" | "settings";
+export type AppSection = "closet" | "outfits" | "insights" | "settings";
 
 type AppShellProps = {
   activeSection: AppSection;
@@ -12,6 +12,7 @@ const sections: ReadonlyArray<{ id: AppSection; label: string; icon: string }> =
   [
     { id: "closet", label: "Closet", icon: "◦" },
     { id: "outfits", label: "Outfits", icon: "♧" },
+    { id: "insights", label: "Insights", icon: "▥" },
     { id: "settings", label: "Settings", icon: "⚙" },
   ];
 
@@ -34,6 +35,7 @@ export function AppShell({
             <button
               className="nav-item"
               data-active={activeSection === section.id}
+              aria-current={activeSection === section.id ? "page" : undefined}
               key={section.id}
               onClick={() => onNavigate(section.id)}
               type="button"

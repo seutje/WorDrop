@@ -31,15 +31,19 @@ const titleCase = (value: string) =>
     .join(" ");
 
 export function ClosetPage({
+  initialItemId,
   onStartOutfit,
   onOpenOutfit,
 }: {
+  initialItemId?: string;
   onStartOutfit: (itemIds: string[]) => void;
   onOpenOutfit: (outfitId: string) => void;
 }) {
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [editingItem, setEditingItem] = useState<ClothingItem>();
-  const [selectedItemId, setSelectedItemId] = useState<string>();
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(
+    initialItemId,
+  );
   const [isFormOpen, setFormOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

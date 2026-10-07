@@ -200,6 +200,77 @@ async function openBackup(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("App", () => {
+  it("opens Insights, filters ownership, and opens a ranked piece", async () => {
+    const user = userEvent.setup();
+    mocks.list.mockResolvedValue([
+      sampleItem,
+      {
+        ...sampleItem,
+        id: "wish",
+        name: "Wishlist shirt",
+        ownership: "wishlist",
+      },
+    ]);
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Insights" }));
+    expect(
+      await screen.findByRole("heading", { name: "Insights" }),
+    ).toBeInTheDocument();
+    const least = await screen.findByRole("region", { name: "Least worn" });
+    expect(within(least).getByText("Blue jeans")).toBeInTheDocument();
+    await user.selectOptions(
+      screen.getByLabelText("Wardrobe selection"),
+      "wishlist",
+    );
+    expect(
+      screen.queryByRole("region", { name: "Least worn" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Choose Owned or All items to see wear insights."),
+    ).toBeInTheDocument();
+    await user.selectOptions(
+      screen.getByLabelText("Wardrobe selection"),
+      "owned",
+    );
+    await user.click(
+      within(screen.getByRole("region", { name: "Least worn" })).getByRole(
+        "button",
+        { name: /Blue jeans/ },
+      ),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Blue jeans" }),
+    ).toBeInTheDocument();
+  });
+
+  it("does not show false zero wear counts after a failed load and can retry", async () => {
+    const user = userEvent.setup();
+    mocks.list.mockResolvedValue([sampleItem]);
+    render(<App />);
+    await screen.findByRole("button", { name: "Open Blue jeans" });
+    wearMocks.list.mockRejectedValueOnce(new Error("Unavailable"));
+    await user.click(screen.getByRole("button", { name: "Insights" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "insights could not be loaded",
+    );
+    expect(
+      screen.queryByRole("region", { name: "Least worn" }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(
+      await screen.findByRole("region", { name: "Least worn" }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a useful Insights empty state", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Insights" }));
+    expect(
+      await screen.findByText("Your wardrobe story starts here"),
+    ).toBeInTheDocument();
+  });
+
   it("filters unused owned pieces using propagated outfit wears and clears the filter", async () => {
     mocks.list.mockResolvedValue([
       sampleItem,
