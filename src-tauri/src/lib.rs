@@ -3,6 +3,7 @@ mod database;
 pub mod image_classification;
 pub mod image_classification_vocabulary;
 mod image_store;
+pub mod imajev;
 mod outfits;
 mod settings;
 mod wear;
@@ -87,6 +88,7 @@ async fn import_website_image(
 #[tauri::command]
 async fn classify_clothing_image(
     app_data: State<'_, AppDataDirectory>,
+    database: State<'_, Database>,
     classifier: State<'_, image_classification::State>,
     reference: String,
 ) -> Result<image_classification::ClassificationResult, String> {
@@ -100,6 +102,22 @@ async fn classify_clothing_image(
         return Err("The clothing image reference is invalid.".into());
     }
     let path = app_data.0.join(relative);
+    let selected = {
+        let connection = database
+            .0
+            .lock()
+            .map_err(|_| "The local settings are unavailable.".to_string())?;
+        settings::get(&connection)?.classifier
+    };
+    if selected == "imajev" {
+        let data = app_data.0.clone();
+        let fallback = classifier.inner().clone();
+        return tauri::async_runtime::spawn_blocking(move || {
+            imajev::classify_with_fallback(&data, &path, &fallback)
+        })
+        .await
+        .map_err(|_| "The local classifier stopped unexpectedly.".to_string())?;
+    }
     let classifier = classifier.inner().clone();
     tauri::async_runtime::spawn_blocking(move || classifier.classify(&path))
         .await
@@ -386,6 +404,7 @@ pub fn run() {
             app.manage(Database(Mutex::new(connection)));
             app.manage(AppDataDirectory(app.path().app_data_dir()?));
             app.manage(website_browser::BrowserImportState::default());
+            app.manage(imajev::DownloadState::default());
             app.manage(image_classification::State::new(
                 app.path().resource_dir()?.join("image-classification"),
             ));
@@ -422,9 +441,45 @@ pub fn run() {
             list_outfits_containing_item,
             get_app_settings,
             set_allow_multiple_bottoms,
+            get_classifier_status,
+            download_imajev,
+            set_image_classifier,
             export_backup,
             restore_backup
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[tauri::command]
+fn get_classifier_status(
+    app_data: State<'_, AppDataDirectory>,
+    download: State<'_, imajev::DownloadState>,
+) -> Result<imajev::DownloadStatus, String> {
+    download.status(&app_data.0)
+}
+#[tauri::command]
+async fn download_imajev(
+    app_data: State<'_, AppDataDirectory>,
+    download: State<'_, imajev::DownloadState>,
+) -> Result<imajev::DownloadStatus, String> {
+    download.inner().clone().download(app_data.0.clone()).await
+}
+#[tauri::command]
+fn set_image_classifier(
+    database: State<'_, Database>,
+    app_data: State<'_, AppDataDirectory>,
+    classifier: String,
+) -> Result<settings::AppSettings, String> {
+    if classifier == "imajev" && !imajev::ready(&app_data.0) {
+        return Err("Download ImaJev before selecting it.".into());
+    }
+    let connection = database
+        .0
+        .lock()
+        .map_err(|_| "The local settings are unavailable.".to_string())?;
+    settings::set_classifier(&connection, &classifier)
+}
+pub fn run_classifier_worker() -> bool {
+    imajev::run_worker()
 }

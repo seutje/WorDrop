@@ -2,7 +2,7 @@ use rusqlite::{params, Connection, OptionalExtension, Transaction};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
 
-pub const CURRENT_SCHEMA_VERSION: i64 = 10;
+pub const CURRENT_SCHEMA_VERSION: i64 = 11;
 
 const INITIAL_MIGRATION: &str = include_str!("../migrations/0001_clothing_items.sql");
 const OUTFITS_MIGRATION: &str = include_str!("../migrations/0002_outfits.sql");
@@ -209,6 +209,16 @@ pub(crate) fn migrate(connection: &mut Connection) -> Result<(), String> {
             .map_err(db_error)?;
         transaction
             .pragma_update(None, "user_version", 10)
+            .map_err(db_error)?;
+        transaction.commit().map_err(db_error)?;
+    }
+    if version < 11 {
+        let transaction = connection.transaction().map_err(db_error)?;
+        transaction
+            .execute_batch(include_str!("../migrations/0011_classifier.sql"))
+            .map_err(db_error)?;
+        transaction
+            .pragma_update(None, "user_version", 11)
             .map_err(db_error)?;
         transaction.commit().map_err(db_error)?;
     }

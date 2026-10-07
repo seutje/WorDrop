@@ -15,6 +15,13 @@ struct EmbeddingResource {
 }
 
 fn main() -> Result<(), String> {
+    ort::init_from(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("resources/image-classification/onnxruntime.dll")
+            .to_string_lossy(),
+    )
+    .commit()
+    .map_err(message)?;
     let resources = env::args()
         .nth(1)
         .map(PathBuf::from)

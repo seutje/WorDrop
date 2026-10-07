@@ -17,14 +17,14 @@ pub const MIN_SUBTYPE_SCORE: f32 = 0.32;
 pub const MIN_SUBTYPE_MARGIN: f32 = 0.10;
 const EMBEDDING_DIMENSIONS: usize = 512;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Prediction {
     pub category: String,
     pub score: f32,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubtypePrediction {
     pub subtype: String,
@@ -32,7 +32,7 @@ pub struct SubtypePrediction {
     pub score: f32,
 }
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ClassificationTiming {
     pub session_initialization_ms: f64,
@@ -44,7 +44,7 @@ pub struct ClassificationTiming {
     pub total_ms: f64,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClassificationResult {
     pub predictions: Vec<Prediction>,
@@ -55,6 +55,10 @@ pub struct ClassificationResult {
     pub suggested_subtype: Option<String>,
     pub subtype_confidence_score: Option<f32>,
     pub subtype_top_two_margin: Option<f32>,
+    #[serde(default)]
+    pub suggested_colors: Vec<String>,
+    #[serde(default)]
+    pub fallback_used: bool,
     pub timing: ClassificationTiming,
 }
 
@@ -105,6 +109,9 @@ struct EmbeddingResource {
 
 impl Classifier {
     fn load(resources: &Path) -> Result<Self, String> {
+        ort::init_from(resources.join("onnxruntime.dll").to_string_lossy())
+            .commit()
+            .map_err(ml_error)?;
         let bytes = std::fs::read(resources.join("label_embeddings.json"))
             .map_err(|error| format!("Could not load classifier label embeddings: {error}"))?;
         let embeddings: EmbeddingResource = serde_json::from_slice(&bytes)
@@ -216,6 +223,8 @@ impl Classifier {
             suggested_subtype,
             subtype_confidence_score,
             subtype_top_two_margin,
+            suggested_colors: Vec::new(),
+            fallback_used: false,
             predictions,
             timing: ClassificationTiming {
                 session_initialization_ms: init_ms,
@@ -298,8 +307,17 @@ fn rank_subtypes(
 }
 
 fn select_subtype(predictions: &[SubtypePrediction]) -> Option<String> {
+    select_subtype_at_score(predictions, MIN_SUBTYPE_SCORE)
+}
+
+pub(crate) fn select_fallback_subtype(predictions: &[SubtypePrediction]) -> Option<String> {
+    // Opt-in ImaJev mode uses editable fallback suggestions with a clear lead.
+    select_subtype_at_score(predictions, 0.20)
+}
+
+fn select_subtype_at_score(predictions: &[SubtypePrediction], min_score: f32) -> Option<String> {
     let (first, second) = predictions.first().zip(predictions.get(1))?;
-    (first.score >= MIN_SUBTYPE_SCORE && first.score - second.score >= MIN_SUBTYPE_MARGIN)
+    (first.score >= min_score && first.score - second.score >= MIN_SUBTYPE_MARGIN)
         .then(|| first.subtype.clone())
 }
 
@@ -387,6 +405,20 @@ mod tests {
         );
         assert_eq!(
             select_subtype(&[prediction("T-shirt", 0.45), prediction("Polo", 0.40)]),
+            None
+        );
+        let red_tshirt = [
+            prediction("T-shirt", 0.25283733),
+            prediction("Jersey", 0.10381709),
+        ];
+        assert_eq!(select_subtype(&red_tshirt), None);
+        assert_eq!(select_fallback_subtype(&red_tshirt), Some("T-shirt".into()));
+        assert_eq!(
+            select_fallback_subtype(&[prediction("T-shirt", 0.19), prediction("Polo", 0.05)]),
+            None
+        );
+        assert_eq!(
+            select_fallback_subtype(&[prediction("T-shirt", 0.25), prediction("Polo", 0.24)]),
             None
         );
     }

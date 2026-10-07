@@ -17,6 +17,7 @@ function App() {
   const [outfitDirty, setOutfitDirty] = useState(false);
   const [settings, setSettings] = useState<AppSettings>({
     allowMultipleBottoms: false,
+    classifier: "fashionclip",
   });
   useEffect(() => {
     void getAppSettings()

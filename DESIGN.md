@@ -1799,3 +1799,73 @@ cutoff. Calendar month subtraction clamps to the target month's last day. Wishli
 pieces are excluded from these filters. Wear history load failures disable filters
 rather than incorrectly classifying pieces as never worn. The Insights destination
 now summarizes this history; changes to suggestion ranking remain future work.
+
+## Optional ImaJev image classifier (promoted to current scope)
+
+Settings > Classifier defaults to the bundled FashionCLIP. The owner explicitly
+requested an opt-in alternative: ImaJev 4B INT4 from
+https://huggingface.co/seutje/wordrop-imajev-4b-int4, pinned at revision
+`6755f6fb978455ca4773a3fd399fe46a150b7c60`, package
+`v0.1.0-embedding-vision-int4`. Migration 0011 persists the selected classifier.
+Downloading does not select it automatically; selection is unlocked only after
+all package files pass size/SHA-256 verification and both inference passes run.
+
+No ImaJev weights, tokenizer, or runtime are bundled or fetched at startup.
+An explicit download streams approximately 3.08 GB of package files into
+`classifiers/v0.1.0-embedding-vision-int4` under app data. It also downloads the
+pinned official Microsoft ONNX Runtime 1.30.0 CPU NuGet package (about 157 MB)
+and extracts only the two Windows x64 runtime DLLs. Archive and DLL checksums
+are pinned. Verified completed files and runtime DLLs are reused on retry;
+incomplete files never unlock selection. Progress lives in native state and
+remains visible when reopening settings. The user must keep WorDrop open.
+Downloaded models are excluded from wardrobe backups; restored selections
+whose files are missing require another explicit download or FashionCLIP.
+
+The optional runtime runs in a hidden invocation of the same executable,
+isolated from FashionCLIP's bundled ONNX Runtime 1.22.0 DLLs. Workers are
+serialized to bound memory use, terminate after five minutes, and release the
+large model after each photo. No Python, GPU, server, account, or photo upload
+is required. The existing `tokenizers` development dependency is now used at
+runtime; `sha2` verifies downloads. The model uses the package's fixed option
+order, prompt boundary, code readout, shared FP32 temperature, and explicit
+unknown option. When ImaJev abstains on category or subtype, the already bundled
+FashionCLIP supplies missing suggestions locally. Matching-category checks protect
+accepted ImaJev decisions. If both classifiers abstain, fields remain available
+for manual entry. Suggestions are editable and do not overwrite manual changes or apply
+to stale image requests.
+
+Image preprocessing applies EXIF orientation, Qwen antialiased bicubic resizing,
+fixed-point uint8 rounding, fused normalization, temporal duplication, and
+spatial merge order. Images over 64 million decoded pixels are declined; 24- and 48-megapixel phone photos are accepted. Decoded RGB is reused without a second full-size copy. The
+minimum processed area is 65,536 pixels; the maximum is deliberately capped at
+262,144 pixels to bound desktop CPU attention cost, below the package's general
+16-million-pixel ceiling. This resolution policy has not been accuracy-tuned.
+
+The published package has category and subtype decisions, but no color taxonomy.
+ImaJev mode therefore also prefills one deterministic local palette estimate
+from the photo's center, excluding a matching corner background where possible.
+This is a heuristic color estimate, not an ImaJev color prediction. Existing
+manual color selections (including clearing) are protected. Model errors remain
+non-blocking and explain that the photo is preserved and details can be entered
+manually. Outfit matching remains deterministic and independent.
+
+The published INT4 package remains experimental; its model parity and task
+accuracy are unverified. Integration fixture checks establish runtime and
+preprocessing compatibility, not garment-recognition accuracy.
+
+The installer also includes the four app-local Microsoft Visual C++ 2022
+runtime DLLs required by the native ONNX runtimes (MSVCP140, MSVCP140_1,
+VCRUNTIME140, and VCRUNTIME140_1), sourced from the licensed Visual Studio
+14.44.35112 x64 redistributable directory. They are placed beside the executable
+and copied there for development builds as well. The Microsoft redistribution
+list accompanies them. A separate runtime installer is not required.
+
+Subtype prefill remains available when a user selects the same category as the classifier while inference is pending. A different selected category, manual subtype edits (including clearing), and stale requests prevent automatic subtype changes.
+
+### Classifier prefill completion
+
+The red T-shirt supplied by the owner exposed an ImaJev category abstention that skipped subtype inference. ImaJev mode now falls back to bundled FashionCLIP only for missing category/subtype suggestions, preserves ImaJev color estimates and accepted decisions, and labels fallback use in the form. The FashionCLIP category gate is unchanged. In this opt-in fallback path, subtype suggestions require at least 0.20 relative score and a 0.10 lead over the runner-up; standard FashionCLIP retains its 0.32 score gate. These scores are relative rankings, not calibrated accuracy probabilities. No network or additional download is involved.
+
+Both classifier modes apply deterministic, editable season and occasion defaults from the suggested garment type: T-shirts and other light summer garments get spring/summer; winter layers get autumn/winter; otherwise all-season. Athletic subtypes get sport, evening/cocktail dresses get formal/party, and other garments default to casual. These defaults are wardrobe rules rather than model predictions. Each untouched group gets at least one option after successful classification; manual selections and clearing remain protected.
+
+An explicit Suggest missing details button reruns classification on a managed photo, including existing items, without overwriting saved nonempty fields or manual edits. Saved categories are preserved; missing subtype prefill requires the predicted category to agree. Photos and originals remain unchanged. The classify_photo native example inspects the same production inference/fallback path without writing wardrobe data.

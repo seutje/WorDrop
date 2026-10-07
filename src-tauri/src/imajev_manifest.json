@@ -1,0 +1,233 @@
+{
+  "manifestVersion": 1,
+  "runtimeContractVersion": 1,
+  "packageName": "wordrop-imajev-4b-int4",
+  "packageVersion": "0.1.0-embedding-vision-int4",
+  "buildId": "42637006506c51d72e8e678d919f650ba8d0c7c261513af2eacc333c5a80a804",
+  "status": "experimental",
+  "baseModel": {
+    "repo": "Qwen/Qwen3.5-4B",
+    "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
+  },
+  "adapter": {
+    "repo": "mohit67890/imajev-4b",
+    "revision": "f8d8234cebc6c99065c07731e59716dc0a6e27ab"
+  },
+  "exporter": {
+    "gitCommit": "61a4346bfa0149313cceb018b5e90a66a6db6c5d",
+    "workingTreeDirty": false,
+    "pythonVersion": "3.13.12",
+    "toolVersions": {
+      "torch": "2.14.1+cu130",
+      "transformers": "5.19.0",
+      "peft": "0.21.2",
+      "onnx": "1.23.2",
+      "onnxruntime": "1.30.0",
+      "onnxruntime-genai": "0.17.1",
+      "jsonschema": "4.25.1"
+    }
+  },
+  "quantization": {
+    "format": "int4",
+    "algorithm": "rtn",
+    "blockSize": 32,
+    "symmetric": true,
+    "activationPrecision": "float32",
+    "readoutPrecision": "float32",
+    "transformedProjections": 746,
+    "operatorPolicy": "decoder constant-MatMul plus vision Gemm matrices and embedding Gather; convolution, normalization, bias and decision readout retained FP32",
+    "exclusions": ["decision_readout"]
+  },
+  "runtime": {
+    "minimumOnnxRuntimeVersion": "1.30.0",
+    "provider": "CPUExecutionProvider",
+    "model": "model.onnx",
+    "inputs": [
+      {
+        "name": "pixel_values",
+        "dtype": "FLOAT",
+        "shape": ["4*merge_blocks", 1536]
+      },
+      {
+        "name": "image_grid_thw",
+        "dtype": "INT64",
+        "shape": [1, 3]
+      },
+      {
+        "name": "input_ids",
+        "dtype": "INT64",
+        "shape": [1, "sequence_length"]
+      },
+      {
+        "name": "mm_token_type_ids",
+        "dtype": "INT64",
+        "shape": [1, "sequence_length"]
+      },
+      {
+        "name": "attention_mask",
+        "dtype": "INT64",
+        "shape": ["batch_size", "total_sequence_length"]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "decision_logits",
+        "dtype": "FLOAT",
+        "shape": [256]
+      }
+    ]
+  },
+  "calibration": {
+    "file": "calibration.json",
+    "version": "p3-r2-s000291-authored",
+    "scheme": "shared_temperature",
+    "temperature": 1.3051569717552742,
+    "precision": "float32"
+  },
+  "promptVersion": "wordrop-clothing-v1",
+  "taxonomyVersion": "wordrop-clothing-v1",
+  "validation": {
+    "numericalParityPassed": false,
+    "experimentalParityOverride": true,
+    "productionQualityVerified": false,
+    "comparisonCount": 14
+  },
+  "files": [
+    {
+      "path": "ATTRIBUTION.txt",
+      "bytes": 789,
+      "sha256": "9ddde775d3ee3ed7c6ee03ea4254c140e9902d3cc704c8fb5c0042d6133247ae"
+    },
+    {
+      "path": "LICENSES/fixture-attribution.md",
+      "bytes": 2272,
+      "sha256": "48c55f6c74ee5be9ab43e8cc1cc6bef175ec246c7becf2d1933f28d15588ddea"
+    },
+    {
+      "path": "LICENSES/imajev-model-card.md",
+      "bytes": 26565,
+      "sha256": "7a2aa695acc2c16d2f0c3d1242bc998f75c9132197fef3bf7690d09eb2e2f9ad"
+    },
+    {
+      "path": "LICENSES/imajev.txt",
+      "bytes": 10755,
+      "sha256": "d7885daad509b79a132f2f1b10d5e5b3c95d248b5987948e68838e8dd80dcbba"
+    },
+    {
+      "path": "LICENSES/qwen.txt",
+      "bytes": 11544,
+      "sha256": "bbedc3fda3305820b977265f01b8619d87570a6739de3a5582c3464840f1e57a"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 1227,
+      "sha256": "a6ecf0a974134043e0a531aa88152fdb030401d86800ad1e373c5fc140c12977"
+    },
+    {
+      "path": "calibration.json",
+      "bytes": 1283,
+      "sha256": "1ef51558c476d27b04b729a5144d81fcaa19d860abc2f51e72c2e9d89268de4b"
+    },
+    {
+      "path": "chat_template.jinja",
+      "bytes": 7756,
+      "sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
+    },
+    {
+      "path": "config.json",
+      "bytes": 3161,
+      "sha256": "ddc63e1c717afa86c865bb5e01313d89d72bb53b97ad4a8a03ba8510c0621670"
+    },
+    {
+      "path": "decision_readout.json",
+      "bytes": 14421,
+      "sha256": "4bc0237812d7d8c2611e60f1e7d0de8f108a9c18fbb8402aefecc3c71c54d68c"
+    },
+    {
+      "path": "fixtures/category-inputs.npz",
+      "bytes": 1776704,
+      "sha256": "c32f217f8320d386bbbc12a067947d267c0af996d750b2bf7a82205a11f8c854"
+    },
+    {
+      "path": "fixtures/expected-int4-logits.json",
+      "bytes": 6788,
+      "sha256": "4720be6cae971fac3fd73291b11a6dee21d698edeb7b3cc970141554ad644224"
+    },
+    {
+      "path": "fixtures/white-tshirt.png",
+      "bytes": 7038,
+      "sha256": "6a08e7b819e897ed2725e286df8af886560b1db59d60c2758d4d550f068a3f08"
+    },
+    {
+      "path": "golden-preprocessing.json",
+      "bytes": 260235,
+      "sha256": "63263df1eea24723deebfbfc6e083ad7a95342707453a05be6492bdc6a14a730"
+    },
+    {
+      "path": "manifest.schema.json",
+      "bytes": 9903,
+      "sha256": "4f4e791d7f14e5ccdeb97c10223f4f81c68d77cd290e92ad7083e13b94d74bd6"
+    },
+    {
+      "path": "merges.txt",
+      "bytes": 3353259,
+      "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d"
+    },
+    {
+      "path": "model.onnx",
+      "bytes": 2453124,
+      "sha256": "399b7c5a8682ee4d5b979c10e5f303626be4b851d2b566e03aa3b5f5317990df"
+    },
+    {
+      "path": "model.onnx.data",
+      "bytes": 3054108672,
+      "sha256": "9af8f87a440b771d777a2d7b9ae5698cf2f9d51d0edeade0bc39b38b85403be5"
+    },
+    {
+      "path": "parity.json",
+      "bytes": 130181,
+      "sha256": "9dbc04ef2c56a11cf45d4ddaa1acc6737f77d43c72b4b3177d96bbc51a423ef4"
+    },
+    {
+      "path": "preprocessor_config.json",
+      "bytes": 390,
+      "sha256": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516"
+    },
+    {
+      "path": "prompts.json",
+      "bytes": 444,
+      "sha256": "67061f8996eede1f45758e8453140e00b271eb91875c257b51c56138c26a5ea3"
+    },
+    {
+      "path": "taxonomy.json",
+      "bytes": 10948,
+      "sha256": "0d7037c4b09b3126d4be94c95006c01307a65be91b019bf85c65e1f940602cad"
+    },
+    {
+      "path": "tokenizer.json",
+      "bytes": 12807982,
+      "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42"
+    },
+    {
+      "path": "tokenizer_config.json",
+      "bytes": 16710,
+      "sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8"
+    },
+    {
+      "path": "video_preprocessor_config.json",
+      "bytes": 385,
+      "sha256": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13"
+    },
+    {
+      "path": "vocab.json",
+      "bytes": 6722759,
+      "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+    }
+  ],
+  "candidate": {
+    "id": "50209a7c88903eaed0be1f6fe85635efa03b57980dbd8822dd6c983ae4c9831d",
+    "name": "embedding-vision-int4",
+    "sourceGraphSha256": "15bea02039f554779f6df9359a45aa46dcf0eac451b30f6b3d63848d6143d8dc",
+    "sourceDataSha256": "fa890dae867b541f9a8c4545b858229ab8ee0621af41c756bb4f2c090c4cf271"
+  }
+}

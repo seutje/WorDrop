@@ -9,3 +9,4 @@ scripts/*.ps1
 AGENTS.md
 DESIGN.md
 PLAN.md
+.playwright-cli

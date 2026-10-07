@@ -504,6 +504,7 @@ describe("App", () => {
       topTwoMargin: 0.5,
       subtypePredictions: [{ subtype: "T-shirt", category: "top", score: 0.7 }],
       suggestedSubtype: "T-shirt",
+      suggestedColors: ["blue"],
       subtypeConfidenceScore: 0.7,
       subtypeTopTwoMargin: 0.4,
       timing: {
@@ -522,10 +523,55 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Choose photo" }));
     const subtype = screen.getByRole("textbox", { name: /subtype/i });
     await waitFor(() => expect(subtype).toHaveValue("T-shirt"));
+    expect(screen.getByRole("checkbox", { name: "Blue" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Spring" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Summer" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Casual" })).toBeChecked();
     await user.clear(subtype);
     await user.type(subtype, "Vintage oversized band tee");
     expect(subtype).toHaveValue("Vintage oversized band tee");
   });
+
+  it.each([
+    ["top", "T-shirt"],
+    ["bottom", ""],
+  ])(
+    "applies subtype only when the category selected while waiting matches (%s)",
+    async (selectedCategory, expectedSubtype) => {
+      let finish!: (value: unknown) => void;
+      classificationMocks.classify.mockReturnValue(
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+      );
+      const user = userEvent.setup();
+      render(<App />);
+      await user.click(screen.getByRole("button", { name: /\+ add item/i }));
+      await user.click(screen.getByRole("button", { name: "Choose photo" }));
+      await user.selectOptions(
+        screen.getByRole("combobox", { name: /category/i }),
+        selectedCategory,
+      );
+      finish({
+        predictions: [{ category: "top", score: 0.8 }],
+        suggestedCategory: "top",
+        confidenceScore: 0.8,
+        topTwoMargin: 0.5,
+        subtypePredictions: [
+          { subtype: "T-shirt", category: "top", score: 0.7 },
+        ],
+        suggestedSubtype: "T-shirt",
+        timing: {},
+      });
+      await screen.findByText(/Suggested from photo/);
+      expect(screen.getByRole("combobox", { name: /category/i })).toHaveValue(
+        selectedCategory,
+      );
+      expect(screen.getByRole("textbox", { name: /subtype/i })).toHaveValue(
+        expectedSubtype,
+      );
+    },
+  );
 
   it("does not overwrite subtype text entered while classification is pending", async () => {
     let finish!: (value: unknown) => void;
@@ -540,6 +586,10 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Choose photo" }));
     const subtype = screen.getByRole("textbox", { name: /subtype/i });
     await user.type(subtype, "Graphic tee");
+    await user.click(screen.getByRole("checkbox", { name: "Red" }));
+    await user.click(screen.getByRole("checkbox", { name: "Winter" }));
+    await user.click(screen.getByRole("checkbox", { name: "Work" }));
+    await user.click(screen.getByRole("checkbox", { name: "Work" }));
     finish({
       predictions: [{ category: "top", score: 0.8 }],
       suggestedCategory: "top",
@@ -547,12 +597,65 @@ describe("App", () => {
       topTwoMargin: 0.5,
       subtypePredictions: [],
       suggestedSubtype: "T-shirt",
+      suggestedColors: ["blue"],
       subtypeConfidenceScore: 0.7,
       subtypeTopTwoMargin: 0.4,
       timing: {},
     });
     await screen.findByText(/Suggested from photo/);
     expect(subtype).toHaveValue("Graphic tee");
+    expect(screen.getByRole("checkbox", { name: "Red" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Blue" })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Winter" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Summer" })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Casual" })).not.toBeChecked();
+  });
+
+  it("can suggest missing details on an existing photo without replacing saved metadata", async () => {
+    mocks.get.mockResolvedValue({
+      ...sampleItem,
+      subtype: undefined,
+      seasons: [],
+      occasions: [],
+    });
+    mocks.list.mockResolvedValue([
+      { ...sampleItem, subtype: undefined, seasons: [], occasions: [] },
+    ]);
+    classificationMocks.classify.mockResolvedValue({
+      suggestedCategory: "bottom",
+      suggestedSubtype: "Jeans",
+      suggestedColors: ["red"],
+      fallbackUsed: true,
+      confidenceScore: 0.8,
+      subtypePredictions: [],
+      timing: {},
+    });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
+    );
+    await user.click(await screen.findByRole("button", { name: "Edit" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Suggest missing details" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("textbox", { name: /subtype/i })).toHaveValue(
+        "Jeans",
+      ),
+    );
+    expect(screen.getByText(/FashionCLIP fallback/)).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "All Season" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Casual" })).toBeChecked();
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalledOnce());
+    expect(mocks.update.mock.calls[0][1]).toMatchObject({
+      category: sampleItem.category,
+      colors: sampleItem.colors,
+      subtype: "Jeans",
+      seasons: ["all-season"],
+      occasions: ["casual"],
+    });
   });
 
   it("opens a saved item for editing", async () => {

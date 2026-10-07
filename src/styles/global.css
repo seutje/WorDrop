@@ -1908,3 +1908,27 @@ h1 {
   padding: 0.6rem 0;
   border-bottom: 1px solid #eee;
 }
+.classifier-options {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.classifier-options legend {
+  margin-bottom: 12px;
+}
+.classifier-options input {
+  flex-shrink: 0;
+}
+.classifier-options label:has(input:disabled) {
+  opacity: 0.65;
+  cursor: default;
+}
+.settings-panel progress {
+  width: 100%;
+  accent-color: #54705b;
+}
+.settings-tabs {
+  flex-wrap: wrap;
+}

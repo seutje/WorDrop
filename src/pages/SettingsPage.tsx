@@ -2,8 +2,9 @@ import { useState } from "react";
 import type { AppSettings } from "../lib/settings";
 import { setAllowMultipleBottoms } from "../lib/settings";
 import { BackupPage } from "./BackupPage";
+import { ClassifierPanel } from "./ClassifierPanel";
 
-type SettingsTab = "preferences" | "backup";
+type SettingsTab = "preferences" | "backup" | "classifier";
 
 export function SettingsPage({
   settings,
@@ -49,6 +50,14 @@ export function SettingsPage({
         </button>
         <button
           role="tab"
+          aria-selected={tab === "classifier"}
+          type="button"
+          onClick={() => setTab("classifier")}
+        >
+          Classifier
+        </button>
+        <button
+          role="tab"
           aria-selected={tab === "backup"}
           type="button"
           onClick={() => setTab("backup")}
@@ -89,6 +98,11 @@ export function SettingsPage({
             />
           </label>
         </div>
+      ) : tab === "classifier" ? (
+        <ClassifierPanel
+          settings={settings}
+          onSettingsChange={onSettingsChange}
+        />
       ) : (
         <div role="tabpanel">
           <BackupPage embedded />

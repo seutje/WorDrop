@@ -11,3 +11,9 @@ regenerates `label_embeddings.json`. The resources are derived from
 The installed application does not contain or initialize the text encoder or
 tokenizer. It loads normalized label vectors and retains one vision session for
 all classifications.
+
+FashionCLIP also bundles the official ONNX Runtime 1.22.0 Windows x64 CPU DLLs,
+license, and third-party notices. The download script verifies the release ZIP
+SHA-256 before extracting them. Runtime paths are explicit because optional
+ImaJev uses a newer runtime in a separate hidden process. ImaJev files are never
+bundled in this directory.

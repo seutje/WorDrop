@@ -15,6 +15,7 @@ import {
   canApplyCategorySuggestion,
   canApplySubtypeSuggestion,
   classifyManagedImage,
+  suggestWearMetadata,
   type ImageClassificationResult,
 } from "../../lib/images/imageClassification";
 import { ImageCropEditor } from "./ImageCropEditor";
@@ -127,7 +128,13 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
   const dropImportInProgress = useRef(false);
   const pendingImageReferenceRef = useRef<string | null>(null);
   const categoryWasEdited = useRef(Boolean(item));
-  const subtypeWasEdited = useRef(Boolean(item));
+  const currentCategory = useRef(category);
+  const subtypeWasEdited = useRef(Boolean(item?.subtype));
+  const currentSubtype = useRef(subtype);
+  const colorsWereEdited = useRef(Boolean(item?.colors.length));
+  const seasonsWereEdited = useRef(Boolean(item?.seasons.length));
+  const occasionsWereEdited = useRef(Boolean(item?.occasions.length));
+  const [classificationError, setClassificationError] = useState<string>();
   const [classification, setClassification] =
     useState<ImageClassificationResult | null>(null);
   const [classifying, setClassifying] = useState(false);
@@ -142,6 +149,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
   function analyzeImage(reference: string) {
     const request = ++classificationRequest.current;
     setClassification(null);
+    setClassificationError(undefined);
     setClassifying(true);
     void classifyManagedImage(reference)
       .then((result) => {
@@ -154,21 +162,40 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
             categoryWasEdited.current,
             result.suggestedCategory,
           )
-        )
+        ) {
+          currentCategory.current = result.suggestedCategory;
           setCategory(result.suggestedCategory);
+        }
         if (
           canApplySubtypeSuggestion(
             request,
             classificationRequest.current,
-            categoryWasEdited.current,
+            currentCategory.current === result.suggestedCategory,
             subtypeWasEdited.current,
             result.suggestedSubtype,
           )
-        )
+        ) {
+          currentSubtype.current = result.suggestedSubtype;
           setSubtype(result.suggestedSubtype);
+        }
+        if (!colorsWereEdited.current && result.suggestedColors?.length)
+          setColors(
+            result.suggestedColors.filter((color) =>
+              clothingColors.includes(color),
+            ),
+          );
+        const wear = suggestWearMetadata(
+          currentCategory.current,
+          currentSubtype.current,
+        );
+        if (!seasonsWereEdited.current) setSelectedSeasons(wear.seasons);
+        if (!occasionsWereEdited.current) setSelectedOccasions(wear.occasions);
       })
       .catch(() => {
-        // Classification is optional; manual item creation must remain available.
+        if (request === classificationRequest.current)
+          setClassificationError(
+            "Photo suggestions are unavailable. Your photo is preserved; enter the details manually or choose another classifier in Settings.",
+          );
       })
       .finally(() => {
         if (request === classificationRequest.current) setClassifying(false);
@@ -459,6 +486,18 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                   Drop a photo anywhere in the app, or choose one. The app keeps
                   a private copy and never changes your original.
                 </p>
+                {image && (
+                  <button
+                    className="secondary-button full-button"
+                    type="button"
+                    disabled={busy || classifying}
+                    onClick={() => analyzeImage(image.reference)}
+                  >
+                    {classifying
+                      ? "Checking photo…"
+                      : "Suggest missing details"}
+                  </button>
+                )}
               </div>
               <div className="form-fields">
                 <label className="form-field form-field-wide">
@@ -481,6 +520,8 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                     value={category}
                     onChange={(event) => {
                       categoryWasEdited.current = true;
+                      currentCategory.current = event.target
+                        .value as ClothingCategory;
                       setCategory(event.target.value as ClothingCategory);
                     }}
                   >
@@ -491,9 +532,16 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                     ))}
                   </select>
                   {classifying && <small>Checking the photo locally…</small>}
+                  {classificationError && (
+                    <small role="status">{classificationError}</small>
+                  )}
                   {!classifying && classification?.suggestedCategory && (
                     <small>
-                      Suggested from photo · relative confidence{" "}
+                      Suggested from photo
+                      {classification.fallbackUsed
+                        ? " · FashionCLIP fallback"
+                        : ""}{" "}
+                      · relative confidence{" "}
                       {Math.round(classification.confidenceScore * 100)}%
                     </small>
                   )}
@@ -504,6 +552,7 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                     value={subtype}
                     onChange={(event) => {
                       subtypeWasEdited.current = true;
+                      currentSubtype.current = event.target.value;
                       setSubtype(event.target.value);
                     }}
                     placeholder="T-shirt"
@@ -550,19 +599,28 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                   label="Colors"
                   options={clothingColors}
                   selected={colors}
-                  onChange={setColors}
+                  onChange={(values) => {
+                    colorsWereEdited.current = true;
+                    setColors(values);
+                  }}
                 />
                 <ToggleGroup
                   label="Seasons"
                   options={seasons}
                   selected={selectedSeasons}
-                  onChange={setSelectedSeasons}
+                  onChange={(values) => {
+                    seasonsWereEdited.current = true;
+                    setSelectedSeasons(values);
+                  }}
                 />
                 <ToggleGroup
                   label="Occasions"
                   options={occasions}
                   selected={selectedOccasions}
-                  onChange={setSelectedOccasions}
+                  onChange={(values) => {
+                    occasionsWereEdited.current = true;
+                    setSelectedOccasions(values);
+                  }}
                 />
                 <label className="form-field form-field-wide">
                   <span>Style tags</span>

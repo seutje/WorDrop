@@ -1485,3 +1485,51 @@ Run periodically:
 - [ ] build/release pipeline remains green
 - [ ] `DESIGN.md` still matches implemented behavior
 - [ ] this plan reflects actual project status
+
+## Optional ImaJev classifier follow-up
+
+Promoted to current scope by the owner; the existing local classifier, image
+import, settings repository, and offline item form are its completed prerequisites.
+
+- [x] Classifier settings tab with FashionCLIP as the default
+- [x] explicit download of pinned ImaJev package and required CPU runtime
+- [x] size/hash checks, progress, retry using verified completed files, and load check
+- [x] unlock selection only after successful installation; persist choice in migration 0011
+- [x] local category/subtype inference with unknown abstention and one local color estimate
+- [x] preserve manual category/subtype/color edits and ignore stale requests
+- [x] isolate optional runtime in hidden workers and preserve bundled FashionCLIP
+- [x] update architecture, storage behavior, dependency notes, and attribution
+- [x] complete final formatting, lint, type checks, tests, and visual CLI verification
+
+Validation: 107 frontend tests and 38 native tests passed (three optional native tests are excluded from the standard suite). Formatting, lint, strict type checks, the frontend production build, and the native build passed. Playwright CLI through npx verified desktop/minimum-size layouts, no automatic download, locked selection, progress, completed unlock, and switching in both directions using browser-only IPC fixtures. The existing FashionCLIP
+inference smoke passed with its bundled runtime. Seven original public-fixture
+category/subtype prompt layouts match token IDs and pixel tensor SHA-256 exactly.
+A copied local package passed the native install path offline, including all
+checksums, runtime checks, two inference passes, and readiness. No model weights
+were downloaded for development, and no task accuracy claim is made. Use the
+`verify_imajev_install` native example with an isolated app-data directory for
+this integration check. `golden_processor_contract` is an optional native test
+requiring fixture/tokenizer copies under `evaluation/imajev-test`.
+
+Packaging follow-up: bundled the four app-local Microsoft C++ runtime DLLs required by ONNX, with the Microsoft redistribution list. The native build and a GUI-subsystem worker check with redirected output and these app-local DLLs passed. This keeps the optional worker usable without installing development tools.
+
+## ImaJev subtype prefill correction
+
+- [x] Reproduce the 20-megapixel input rejection on a managed 24-megapixel phone photo
+- [x] Accept phone photos up to 64 megapixels while retaining bounded inference resolution and avoiding an extra decoded RGB copy
+- [x] Allow subtype suggestions after selecting a matching category; preserve mismatched categories and manual subtype edits
+- [x] Verify native inference on the previously rejected photo and add input-limit and pending-category regression checks
+
+Validation: 109 frontend tests and 39 native tests passed; formatting, lint, strict type checks, and the native build passed. The previously rejected 24-megapixel managed photo completed native inference locally and returned category/subtype suggestions. Playwright CLI through npx verified subtype and color prefill after selecting a matching category with a browser IPC fixture.
+
+## Classifier subtype abstention and wear defaults
+
+- [x] Reproduce ImaJev category abstention on the supplied red T-shirt
+- [x] Add local FashionCLIP fallback for missing decisions with category agreement and visible attribution
+- [x] Preserve standard FashionCLIP gates; use a clear-lead subtype gate for the opt-in fallback
+- [x] Prefill at least one season and occasion using editable garment rules
+- [x] Preserve manual options, including clearing, and saved metadata
+- [x] Allow classification of missing details on existing managed photos
+- [x] Add decision fallback, wear-default, and item-form regression coverage
+
+Validation: the exact supplied red T-shirt completes the production native path as top/T-shirt/red with local FashionCLIP fallback. Playwright CLI through npx used that real inference result and photo to verify spring/summer, casual, and the save payload at desktop and minimum window sizes, with zero browser errors. The frontend suite passed 113 tests and the native suite passed 42 (three optional tests ignored); formatting, lint, type checks, and both builds passed. No model or photo was uploaded or downloaded during this fix.
