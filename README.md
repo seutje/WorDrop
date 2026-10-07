@@ -4,7 +4,6 @@ A local-first Windows desktop wardrobe manager built with Tauri 2, React, TypeSc
 
 ![WorDrop application](design.png)
 
-
 ## Prerequisites
 
 - Node.js LTS and npm

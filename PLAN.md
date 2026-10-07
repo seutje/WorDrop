@@ -1069,6 +1069,12 @@ workflow artifact. Releases are public and intentionally unsigned. The app
 displays its build version in the sidebar. A real tagged GitHub run and clean
 machine installation remain part of the external verification and user gate.
 
+Release 0.7.0: synchronized application versions and lockfiles, and updated the
+sidebar version assertion. This release includes wear tracking and wardrobe insights.
+Local release checks passed: formatting, lint, type checks, production frontend
+build, 103 frontend tests, and 30 native tests (2 optional tests ignored). Existing
+README and generated embedding JSON formatting issues were corrected for CI.
+
 ## Verification
 
 Create a test release.
