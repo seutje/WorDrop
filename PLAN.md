@@ -1075,6 +1075,13 @@ Local release checks passed: formatting, lint, type checks, production frontend
 build, 103 frontend tests, and 30 native tests (2 optional tests ignored). Existing
 README and generated embedding JSON formatting issues were corrected for CI.
 
+Release 0.8.0: synchronized application versions and lockfiles, and updated the
+sidebar version assertion. This release includes the optional ImaJev classifier,
+subtype prefill corrections, local FashionCLIP fallback, and editable wear defaults.
+Local release checks passed: version/tag consistency, formatting, lint, type
+checks, production frontend build, 113 frontend tests, and 42 native tests
+(3 optional tests ignored).
+
 ## Verification
 
 Create a test release.
