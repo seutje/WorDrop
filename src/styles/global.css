@@ -1579,6 +1579,10 @@ h1 {
 .card-copy small {
   color: #4c7658;
 }
+.card-copy .card-notes {
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
 .card-copy small[data-wishlist="true"] {
   color: #b74b55;
 }

@@ -85,6 +85,12 @@ export const ClothingCard = memo(function ClothingCard({
         <div className="card-copy">
           <strong>{item.name}</strong>
           <span>{item.subtype || item.category}</span>
+          {item.notes && (
+            <span className="card-notes">
+              {Array.from(item.notes).slice(0, 50).join("")}
+              {Array.from(item.notes).length > 50 ? "…" : ""}
+            </span>
+          )}
           <small data-wishlist={item.ownership === "wishlist"}>
             {item.ownership === "wishlist" ? "♥ Wishlist" : "● Owned"}
           </small>

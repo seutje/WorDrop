@@ -325,6 +325,7 @@ Make the wardrobe pleasant to browse.
 
 - [x] responsive clothing grid
 - [x] visual item cards
+- [x] show the first 50 characters of notes between category and ownership on item cards
 - [x] owned/wishlist indication
 - [x] item detail navigation
 - [x] search by name

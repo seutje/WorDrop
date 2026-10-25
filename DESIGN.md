@@ -807,6 +807,7 @@ Each card should show:
 - image
 - name
 - category or subtype
+- first 50 characters of notes, when present, followed by an ellipsis if truncated
 - wishlist indicator when relevant
 - a heart control for toggling the item's favorite status
 
@@ -1331,6 +1332,7 @@ Recommended:
 - photo
 - name
 - subtype/category
+- optional notes preview between category and ownership (first 50 characters)
 - small wishlist indicator if relevant
 
 ### 20.4 Detail view
