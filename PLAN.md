@@ -1083,6 +1083,10 @@ Local release checks passed: version/tag consistency, formatting, lint, type
 checks, production frontend build, 113 frontend tests, and 42 native tests
 (3 optional tests ignored).
 
+Release 0.8.1: synchronized application versions and lockfiles, and updated the
+sidebar version assertion. This release adds a 50-character notes preview to
+wardrobe overview cards.
+
 ## Verification
 
 Create a test release.
