@@ -1087,6 +1087,10 @@ Release 0.8.1: synchronized application versions and lockfiles, and updated the
 sidebar version assertion. This release adds a 50-character notes preview to
 wardrobe overview cards.
 
+Release 0.9.0: synchronized application versions and lockfiles, and updated the
+sidebar version assertion. Includes Store metadata, searchable store options with
+default stores, item details, and overview filtering.
+
 ## Verification
 
 Create a test release.
