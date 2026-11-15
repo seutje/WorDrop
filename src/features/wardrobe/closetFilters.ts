@@ -11,6 +11,7 @@ import { monthCutoff } from "../../lib/wearHistory";
 
 export type ClosetFilters = {
   search: string;
+  store: string;
   category: ClothingCategory | "";
   ownership: Ownership | "";
   color: ClothingColor | "";
@@ -26,6 +27,7 @@ export const defaultClosetSort: ClosetSort = "newest";
 
 export const emptyClosetFilters: ClosetFilters = {
   search: "",
+  store: "",
   category: "",
   ownership: "",
   color: "",
@@ -47,6 +49,9 @@ export function filterClothingItems(
   return items.filter(
     (item) =>
       (!search || item.name.toLocaleLowerCase().includes(search)) &&
+      (!filters.store ||
+        item.store?.trim().toLocaleLowerCase() ===
+          filters.store.trim().toLocaleLowerCase()) &&
       (!filters.category || item.category === filters.category) &&
       (!filters.ownership || item.ownership === filters.ownership) &&
       (!filters.color || item.colors.includes(filters.color)) &&

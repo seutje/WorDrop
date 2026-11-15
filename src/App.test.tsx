@@ -200,6 +200,45 @@ async function openBackup(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("App", () => {
+  it("shows the store in wardrobe item details", async () => {
+    mocks.list.mockResolvedValue([{ ...sampleItem, store: "Zara" }]);
+    mocks.get.mockResolvedValue({ ...sampleItem, store: "Zara" });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(
+      await screen.findByRole("button", { name: "Open Blue jeans" }),
+    );
+    expect(await screen.findByText("Zara")).toBeInTheDocument();
+    expect(screen.getByText("Store")).toBeInTheDocument();
+  });
+  it("filters by store, clears the filter, and offers saved stores in Add Item", async () => {
+    mocks.list.mockResolvedValue([
+      { ...sampleItem, store: "Uniqlo" },
+      { ...sampleItem, id: "other", name: "Other shirt", store: "Gap" },
+    ]);
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("button", { name: "Open Blue jeans" });
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Store" }),
+      "Uniqlo",
+    );
+    expect(
+      screen.queryByRole("button", { name: "Open Other shirt" }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(
+      screen.getByRole("button", { name: "Open Other shirt" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /\+ add item/i }));
+    const dialog = screen.getByRole("dialog", { name: "Add item" });
+    const store = within(dialog).getByRole("combobox", { name: "Store" });
+    expect(store).toHaveAttribute("list", "wardrobe-stores");
+    expect(dialog.querySelector('option[value="Uniqlo"]')).toBeInTheDocument();
+    expect(dialog.querySelector('option[value="Gap"]')).toBeInTheDocument();
+    await user.type(store, "uniqlo");
+    expect(store).toHaveValue("uniqlo");
+  });
   it("opens Insights, filters ownership, and opens a ranked piece", async () => {
     const user = userEvent.setup();
     mocks.list.mockResolvedValue([
@@ -435,11 +474,16 @@ describe("App", () => {
     await user.click(screen.getByRole("checkbox", { name: "Black" }));
     await user.click(screen.getByRole("checkbox", { name: "Summer" }));
     await user.click(screen.getByRole("checkbox", { name: "Casual" }));
+    await user.type(
+      screen.getByRole("combobox", { name: "Store" }),
+      "  New shop  ",
+    );
     await user.click(screen.getByRole("radio", { name: "Wishlist" }));
     await user.click(screen.getByRole("button", { name: "Add item" }));
     await waitFor(() => expect(mocks.create).toHaveBeenCalledOnce());
     expect(mocks.create.mock.calls[0][0]).toMatchObject({
       name: "Black tee",
+      store: "New shop",
       colors: ["black"],
       seasons: ["summer"],
       occasions: ["casual"],

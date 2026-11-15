@@ -1,3 +1,4 @@
+import { storeOptions } from "../features/wardrobe/storeOptions";
 import { useEffect, useMemo, useState } from "react";
 import { ClothingCard } from "../features/wardrobe/ClothingCard";
 import { ClothingDetail } from "../features/wardrobe/ClothingDetail";
@@ -58,6 +59,7 @@ export function ClosetPage({
       sortClothingItems(filterClothingItems(items, filters, lastWorn), sort),
     [items, filters, sort, lastWorn],
   );
+  const stores = storeOptions(items);
   const filtersActive = hasActiveFilters(filters);
 
   async function loadItems() {
@@ -244,6 +246,25 @@ export function ClosetPage({
               />
             </label>
             <div className="filter-row" aria-label="Closet filters">
+              <label>
+                <span className="sr-only">Store</span>
+                <select
+                  value={filters.store}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      store: event.target.value,
+                    }))
+                  }
+                >
+                  <option value="">All stores</option>
+                  {stores.map((store) => (
+                    <option key={store} value={store}>
+                      {store}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label>
                 <span className="sr-only">Wear frequency</span>
                 <select
@@ -432,6 +453,7 @@ export function ClosetPage({
       {isFormOpen && (
         <ClothingItemForm
           item={editingItem}
+          stores={stores}
           onCancel={() => setFormOpen(false)}
           onSaved={finishForm}
         />

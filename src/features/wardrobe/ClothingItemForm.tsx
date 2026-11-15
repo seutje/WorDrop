@@ -35,6 +35,7 @@ import {
 
 type Props = {
   item?: ClothingItem;
+  stores?: readonly string[];
   onCancel: () => void;
   onSaved: (message: string) => void;
 };
@@ -88,12 +89,18 @@ function ToggleGroup<T extends string>({
   );
 }
 
-export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
+export function ClothingItemForm({
+  item,
+  stores = [],
+  onCancel,
+  onSaved,
+}: Props) {
   const [name, setName] = useState(item?.name ?? "");
   const [category, setCategory] = useState<ClothingCategory>(
     item?.category ?? "top",
   );
   const [subtype, setSubtype] = useState(item?.subtype ?? "");
+  const [store, setStore] = useState(item?.store ?? "");
   const [size, setSize] = useState(item?.size ?? "");
   const [colors, setColors] = useState<ClothingColor[]>(item?.colors ?? []);
   const [material, setMaterial] = useState(item?.material ?? "");
@@ -354,6 +361,12 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
       category,
       subtype: subtype.trim() || undefined,
       size: size || undefined,
+      store:
+        stores.find(
+          (value) =>
+            value.toLocaleLowerCase() === store.trim().toLocaleLowerCase(),
+        ) ??
+        (store.trim() || undefined),
       colors,
       material: material.trim() || undefined,
       pattern: pattern.trim() || undefined,
@@ -557,6 +570,24 @@ export function ClothingItemForm({ item, onCancel, onSaved }: Props) {
                     }}
                     placeholder="T-shirt"
                   />
+                </label>
+                <label className="form-field">
+                  <span>Store</span>
+                  <input
+                    aria-label="Store"
+                    list="wardrobe-stores"
+                    value={store}
+                    onChange={(event) => setStore(event.target.value)}
+                    placeholder="Search or enter a store"
+                  />
+                  <datalist id="wardrobe-stores">
+                    {stores.map((value) => (
+                      <option key={value} value={value} />
+                    ))}
+                  </datalist>
+                  <small>
+                    New stores are added automatically when you save.
+                  </small>
                 </label>
                 <label className="form-field">
                   <span>Size</span>

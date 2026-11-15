@@ -238,6 +238,9 @@ export function ClothingDetail({
             {item.subtype && (
               <MetadataRow label="Subtype">{item.subtype}</MetadataRow>
             )}
+            <MetadataRow label="Store">
+              {item.store || "Not specified"}
+            </MetadataRow>
             {item.size && <MetadataRow label="Size">{item.size}</MetadataRow>}
             {item.colors.length > 0 && (
               <MetadataRow label="Colors">

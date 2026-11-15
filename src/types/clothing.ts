@@ -59,6 +59,7 @@ export type ClothingItem = {
   category: ClothingCategory;
   subtype?: string;
   size?: string;
+  store?: string;
   colors: ClothingColor[];
   material?: string;
   pattern?: string;

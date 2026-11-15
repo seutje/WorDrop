@@ -135,6 +135,7 @@ describe("filterClothingItems", () => {
 
   it("combines every active filter", () => {
     const filters: ClosetFilters = {
+      store: "",
       notWornMonths: "",
       search: "black",
       category: "dress",
@@ -165,4 +166,21 @@ describe("filterClothingItems", () => {
       }).map(({ id }) => id),
     ).toEqual(["999"]);
   });
+});
+
+it("filters stores without case sensitivity and combines other filters", () => {
+  const items = [
+    item("a", { store: "Uniqlo" }),
+    item("b", { store: " uniqlo ", ownership: "wishlist" }),
+    item("c", {}),
+    item("d", { store: "Gap" }),
+  ];
+  expect(
+    filterClothingItems(items, {
+      ...emptyClosetFilters,
+      store: "UNIQLO",
+      ownership: "owned",
+    }).map(({ id }) => id),
+  ).toEqual(["a"]);
+  expect(filterClothingItems(items, emptyClosetFilters)).toHaveLength(4);
 });

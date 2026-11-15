@@ -397,6 +397,7 @@ mod tests {
             category: "bottom".into(),
             subtype: Some("Jeans".into()),
             size: Some("M".into()),
+            store: Some("Uniqlo".into()),
             colors: vec!["blue".into()],
             material: Some("Denim".into()),
             pattern: None,
@@ -464,6 +465,7 @@ mod tests {
         assert_eq!(wear[0].item_ids, vec!["item-1"]);
         let restored_item = database::get(&connection, "item-1").unwrap().unwrap();
         assert_eq!(restored_item.colors, vec!["blue"]);
+        assert_eq!(restored_item.store.as_deref(), Some("Uniqlo"));
         assert_eq!(restored_item.notes.as_deref(), Some("Favorite"));
         assert_eq!(
             restored_item.source_url.as_deref(),

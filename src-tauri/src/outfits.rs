@@ -197,6 +197,7 @@ mod tests {
             category: "top".into(),
             subtype: None,
             size: None,
+            store: None,
             colors: vec![],
             material: None,
             pattern: None,

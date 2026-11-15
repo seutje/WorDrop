@@ -1545,3 +1545,25 @@ Validation: 109 frontend tests and 39 native tests passed; formatting, lint, str
 - [x] Add decision fallback, wear-default, and item-form regression coverage
 
 Validation: the exact supplied red T-shirt completes the production native path as top/T-shirt/red with local FashionCLIP fallback. Playwright CLI through npx used that real inference result and photo to verify spring/summer, casual, and the save payload at desktop and minimum window sizes, with zero browser errors. The frontend suite passed 113 tests and the native suite passed 42 (three optional tests ignored); formatting, lint, type checks, and both builds passed. No model or photo was uploaded or downloaded during this fix.
+
+## Store metadata follow-up
+
+Promoted into scope by the owner, extending the completed clothing persistence,
+Add/Edit, details, and Closet filtering phases.
+
+- [x] Add optional Store metadata and a non-destructive schema migration
+- [x] Search existing store names or type a new one in Add/Edit
+- [x] Show Store in item details and expose it as a Closet filter
+- [x] Complete formatting, lint, type checks, frontend and native validation
+
+Validation: 115 frontend tests passed, followed by all 37 App tests after adding
+the Store overview/reuse flow (116 total tests). All 42 native tests passed
+(three existing optional tests ignored), including Store persistence, clearing,
+reopen, and backup/restore coverage. Lint, strict type checks, the production
+frontend build, changed-source formatting, Rust formatting, and diff checks passed.
+Native dropdown appearance has not been manually inspected in the desktop app.
+
+Store follow-up: always show Store in details (Not specified when empty). Prefill
+Zara, H&M, RW&CO, and Rickis, merging saved custom stores without case duplicates
+and sorting form and overview options alphabetically without case sensitivity.
+Validation: all 119 frontend tests, lint, strict type checks, production build, changed-source formatting, and diff checks passed.

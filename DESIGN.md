@@ -1871,3 +1871,15 @@ The red T-shirt supplied by the owner exposed an ImaJev category abstention that
 Both classifier modes apply deterministic, editable season and occasion defaults from the suggested garment type: T-shirts and other light summer garments get spring/summer; winter layers get autumn/winter; otherwise all-season. Athletic subtypes get sport, evening/cocktail dresses get formal/party, and other garments default to casual. These defaults are wardrobe rules rather than model predictions. Each untouched group gets at least one option after successful classification; manual selections and clearing remain protected.
 
 An explicit Suggest missing details button reruns classification on a managed photo, including existing items, without overwriting saved nonempty fields or manual edits. Saved categories are preserved; missing subtype prefill requires the predicted category to agree. Photos and originals remain unchanged. The classify_photo native example inspects the same production inference/fallback path without writing wardrobe data.
+
+## Store metadata
+
+Clothing items have an optional free-form `store?: string` persisted in migration
+0012. Add/Edit uses a native searchable dropdown (datalist) that accepts new
+names without a separate creation action. Saving makes the name available for
+subsequent items and the Closet Store filter. Options include Zara, H&M, RW&CO, and Rickis plus stores from all saved items,
+are trimmed, deduplicated without case sensitivity, and sorted alphabetically.
+Existing casing is reused when selected or typed. Clearing Store removes the
+value; older items have no store. Item details always show Store, using Not specified when empty.
+The overview matches stores without case sensitivity and combines this with
+all other filters. Custom options unused by any saved item disappear from the list; the four defaults remain. Both the form and overview lists are always alphabetical without case sensitivity.
